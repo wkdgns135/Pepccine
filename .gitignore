@@ -76,6 +76,9 @@ DerivedDataCache/*
 # Content 폴더의 모든 파일과 폴더 무시
 Content/*
 
-# Team_4 폴더는 제외
+# 필요한 폴더 제외
 !Content/Pepccine/
-!Content/Pepccine/**
+!Content/Character/
+!Content/LevelPrototyping/
+!Content/StarterContent/
+!Content/ThirdPerson/
