@@ -9,5 +9,6 @@ public class Pepccine : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
-	}
+		PrivateIncludePaths.Add("Pepccine");
+    }
 }
