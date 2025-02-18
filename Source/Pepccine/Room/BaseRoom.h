@@ -6,7 +6,7 @@
 #include "UObject/NoExportTypes.h"
 #include "BaseRoom.generated.h"
 
-//class ASpawner;
+class ASpawner;
 
 UCLASS()
 class PEPCCINE_API UBaseRoom : public UObject
@@ -18,8 +18,9 @@ public:
 protected:
 
 private:
-	//UPROPERTY()
-	//TArray<ASpawner*> Spawners;
+	UPROPERTY(EditAnywhere, Category = "Room")
+	TArray<ASpawner*> Spawners;
+	UPROPERTY(EditAnywhere, Category = "Room")
 	bool bIsCleared;
 
 public:
