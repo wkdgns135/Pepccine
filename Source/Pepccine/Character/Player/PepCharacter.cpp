@@ -1,34 +1,84 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
+#include "PepCharacter.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "Pepccine/Character/Controller/PepccinePlayerController.h"
 
-#include "Pepccine/Character/Player/PepCharacter.h"
-
-// Sets default values
 APepCharacter::APepCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+  PrimaryActorTick.bCanEverTick = true;
 
 }
 
-// Called when the game starts or when spawned
 void APepCharacter::BeginPlay()
 {
-	Super::BeginPlay();
-	
+  Super::BeginPlay();
+
 }
 
-// Called every frame
 void APepCharacter::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+  Super::Tick(DeltaTime);
 
 }
 
-// Called to bind functionality to input
+void APepCharacter::Move(const FInputActionValue& Value)
+{
+  FVector2D MovementVector = Value.Get<FVector2D>();
+  AddMovementInput(FVector(MovementVector.X, MovementVector.Y, 0.0f));
+}
+
+void APepCharacter::JumpStart()
+{
+  Super::Jump();
+
+}
+
+void APepCharacter::JumpStop()
+{
+  Super::StopJumping();
+
+}
+
 void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+  Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+  UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+  if (!EnhancedInput) return;
+
+  APepccinePlayerController* PlayerController = Cast<APepccinePlayerController>(GetController());
+  if (!PlayerController) return;
+
+  // MoveAction
+  //if (PlayerController->MoveAction)
+  //{
+  //  EnhancedInput->BindAction(
+  //    PlayerController->MoveAction,
+  //    ETriggerEvent::Triggered,
+  //    this,
+  //    &APepCharacter::Move
+  //  );
+  //}
+
+  //// Jump
+  //if (PlayerController->JumpAction)
+  //{
+  //  EnhancedInput->BindAction(
+  //    PlayerController->JumpAction,
+  //    ETriggerEvent::Triggered,
+  //    this,
+  //    &APepCharacter::JumpStart
+  //  );
+  //}
+
+  //if (PlayerController->JumpAction)
+  //{
+  //  EnhancedInput->BindAction(
+  //    PlayerController->JumpAction,
+  //    ETriggerEvent::Completed,
+  //    this,
+  //    &APepCharacter::JumpStop
+  //  );
+  //}
 }
-
