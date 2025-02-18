@@ -4,6 +4,8 @@
 #include "Components/ActorComponent.h"
 #include "ItemManagerComponent.generated.h"
 
+class UItemDataAssetBase;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PEPCCINE_API UItemManagerComponent : public UActorComponent
 {
@@ -13,10 +15,13 @@ public:
 	UItemManagerComponent();
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	UItemDataAssetBase* ItemDataAsset;
+
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	UDataTable* ItemStatDataTable;
+	UFUNCTION(BlueprintCallable)
+	void PrintWeaponItemData(int32 Index);
+	
 };

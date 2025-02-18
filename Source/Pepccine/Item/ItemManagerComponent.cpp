@@ -1,5 +1,5 @@
 #include "ItemManagerComponent.h"
-#include "ItemDataRow.h"
+#include "Data/ItemDataAssetBase.h"
 
 UItemManagerComponent::UItemManagerComponent()
 {
@@ -8,28 +8,21 @@ UItemManagerComponent::UItemManagerComponent()
 
 void UItemManagerComponent::BeginPlay()
 {
-	Super::BeginPlay();	
-
-	if (ItemStatDataTable)
-	{
-		// 모든 행 가져오기
-		TArray<FItemDataRow*> AllRows;
-		static const FString ContextString(TEXT("ItemStatContext"));
-		ItemStatDataTable->GetAllRows(ContextString, AllRows);
-
-		for(const FItemDataRow* Row : AllRows)
-		{
-			// 행이 유효한지 확인
-			if (Row)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("AttackMultiplier = %.1f / FireRateMultiplier = %.1f"), Row->AttackMultiplier, Row->FireRateMultiplier);
-			}
-		}
-	}
+	Super::BeginPlay();
 }
 
 void UItemManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+void UItemManagerComponent::PrintWeaponItemData(int32 Index)
+{
+	if (ItemDataAsset && Index < ItemDataAsset->Weapons.Num())
+	{
+		const FWeaponItemData& Weapon = ItemDataAsset->Weapons[Index];
+
+		UE_LOG(LogTemp, Warning, TEXT("Weapon Name : %s / Weapon Description : %s / Weapon SellingPrice : %d"), *Weapon.Info.DisplayName, *Weapon.Info.Description, Weapon.Info.SellingPrice);
+	}
 }
 
