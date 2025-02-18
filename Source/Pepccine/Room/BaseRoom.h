@@ -6,7 +6,12 @@
 #include "UObject/NoExportTypes.h"
 #include "BaseRoom.generated.h"
 
-//class ASpawner;
+class ASpawner;
+
+DECLARE_MULTICAST_DELEGATE(FOnRoomEnter)
+DECLARE_MULTICAST_DELEGATE(FOnRoomExit)
+DECLARE_MULTICAST_DELEGATE(FOnStageEnter)
+DECLARE_MULTICAST_DELEGATE(FOnStageExit)
 
 UCLASS()
 class PEPCCINE_API UBaseRoom : public UObject
@@ -14,12 +19,15 @@ class PEPCCINE_API UBaseRoom : public UObject
 	GENERATED_BODY()
 	
 public:
+	FOnRoomEnter OnRoomEnter;
+	FOnRoomExit OnRoomExit;
 
 protected:
 
 private:
-	//UPROPERTY()
-	//TArray<ASpawner*> Spawners;
+	UPROPERTY(EditAnywhere, Category = "Room")
+	TArray<ASpawner*> Spawners;
+	UPROPERTY(EditAnywhere, Category = "Room")
 	bool bIsCleared;
 
 public:
