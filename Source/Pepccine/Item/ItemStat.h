@@ -1,26 +1,26 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "ItemStat.generated.h"
 
-/** ¾ÆÀÌÅÛ ½ºÅİ ÀÌ¸§ */
+/** ì•„ì´í…œ ìŠ¤í…Ÿ ì´ë¦„ */
 UENUM(BlueprintType)
 enum class EItemStatName : uint8
 {
-	AttackMultiplier UMETA(DisplayName = "°ø°İ·Â ¹èÀ²"),
-	RangeMultiplier UMETA(DisplayName = "»ç°Å¸® ¹èÀ²"),
-	FireRateMultiplier UMETA(DisplayName = "¿¬»ç ¹èÀ²"),
-	ZoomMultiplier UMETA(DisplayName = "È®´ë ¹èÀ²"),
-	MagazineCapacity UMETA(DisplayName = "ÅºÃ¢"),
-	BulletSpeed UMETA(DisplayName = "Åº¼Ó"),
-	ReloadSpeed UMETA(DisplayName = "ÀçÀåÀü ¼Óµµ"),
-	ProjectileCount UMETA(DisplayName = "Åõ»çÃ¼ °³¼ö"),
-	BulletSpread UMETA(DisplayName = "Åº ÆÛÁü"),
-	Recoil UMETA(DisplayName = "¹İµ¿"),
-	Weight UMETA(DisplayName = "¹«°Ô")
+	AttackMultiplier UMETA(DisplayName = "ê³µê²©ë ¥ ë°°ìœ¨"),
+	RangeMultiplier UMETA(DisplayName = "ì‚¬ê±°ë¦¬ ë°°ìœ¨"),
+	FireRateMultiplier UMETA(DisplayName = "ì—°ì‚¬ ë°°ìœ¨"),
+	ZoomMultiplier UMETA(DisplayName = "í™•ëŒ€ ë°°ìœ¨"),
+	MagazineCapacity UMETA(DisplayName = "íƒ„ì°½"),
+	BulletSpeed UMETA(DisplayName = "íƒ„ì†"),
+	ReloadSpeed UMETA(DisplayName = "ì¬ì¥ì „ ì†ë„"),
+	ProjectileCount UMETA(DisplayName = "íˆ¬ì‚¬ì²´ ê°œìˆ˜"),
+	BulletSpread UMETA(DisplayName = "íƒ„ í¼ì§"),
+	Recoil UMETA(DisplayName = "ë°˜ë™"),
+	Weight UMETA(DisplayName = "ë¬´ê²Œ")
 };
 
-/** ¾ÆÀÌÅÛ ½ºÅİ */
+/** ì•„ì´í…œ ìŠ¤í…Ÿ */
 USTRUCT(BlueprintType)
 struct FItemStat
 {
