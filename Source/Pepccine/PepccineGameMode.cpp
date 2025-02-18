@@ -2,6 +2,7 @@
 
 #include "PepccineGameMode.h"
 #include "PepccineCharacter.h"
+#include "PepccineGameState.h"
 #include "UObject/ConstructorHelpers.h"
 
 APepccineGameMode::APepccineGameMode()
@@ -12,4 +13,6 @@ APepccineGameMode::APepccineGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+
+	GameStateClass = APepccineGameState::StaticClass();
 }
