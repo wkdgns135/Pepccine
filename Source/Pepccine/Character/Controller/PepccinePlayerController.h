@@ -17,9 +17,6 @@ class PEPCCINE_API APepccinePlayerController : public APlayerController
 public:
   APepccinePlayerController();
 
-protected:
-  virtual void BeginPlay() override;
-
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
   UInputMappingContext* InputMappingContext;
   // W A S D
@@ -56,7 +53,8 @@ protected:
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
   UInputAction* InventoryAction;
 
-
+protected:
+  virtual void BeginPlay() override;
   virtual void SetupInputComponent() override;
 
   virtual void OpenMenu();
