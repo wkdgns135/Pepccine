@@ -16,8 +16,8 @@ class PEPCCINE_API APepccineGameState : public AGameState
 public:
 
 private:
-	//UPROPERTY()
-	//TSubclassOf<UBaseRoom> RoomClass;
+	UPROPERTY()
+	TSubclassOf<UBaseRoom> RoomClass;
 
 public:
 
