@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
@@ -30,7 +30,7 @@ struct FWeaponItemData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<USkeletalMesh> EquippedMesh;
 
-	// TODO[¸í°ü] : ¹«±â ½ºÅÝ Ãß°¡
+	// TODO[ëª…ê´€] : ë¬´ê¸° ìŠ¤í…Ÿ ì¶”ê°€
 };
 
 USTRUCT(BlueprintType)
@@ -41,7 +41,7 @@ struct FPassiveItemData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Passive");
 	FItemDataInfo Info;
 
-	// TODO[¸í°ü] : ±â´É Ãß°¡
+	// TODO[ëª…ê´€] : ê¸°ëŠ¥ ì¶”ê°€
 };
 
 
@@ -58,6 +58,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FPassiveItemData> Passives;
 
-	// TODO[¸í°ü] : UseableItemData Ãß°¡
+	// TODO[ëª…ê´€] : UseableItemData ì¶”ê°€
 
 };
