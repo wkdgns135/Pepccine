@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Pepccine/Common/BasePlayerController.h"
+#include "Pepccine/Character/Controller/BasePlayerController.h"
 #include "EnhancedInputSubsystems.h"
 
 ABasePlayerController::ABasePlayerController()
