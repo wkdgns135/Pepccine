@@ -78,7 +78,7 @@ Content/*
 
 # 필요한 폴더 제외
 !Content/Pepccine/
-!Content/Character/
+!Content/Characters/
 !Content/LevelPrototyping/
 !Content/StarterContent/
 !Content/ThirdPerson/
