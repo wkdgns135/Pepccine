@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Pepccine/Character/PepCharacter.h"
+#include "Pepccine/Character/Player/PepCharacter.h"
 
 // Sets default values
 APepCharacter::APepCharacter()
