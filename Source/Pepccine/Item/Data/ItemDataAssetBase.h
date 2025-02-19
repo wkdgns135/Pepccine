@@ -4,68 +4,59 @@
 #include "Engine/DataAsset.h"
 #include "ItemDataAssetBase.generated.h"
 
+class UWeaponItemData;
+
 USTRUCT(BlueprintType)
-struct FItemDataInfo 
+struct FTestStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info")
+public:
+	// 화면에 보여질 이름
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "이름"))
 	FString DisplayName;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (MultiLine = "true"))
-	FString Description;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info")
-	int32 SellingPrice;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info")
-	TObjectPtr<UStaticMesh> SpawnMesh;
 };
-
-USTRUCT(BlueprintType)
-struct FWeaponItemData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
-	FItemDataInfo Info;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
-	TObjectPtr<USkeletalMesh> EquippedMesh;
-
-	// TODO[명관] : 무기 스텟 업데이트
-
-	// 임시 스텟
-
-	// 공격력 배율
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Stats", meta = (DisplayName = "공격력 배율"));
-	float AttackMultiplier = 1.0f;
-	// 최대 탄창 용량
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Stats", meta = (DisplayName = "최대 탄창 용량"));
-	int32 MagazineCapacity = 30;
-};
-
-USTRUCT(BlueprintType)
-struct FPassiveItemData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Passive");
-	FItemDataInfo Info;
-
-	// TODO[명관] : 기능 추가
-};
-
 
 UCLASS()
+class PEPCCINE_API UTestClass : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	// 화면에 보여질 이름
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "이름"))
+	FString DisplayName;
+};
+
+UCLASS(DefaultToInstanced, EditInlineNew)
+class PEPCCINE_API UTestInstancedClass : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	// 화면에 보여질 이름
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "이름"))
+	FString DisplayName;
+};
+
+UCLASS(BlueprintType)
 class PEPCCINE_API UItemDataAssetBase : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
 public:
+	// 전체 무기 데이터 목록
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<TObjectPtr<UWeaponItemData>> Weapons;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FWeaponItemData> Weapons;
+	TArray<FTestStruct> TestStruct;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FPassiveItemData> Passives;
+	TArray<TObjectPtr<UTestClass>> TestClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<TObjectPtr<UTestInstancedClass>> TestInstancedClass;
 
 	// TODO[명관] : UseableItemData 추가
 

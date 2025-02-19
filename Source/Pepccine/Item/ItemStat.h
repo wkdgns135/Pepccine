@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "ItemStat.generated.h"
 
-/** 아이템 스텟 이름 */
+// 무기 스텟 이름
 UENUM(BlueprintType)
 enum class EItemStatName : uint8
 {
@@ -11,7 +11,8 @@ enum class EItemStatName : uint8
 	RangeMultiplier UMETA(DisplayName = "사거리 배율"),
 	FireRateMultiplier UMETA(DisplayName = "연사 배율"),
 	ZoomMultiplier UMETA(DisplayName = "확대 배율"),
-	MagazineCapacity UMETA(DisplayName = "탄창"),
+	MagazineCapacity UMETA(DisplayName = "탄창 용량"),
+	MaxMagazineCapacity UMETA(DisplayName = "최대 탄창 용량"),
 	BulletSpeed UMETA(DisplayName = "탄속"),
 	ReloadSpeed UMETA(DisplayName = "재장전 속도"),
 	ProjectileCount UMETA(DisplayName = "투사체 개수"),
@@ -20,7 +21,7 @@ enum class EItemStatName : uint8
 	Weight UMETA(DisplayName = "무게")
 };
 
-/** 아이템 스텟 */
+// 아이템 스텟
 USTRUCT(BlueprintType)
 struct FItemStat
 {
