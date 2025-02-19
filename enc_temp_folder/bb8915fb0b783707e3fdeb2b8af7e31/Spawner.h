@@ -7,7 +7,6 @@
 #include "Spawner.generated.h"
 
 class ABaseMonster;
-class APepccineGameState;
 
 UCLASS()
 class PEPCCINE_API ASpawner : public AActor
@@ -17,7 +16,6 @@ class PEPCCINE_API ASpawner : public AActor
 private:
 	UPROPERTY(EditAnywhere, Category = "Spawner")
 	TSubclassOf<ABaseMonster> SpawnMonsterClass;
-	APepccineGameState* GameState;
 
 public:
 	ASpawner();

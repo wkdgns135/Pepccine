@@ -6,12 +6,13 @@
 #include "Engine/GameInstance.h"
 #include "PepccineGameInstance.generated.h"
 
-/**
- * 
- */
+class ABaseRoom;
+
 UCLASS()
 class PEPCCINE_API UPepccineGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 	
+private:
+	TArray<ABaseRoom*> Rooms;
 };

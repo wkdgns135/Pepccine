@@ -15,7 +15,7 @@ ASpawner::ASpawner()
 void ASpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	APepccineGameState* GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	if (GameState)
 	{
 		GameState->GetCurrentRoom()->OnRoomStarted.AddUObject(this, &ASpawner::SpawnMonster);

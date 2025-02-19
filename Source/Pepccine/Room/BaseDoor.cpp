@@ -10,7 +10,6 @@
 ABaseDoor::ABaseDoor()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
 }
 
 void ABaseDoor::BeginPlay()
@@ -26,9 +25,11 @@ void ABaseDoor::BeginPlay()
 
 void ABaseDoor::LockDoor()
 {
+	UE_LOG(LogTemp, Display, TEXT("Lock Door"));
 }
 
 void ABaseDoor::UnlockDoor()
 {
+	UE_LOG(LogTemp, Display, TEXT("Unlock Door"));
 }
 

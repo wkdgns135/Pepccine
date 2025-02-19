@@ -20,18 +20,19 @@ public:
 	FOnRoomStarted OnRoomStarted;
 	FOnRoomCleared OnRoomCleared;
 
+private:
+	UPROPERTY(EditAnywhere, Category = "Room")
+	bool bIsRoomClear;
+
 protected:
 	virtual void PostInitializeComponents();
 	virtual void BeginPlay() override;
 
-private:
-	UPROPERTY(EditAnywhere, Category = "Room")
-	TArray<ASpawner*> Spawners;
-	UPROPERTY(EditAnywhere, Category = "Room")
-	bool bRoomCleared;
-
 public:
-	FORCEINLINE bool IsRoomCleared() const { return bRoomCleared; }
+	void ClearRoom();
+		
+public:
+	FORCEINLINE bool GetIsRoomClear() const { return bIsRoomClear; }
 
 };
 

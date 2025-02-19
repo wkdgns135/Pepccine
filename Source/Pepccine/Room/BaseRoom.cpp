@@ -23,3 +23,8 @@ void ABaseRoom::BeginPlay()
 			OnRoomStarted.Broadcast();
 		});
 }
+
+void ABaseRoom::ClearRoom()
+{
+	OnRoomCleared.Broadcast();
+}
