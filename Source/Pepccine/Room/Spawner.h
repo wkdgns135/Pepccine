@@ -7,22 +7,25 @@
 #include "Spawner.generated.h"
 
 class ABaseMonster;
+class APepccineGameState;
 
 UCLASS()
 class PEPCCINE_API ASpawner : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	ASpawner();
-	virtual void Tick(float DeltaTime) override;
-
-protected:
-	virtual void BeginPlay() override;
-
-public:
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Spawner")
 	TSubclassOf<ABaseMonster> SpawnMonsterClass;
+	APepccineGameState* GameState;
+
+public:
+	ASpawner();
+
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	UFUNCTION()
+	void SpawnMonster();
 };

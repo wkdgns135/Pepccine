@@ -3,33 +3,36 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "GameFramework/Actor.h"
 #include "BaseRoom.generated.h"
 
 class ASpawner;
 
-DECLARE_MULTICAST_DELEGATE(FOnRoomEnter)
-DECLARE_MULTICAST_DELEGATE(FOnRoomExit)
-DECLARE_MULTICAST_DELEGATE(FOnStageEnter)
-DECLARE_MULTICAST_DELEGATE(FOnStageExit)
+DECLARE_MULTICAST_DELEGATE(FOnRoomStarted)
+DECLARE_MULTICAST_DELEGATE(FOnRoomCleared)
 
 UCLASS()
-class PEPCCINE_API UBaseRoom : public UObject
+class PEPCCINE_API ABaseRoom : public AActor
 {
 	GENERATED_BODY()
-	
-public:
-	FOnRoomEnter OnRoomEnter;
-	FOnRoomExit OnRoomExit;
 
-protected:
+public:
+	FOnRoomStarted OnRoomStarted;
+	FOnRoomCleared OnRoomCleared;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Room")
-	TArray<ASpawner*> Spawners;
-	UPROPERTY(EditAnywhere, Category = "Room")
-	bool bIsCleared;
+	bool bIsRoomClear;
+
+protected:
+	virtual void PostInitializeComponents();
+	virtual void BeginPlay() override;
 
 public:
-	FORCEINLINE bool GetIsCleared() const { return bIsCleared; }
+	void ClearRoom();
+		
+public:
+	FORCEINLINE bool GetIsRoomClear() const { return bIsRoomClear; }
+
 };
+

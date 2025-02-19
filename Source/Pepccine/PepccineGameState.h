@@ -6,19 +6,23 @@
 #include "GameFramework/GameState.h"
 #include "PepccineGameState.generated.h"
 
-class UBaseRoom;
+class ABaseRoom;
 
 UCLASS()
 class PEPCCINE_API APepccineGameState : public AGameState
 {
 	GENERATED_BODY()
-	
+
 public:
+
+protected:
+	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY()
-	TSubclassOf<UBaseRoom> RoomClass;
+	UPROPERTY(EditAnywhere)
+	ABaseRoom* CurrentRoom;
 
 public:
-
+	FORCEINLINE ABaseRoom* GetCurrentRoom() const { return CurrentRoom; }
+	FORCEINLINE void SetCurrentRoom(ABaseRoom *Room) { CurrentRoom = Room; }
 };

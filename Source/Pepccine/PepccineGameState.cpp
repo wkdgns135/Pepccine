@@ -2,4 +2,15 @@
 
 
 #include "PepccineGameState.h"
+#include "Room/BaseRoom.h"
+
+void APepccineGameState::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (CurrentRoom)
+	{
+
+	}
+}
 
