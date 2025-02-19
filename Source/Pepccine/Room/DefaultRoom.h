@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class PEPCCINE_API UDefaultRoom : public UBaseRoom
+class PEPCCINE_API ADefaultRoom : public ABaseRoom
 {
 	GENERATED_BODY()
 	

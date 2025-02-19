@@ -4,25 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Spawner.generated.h"
-
-class ABaseMonster;
+#include "BaseDoor.generated.h"
 
 UCLASS()
-class PEPCCINE_API ASpawner : public AActor
+class PEPCCINE_API ABaseDoor : public AActor
 {
 	GENERATED_BODY()
-
-public:
-	ASpawner();
+	
+public:	
+	ABaseDoor();
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Spawner")
-	TSubclassOf<ABaseMonster> SpawnMonsterClass;
-
 	UFUNCTION()
-	void SpawnMonster();
+	void LockDoor();
+	UFUNCTION()
+	void UnlockDoor();
 };
