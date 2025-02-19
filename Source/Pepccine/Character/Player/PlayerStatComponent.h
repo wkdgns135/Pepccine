@@ -16,17 +16,18 @@ class PEPCCINE_API UPlayerStatComponent : public UBaseStatComponent
 public:	
 	UPlayerStatComponent();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status|Player")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float HealthDecelerationSpeed;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status|Player")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float Stamina;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status|Player")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float InvincibilityTime;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status|Player")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float Defence;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status|Player")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float FireRate;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Status|Common")
+	float SprintSpeed;
 
 protected:
 	virtual void BeginPlay() override;

@@ -34,15 +34,9 @@ void APepccinePlayerController::SetupInputComponent()
 
   // BindAction(const UInputAction* Action, ETriggerEvent TriggerEvent, UObject* Object, FName FunctionName)
   EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Started, this, &APepccinePlayerController::OpenMenu);
-  EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &APepccinePlayerController::OpenInventory);
 }
 
 void APepccinePlayerController::OpenMenu()
 {
   UE_LOG(LogTemp, Log, TEXT("Menu Opened!"));
-}
-
-void APepccinePlayerController::OpenInventory()
-{
-  UE_LOG(LogTemp, Log, TEXT("Inventory Opened!"));
 }
