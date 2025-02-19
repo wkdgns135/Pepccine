@@ -7,8 +7,8 @@ UBaseStatComponent::UBaseStatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	CurrentHealth = 0;
 	MaxHealth = 0;
+	CurrentHealth = MaxHealth;
 	MovementSpeed = 0;
 	AttackDamage = 0;
 }

@@ -57,7 +57,6 @@ protected:
   virtual void BeginPlay() override;
   virtual void SetupInputComponent() override;
 
+  UFUNCTION()
   virtual void OpenMenu();
-  virtual void OpenInventory();
-
 };

@@ -15,13 +15,13 @@ class PEPCCINE_API UBaseStatComponent : public UActorComponent
 public:	
 	UBaseStatComponent();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status|Common")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Status|Common")
 	float CurrentHealth;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status|Common")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Status|Common")
 	float MaxHealth;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status|Common")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Status|Common")
 	float MovementSpeed;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status|Common")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Status|Common")
 	float AttackDamage;
 
 protected:

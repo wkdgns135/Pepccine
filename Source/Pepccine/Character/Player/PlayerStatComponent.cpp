@@ -13,7 +13,7 @@ UPlayerStatComponent::UPlayerStatComponent()
 	HealthDecelerationSpeed = 0;
 	Stamina = 0;
 	InvincibilityTime = 0;
-	Defence = 0;
+	Defence = 0;  
 	FireRate = 0;
 }
 

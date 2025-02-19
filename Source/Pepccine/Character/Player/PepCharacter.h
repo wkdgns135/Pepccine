@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "PlayerStatComponent.h"
 #include "PepCharacter.generated.h"
 
 class UInputMappingContext;
@@ -31,12 +32,35 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	USpringArmComponent* SpringArmComp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	UCameraComponent* CameraComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UPlayerStatComponent* PlayerStatComponent;
 
+	UFUNCTION()
 	void Move(const FInputActionValue& Value);
+	UFUNCTION()
 	void JumpStart();
+	UFUNCTION()
 	void JumpStop();
+	UFUNCTION()
+	void UseItem();
+	UFUNCTION()
+	void Look(const FInputActionValue& value);
+	UFUNCTION()
+	void StartSprint(const FInputActionValue& value);
+	UFUNCTION()
+	void StopSprint(const FInputActionValue& value);
+	UFUNCTION()
+	void Crouching();
+	UFUNCTION()
+	void Reload();
+	UFUNCTION()
+	void Interactive();
+	UFUNCTION()
+	void OpenInventory();
+	UFUNCTION()
+	void Swap(const FInputActionValue& value);
 };
