@@ -20,6 +20,12 @@ class PEPCCINE_API APepCharacter : public ACharacter
 public:
 	APepCharacter();
 
+	/*
+	BaseStatComponent {Speed 기타 등등 몬스터와 공유할 부분}
+	PlayerStatComponent
+	PlayerCharacter {}
+	*/
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
