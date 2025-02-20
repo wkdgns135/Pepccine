@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Pepccine/Character/Controller/PepccinePlayerController.h"
 #include "PlayerStatComponent.h"
 #include "PepCharacter.generated.h"
 
@@ -29,7 +30,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	USpringArmComponent* SpringArmComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
-	UCameraComponent* CameraComp;
+	UCameraComponent* FirstPersonCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
+	UCameraComponent* ThirdPersonCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPlayerStatComponent* PlayerStatComponent;
 
@@ -73,10 +77,19 @@ protected:
 	UFUNCTION()
 	void SwapItem(const FInputActionValue& value);
 
+	UFUNCTION()
+	void Fire();
+	UFUNCTION()
+	void ZoomIn();
+	UFUNCTION()
+	void ZoomOut();
+
+	APepccinePlayerController* PlayerController;
+
 private:
 	float CameraArmLength = 300.0f;
 	
-	bool bIsfire = false;
+	bool bIsZooming = false;
 	bool bIsJumping = false;
 	bool bIsCrouching = false;
 	bool bIsSpringting = false;
@@ -88,11 +101,16 @@ private:
 	bool bIsRollable = true;
 	bool bIsMoving = false;
 
+	bool bIsFirstPersonView = false;
+
 	float SprintHoldStartTime = 0.0f;
 	float SprintHoldThreshold = 0.2f;
 
 	FTimerHandle RollTimerHandle;
 
-	void DefineCharacterMovement();
+	void InitializeCharacterMovement();
+	void InitializeCharacterCamera();
+	void ToggleCameraView();
+	void UpdateHUD();
 	FVector GetRollDirection();
 };
