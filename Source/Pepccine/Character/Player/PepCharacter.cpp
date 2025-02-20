@@ -117,11 +117,11 @@ void APepCharacter::Crouching()
   if (!GetCharacterMovement())
     return;
 
-  bool bIsCurrentlyCrouching = GetCharacterMovement()->IsCrouching();
+  bIsCrouching = GetCharacterMovement()->IsCrouching();
 
-  UE_LOG(LogTemp, Log, TEXT("Crouching State Before: [%d]"), bIsCurrentlyCrouching);
+  UE_LOG(LogTemp, Log, TEXT("Crouching State Before: [%d]"), bIsCrouching);
 
-  if (bIsCurrentlyCrouching)
+  if (bIsCrouching)
   {
     UnCrouch();
   }
