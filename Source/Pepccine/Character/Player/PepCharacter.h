@@ -21,12 +21,6 @@ class PEPCCINE_API APepCharacter : public ACharacter
 public:
 	APepCharacter();
 
-	/*
-	BaseStatComponent {Speed 기타 등등 몬스터와 공유할 부분}
-	PlayerStatComponent
-	PlayerCharacter {}
-	*/
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -42,25 +36,63 @@ protected:
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
 	UFUNCTION()
+	void OnMovementStopped();
+
+	UFUNCTION()
 	void JumpStart();
 	UFUNCTION()
 	void JumpStop();
+
 	UFUNCTION()
 	void UseItem();
+
 	UFUNCTION()
 	void Look(const FInputActionValue& value);
+
 	UFUNCTION()
 	void StartSprint(const FInputActionValue& value);
 	UFUNCTION()
 	void StopSprint(const FInputActionValue& value);
 	UFUNCTION()
+	void Roll();
+	UFUNCTION()
+	void EndRoll();
+
+	UFUNCTION()
 	void Crouching();
+
 	UFUNCTION()
 	void Reload();
+
 	UFUNCTION()
 	void Interactive();
+
 	UFUNCTION()
 	void OpenInventory();
+
 	UFUNCTION()
-	void Swap(const FInputActionValue& value);
+	void SwapItem(const FInputActionValue& value);
+
+private:
+	float CameraArmLength = 300.0f;
+	
+	bool bIsfire = false;
+	bool bIsJumping = false;
+	bool bIsCrouching = false;
+	bool bIsSpringting = false;
+	bool bIsSprintable = true;
+	bool bIsReloading = false;
+	bool bIsInteracting = false;
+	bool bIsInventoryOpened = false;
+	bool bIsRolling = false;
+	bool bIsRollable = true;
+	bool bIsMoving = false;
+
+	float SprintHoldStartTime = 0.0f;
+	float SprintHoldThreshold = 0.2f;
+
+	FTimerHandle RollTimerHandle;
+
+	void DefineCharacterMovement();
+	FVector GetRollDirection();
 };
