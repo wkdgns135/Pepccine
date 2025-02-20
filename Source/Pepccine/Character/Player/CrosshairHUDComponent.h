@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "CrosshairHUDComponent.generated.h"
 
 
@@ -15,11 +16,18 @@ class PEPCCINE_API UCrosshairHUDComponent : public UActorComponent
 public:	
 	UCrosshairHUDComponent();
 
+	void ShowCrosshair();
+	void HideCrosshair();
+
 protected:
 	virtual void BeginPlay() override;
-
-public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	
+private:
+	UPROPERTY(EditAnywhere, Category = "HUD|Crosshair")
+	TSubclassOf<UUserWidget> CrosshairWidgetClass;
+	UUserWidget* CrosshairWidget;
+	APlayerController* NewController;
+
+	void GetPlayerController();
 };

@@ -4,6 +4,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "CrosshairHUDComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 APepCharacter::APepCharacter()
@@ -24,6 +25,8 @@ APepCharacter::APepCharacter()
   FirstPersonCamera->bUsePawnControlRotation = false;
 
   PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
+  
+  CrosshairHUDComponent = CreateDefaultSubobject<UCrosshairHUDComponent>(TEXT("CrosshairHUDComponent"));
 }
 
 void APepCharacter::BeginPlay()
@@ -32,11 +35,18 @@ void APepCharacter::BeginPlay()
 
   InitializeCharacterMovement();
   InitializeCharacterCamera();
+  AddObservers();
 }
 
 void APepCharacter::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
+
+}
+
+void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
+{
+  UE_LOG(LogTemp, Warning, TEXT("Stamina Updated: %f / %f"), NewStamina, MaxStamina);
 }
 
 void APepCharacter::ToggleCameraView()
@@ -99,6 +109,11 @@ void APepCharacter::InitializeCharacterCamera()
   //UpdateHUD();
 }
 
+void APepCharacter::AddObservers()
+{
+  PlayerStatComponent->AddStaminaObserver(this);
+}
+
 void APepCharacter::InitializeCharacterMovement()
 {
   if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
@@ -113,7 +128,7 @@ void APepCharacter::Move(const FInputActionValue& Value)
 {
   FVector2D MoveInput = Value.Get<FVector2D>();
 
-  UE_LOG(LogTemp, Log, TEXT("MovementVector: [%s]"), *MoveInput.ToString());
+  //UE_LOG(LogTemp, Log, TEXT("MovementVector: [%s]"), *MoveInput.ToString());
 
   bool bWasMoving = bIsMoving;
   bIsMoving = !FMath::IsNearlyZero(MoveInput.X) || !FMath::IsNearlyZero(MoveInput.Y); // 1, 1, 1, 0
@@ -165,7 +180,7 @@ void APepCharacter::Look(const FInputActionValue& value)
 {
   FVector2D LookInput = value.Get<FVector2D>();
 
-  UE_LOG(LogTemp, Log, TEXT("LookInput[%s]"), *LookInput.ToString());
+  //UE_LOG(LogTemp, Log, TEXT("LookInput[%s]"), *LookInput.ToString());
 
   AddControllerYawInput(LookInput.X);
   AddControllerPitchInput(LookInput.Y);
@@ -187,6 +202,11 @@ void APepCharacter::StartSprint(const FInputActionValue& value)
 
   if (GetCharacterMovement())
   {
+    if (!PlayerStatComponent->DecreaseStamina(2))
+    {
+      bIsSpringting = false;
+      return;
+    }
     GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->SprintSpeed;
   }
 }
@@ -222,8 +242,26 @@ void APepCharacter::Roll()
 
   bIsRolling = true;
 
+  if (!PlayerStatComponent->DecreaseStaminaByPercentage(30))
+  {
+    bIsRolling = false;
+    return;
+  }
   GetCharacterMovement()->AddImpulse(GetRollDirection(), true);
   GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 0.1f, false);
+}
+
+void APepCharacter::EndRoll()
+{
+  bIsRolling = false;
+
+  // [임시] 롤 활성시에 해당부분 접근을 못해서 가져옴
+  if (GetCharacterMovement())
+  {
+    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
+  }
+
+  UE_LOG(LogTemp, Log, TEXT("Roll Ended!"));
 }
 
 FVector APepCharacter::GetRollDirection()
@@ -243,19 +281,6 @@ FVector APepCharacter::GetRollDirection()
   UE_LOG(LogTemp, Log, TEXT("RollDirection! [%s]"), *RollDirection.ToString());
 
   return RollDirection;
-}
-
-void APepCharacter::EndRoll()
-{
-  bIsRolling = false;
-
-  // [임시] 롤 활성시에 해당부분 접근을 못해서 가져옴
-  if (GetCharacterMovement())
-  {
-    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
-  }
-
-  UE_LOG(LogTemp, Log, TEXT("Roll Ended!"));
 }
 
 void APepCharacter::Crouching()

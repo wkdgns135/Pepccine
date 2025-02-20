@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "Pepccine/Character/Controller/PepccinePlayerController.h"
 #include "PlayerStatComponent.h"
+#include "Character/Interfaces/IStaminaObserver.h"
 #include "PepCharacter.generated.h"
 
 class UInputMappingContext;
@@ -15,12 +16,14 @@ class USpringArmComponent;
 class UCameraComponent;
 
 UCLASS()
-class PEPCCINE_API APepCharacter : public ACharacter
+class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver
 {
 	GENERATED_BODY()
 
 public:
 	APepCharacter();
+
+	virtual void OnStaminaChanged(float NewStamina, float MaxStamina) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -85,6 +88,7 @@ protected:
 	void ZoomOut();
 
 	APepccinePlayerController* PlayerController;
+	class UCrosshairHUDComponent* CrosshairHUDComponent;
 
 private:
 	float CameraArmLength = 300.0f;
@@ -112,5 +116,7 @@ private:
 	void InitializeCharacterCamera();
 	void ToggleCameraView();
 	void UpdateHUD();
+	void AddObservers();
+
 	FVector GetRollDirection();
 };
