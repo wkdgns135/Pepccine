@@ -26,10 +26,14 @@ public:
 	float Defence;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float FireRate;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Common")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float SprintSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Common")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float CrouchSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
+	float RollingDistance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
+	float JumpZVelocity;
 
 protected:
 	virtual void BeginPlay() override;

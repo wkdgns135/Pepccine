@@ -42,6 +42,8 @@ void APepCharacter::DefineCharacterMovement()
   if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
   {
     MovementComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
+    MovementComponent->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
+    MovementComponent->JumpZVelocity = PlayerStatComponent->JumpZVelocity;
   }
 }
 
@@ -50,6 +52,14 @@ void APepCharacter::Move(const FInputActionValue& Value)
   FVector2D MoveInput = Value.Get<FVector2D>();
 
   UE_LOG(LogTemp, Log, TEXT("MovementVector: [%s]"), *MoveInput.ToString());
+
+  bool bWasMoving = bIsMoving;
+  bIsMoving = !FMath::IsNearlyZero(MoveInput.X) || !FMath::IsNearlyZero(MoveInput.Y); // 1, 1, 1, 0
+
+  if (bWasMoving && !bIsMoving)
+  {
+    OnMovementStopped();
+  }
 
   if (!FMath::IsNearlyZero(MoveInput.X))
   {
@@ -62,19 +72,24 @@ void APepCharacter::Move(const FInputActionValue& Value)
   }
 }
 
+void APepCharacter::OnMovementStopped()
+{
+  UE_LOG(LogTemp, Log, TEXT("Movement Stopped!"));
+}
+
 void APepCharacter::JumpStart()
 {
   Super::Jump();
 
   UE_LOG(LogTemp, Log, TEXT("JumpStart!"));
-
+  bIsJumping = true;
   Jump();
 }
 
 void APepCharacter::JumpStop()
 {
   Super::StopJumping();
-
+  bIsJumping = false;
   StopJumping();
   UE_LOG(LogTemp, Log, TEXT("JumpStop!"));
 }
@@ -96,7 +111,18 @@ void APepCharacter::Look(const FInputActionValue& value)
 
 void APepCharacter::StartSprint(const FInputActionValue& value)
 {
+  if (bIsRollable)
+  {
+    SprintHoldStartTime = GetWorld()->GetTimeSeconds();
+    UE_LOG(LogTemp, Log, TEXT("StartSprint HoldTime! [%f]"), SprintHoldStartTime);
+  }
+
+  if (!bIsSprintable) return;
+
+  bIsSpringting = true;
+
   UE_LOG(LogTemp, Log, TEXT("StartSprint!"));
+
   if (GetCharacterMovement())
   {
     GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->SprintSpeed;
@@ -105,11 +131,62 @@ void APepCharacter::StartSprint(const FInputActionValue& value)
 
 void APepCharacter::StopSprint(const FInputActionValue& value)
 {
-  UE_LOG(LogTemp, Log, TEXT("StopSprint!"));
-  if (GetCharacterMovement())
+  float HoldTime = GetWorld()->GetTimeSeconds() - SprintHoldStartTime;
+  UE_LOG(LogTemp, Log, TEXT("SprintHoldStartTime! [%f]"), SprintHoldStartTime);
+  UE_LOG(LogTemp, Log, TEXT("HoldTime! [%f]"), HoldTime);
+
+  if (HoldTime > SprintHoldThreshold)
   {
-    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
+    UE_LOG(LogTemp, Log, TEXT("StopSprint!"));
+    bIsSpringting = false;
+
+    if (GetCharacterMovement())
+    {
+      GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
+    }
   }
+  else
+  {
+    UE_LOG(LogTemp, Log, TEXT("Rolling!"));
+    Roll();
+  }
+
+  SprintHoldStartTime = 0.0f; // ÃÊ±âÈ­
+}
+
+void APepCharacter::Roll()
+{
+  if (!GetCharacterMovement() || bIsRolling) return;
+
+  bIsRolling = true;
+
+  GetCharacterMovement()->AddImpulse(GetRollDirection(), true);
+  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 0.1f, false);
+}
+
+FVector APepCharacter::GetRollDirection()
+{
+  FVector Velocity = GetCharacterMovement()->Velocity;
+  FVector RollDirection;
+
+  if (!Velocity.IsNearlyZero())
+  {
+    RollDirection = Velocity.GetSafeNormal() * PlayerStatComponent->RollingDistance;
+  }
+  else
+  {
+    RollDirection = GetActorForwardVector() * PlayerStatComponent->RollingDistance;
+  }
+
+  UE_LOG(LogTemp, Log, TEXT("RollDirection! [%s]"), *RollDirection.ToString());
+
+  return RollDirection;
+}
+
+void APepCharacter::EndRoll()
+{
+  bIsRolling = false;
+  UE_LOG(LogTemp, Log, TEXT("Roll Ended!"));
 }
 
 void APepCharacter::Crouching()
@@ -119,32 +196,46 @@ void APepCharacter::Crouching()
 
   bIsCrouching = GetCharacterMovement()->IsCrouching();
 
-  UE_LOG(LogTemp, Log, TEXT("Crouching State Before: [%d]"), bIsCrouching);
-
   if (bIsCrouching)
   {
     UnCrouch();
+    UE_LOG(LogTemp, Log, TEXT("UnCrouch! [%d][%f]"), bIsCrouching, PlayerStatComponent->MovementSpeed);
+    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
   }
   else
   {
     Crouch();
+    UE_LOG(LogTemp, Log, TEXT("Crouch! [%d][%f]"), bIsCrouching, PlayerStatComponent->CrouchSpeed);
+    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->CrouchSpeed;
   }
-
-  UE_LOG(LogTemp, Log, TEXT("Crouching State After: [%d]"), GetCharacterMovement()->IsCrouching());
 }
 
 void APepCharacter::Reload()
 {
   UE_LOG(LogTemp, Log, TEXT("Reload!"));
 
+  if (bIsReloading)
+  {
 
+  }
+  else
+  {
+
+  }
 }
 
 void APepCharacter::Interactive()
 {
   UE_LOG(LogTemp, Log, TEXT("Interactive!"));
 
+  if (bIsInteracting)
+  {
 
+  }
+  else
+  {
+
+  }
 }
 
 void APepCharacter::OpenInventory()
@@ -152,6 +243,14 @@ void APepCharacter::OpenInventory()
   UE_LOG(LogTemp, Log, TEXT("OpenInventory!"));
 
   // HUD
+  if (bIsInventoryOpened)
+  {
+    
+  }
+  else
+  {
+
+  }
 }
 
 void APepCharacter::SwapItem(const FInputActionValue& value)
@@ -206,7 +305,7 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
   {
     EnhancedInput->BindAction(
       PlayerController->SprintAction,
-      ETriggerEvent::Triggered,
+      ETriggerEvent::Started,
       this,
       &APepCharacter::StartSprint
     );
@@ -227,7 +326,7 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
   {
     EnhancedInput->BindAction(
       PlayerController->JumpAction,
-      ETriggerEvent::Triggered,
+      ETriggerEvent::Started,
       this,
       &APepCharacter::JumpStart
     );
