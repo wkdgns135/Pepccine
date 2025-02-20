@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
 
@@ -10,14 +10,6 @@ public class Pepccine : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
 
-        PublicIncludePaths.AddRange(
-            new string[] {
-                "Pepccine",
-                "Pepccine/Item",
-                "Pepccine/Item/Data"
-            }
-        );
-
-        //PrivateIncludePaths.Add("Pepccine");
-    }
+        PrivateIncludePaths.Add("Pepccine");
+	}
 }

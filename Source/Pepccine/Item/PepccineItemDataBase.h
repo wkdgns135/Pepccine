@@ -2,10 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "ItemDataBase.generated.h"
+
+#include "PepccineItemDataBase.generated.h"
 
 UCLASS(DefaultToInstanced, EditInlineNew, Abstract)
-class PEPCCINE_API UItemDataBase : public UObject
+class PEPCCINE_API UPepccineItemDataBase : public UObject
 {
 	GENERATED_BODY()
 	
@@ -27,5 +28,5 @@ public:
 	TObjectPtr<UStaticMesh> MeshToSpawn;
 
 	UFUNCTION(BlueprintCallable)
-	virtual void UseItem() {};
+	virtual void UseItem(class UPepccineItemManagerComponent* ItemManagerComp) {};
 };
