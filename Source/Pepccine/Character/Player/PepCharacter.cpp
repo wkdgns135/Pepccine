@@ -194,7 +194,8 @@ void APepCharacter::StartSprint(const FInputActionValue& value)
 void APepCharacter::StopSprint(const FInputActionValue& value)
 {
   float HoldTime = GetWorld()->GetTimeSeconds() - SprintHoldStartTime;
-
+  UE_LOG(LogTemp, Log, TEXT("SprintHoldStartTime! [%f]"), SprintHoldStartTime);
+  UE_LOG(LogTemp, Log, TEXT("HoldTime! [%f]"), HoldTime);
   bIsSpringting = false;
 
   if (HoldTime > SprintHoldThreshold)
