@@ -248,6 +248,13 @@ FVector APepCharacter::GetRollDirection()
 void APepCharacter::EndRoll()
 {
   bIsRolling = false;
+
+  // [임시] 롤 활성시에 해당부분 접근을 못해서 가져옴
+  if (GetCharacterMovement())
+  {
+    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
+  }
+
   UE_LOG(LogTemp, Log, TEXT("Roll Ended!"));
 }
 
