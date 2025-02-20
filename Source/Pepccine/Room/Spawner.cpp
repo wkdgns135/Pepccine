@@ -2,26 +2,32 @@
 
 
 #include "Room/Spawner.h"
+#include "PepccineGameState.h"
+#include "Room/BaseRoom.h"
+#include "Monster/Class/BaseMonster.h"
+#include "Kismet/GameplayStatics.h"
 
-// Sets default values
 ASpawner::ASpawner()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+	PrimaryActorTick.bCanEverTick = false;
 }
 
-// Called when the game starts or when spawned
 void ASpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	if (GameState)
+	{
+		GameState->GetCurrentRoom()->OnRoomStarted.AddUObject(this, &ASpawner::SpawnMonster);
+	}
 }
 
-// Called every frame
-void ASpawner::Tick(float DeltaTime)
+void ASpawner::SpawnMonster()
 {
-	Super::Tick(DeltaTime);
-
+	if (SpawnMonsterClass)
+	{
+		GetWorld()->SpawnActor<AActor>(SpawnMonsterClass, GetActorTransform());
+	}
 }
+
 

@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Room/BaseRoom.h"
-#include "DefaultRoom.generated.h"
+#include "Monster/Class/BaseMonster.h"
+#include "BossMonster.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PEPCCINE_API ADefaultRoom : public ABaseRoom
+class PEPCCINE_API ABossMonster : public ABaseMonster
 {
 	GENERATED_BODY()
 	
