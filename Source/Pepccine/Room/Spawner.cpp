@@ -4,7 +4,7 @@
 #include "Room/Spawner.h"
 #include "PepccineGameState.h"
 #include "Room/BaseRoom.h"
-#include "BaseMonster.h"
+#include "Monster/Class/BaseMonster.h"
 #include "Kismet/GameplayStatics.h"
 
 ASpawner::ASpawner()
