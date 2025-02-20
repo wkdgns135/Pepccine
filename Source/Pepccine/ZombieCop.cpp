@@ -1,2 +1,0 @@
-#include "ZombieCop.h"
-
