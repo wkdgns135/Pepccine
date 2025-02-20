@@ -13,7 +13,7 @@ APepCharacter::APepCharacter()
 
   SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
   SpringArmComp->SetupAttachment(RootComponent);
-  SpringArmComp->TargetArmLength = 300.0f;
+  SpringArmComp->TargetArmLength = CameraArmLength;
   SpringArmComp->bUsePawnControlRotation = true;
 
   CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
@@ -21,12 +21,14 @@ APepCharacter::APepCharacter()
   CameraComp->bUsePawnControlRotation = false;
 
   PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
+  
 }
 
 void APepCharacter::BeginPlay()
 {
   Super::BeginPlay();
 
+  DefineCharacterMovement();
 }
 
 void APepCharacter::Tick(float DeltaTime)
@@ -35,13 +37,29 @@ void APepCharacter::Tick(float DeltaTime)
 
 }
 
+void APepCharacter::DefineCharacterMovement()
+{
+  if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+  {
+    MovementComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
+  }
+}
+
 void APepCharacter::Move(const FInputActionValue& Value)
 {
-  FVector2D MovementVector = Value.Get<FVector2D>();
+  FVector2D MoveInput = Value.Get<FVector2D>();
 
-  UE_LOG(LogTemp, Log, TEXT("MovementVector: [%s]"), *MovementVector.ToString());
+  UE_LOG(LogTemp, Log, TEXT("MovementVector: [%s]"), *MoveInput.ToString());
 
-  AddMovementInput(FVector(MovementVector.X, MovementVector.Y, 0.0f));
+  if (!FMath::IsNearlyZero(MoveInput.X))
+  {
+    AddMovementInput(GetActorForwardVector(), MoveInput.X);
+  }
+
+  if (!FMath::IsNearlyZero(MoveInput.Y))
+  {
+    AddMovementInput(GetActorRightVector(), MoveInput.Y);
+  }
 }
 
 void APepCharacter::JumpStart()
@@ -49,12 +67,15 @@ void APepCharacter::JumpStart()
   Super::Jump();
 
   UE_LOG(LogTemp, Log, TEXT("JumpStart!"));
+
+  Jump();
 }
 
 void APepCharacter::JumpStop()
 {
   Super::StopJumping();
 
+  StopJumping();
   UE_LOG(LogTemp, Log, TEXT("JumpStop!"));
 }
 
@@ -93,36 +114,58 @@ void APepCharacter::StopSprint(const FInputActionValue& value)
 
 void APepCharacter::Crouching()
 {
-  UE_LOG(LogTemp, Log, TEXT("Crouch!"));
-  GetCharacterMovement()->Crouch();
+  if (!GetCharacterMovement())
+    return;
+
+  bool bIsCurrentlyCrouching = GetCharacterMovement()->IsCrouching();
+
+  UE_LOG(LogTemp, Log, TEXT("Crouching State Before: [%d]"), bIsCurrentlyCrouching);
+
+  if (bIsCurrentlyCrouching)
+  {
+    UnCrouch();
+  }
+  else
+  {
+    Crouch();
+  }
+
+  UE_LOG(LogTemp, Log, TEXT("Crouching State After: [%d]"), GetCharacterMovement()->IsCrouching());
 }
 
 void APepCharacter::Reload()
 {
   UE_LOG(LogTemp, Log, TEXT("Reload!"));
+
+
 }
 
 void APepCharacter::Interactive()
 {
   UE_LOG(LogTemp, Log, TEXT("Interactive!"));
+
+
 }
 
 void APepCharacter::OpenInventory()
 {
   UE_LOG(LogTemp, Log, TEXT("OpenInventory!"));
+
+  // HUD
 }
 
-void APepCharacter::Swap(const FInputActionValue& value)
+void APepCharacter::SwapItem(const FInputActionValue& value)
 {
-  UE_LOG(LogTemp, Log, TEXT("Swap!"));
+  UE_LOG(LogTemp, Warning, TEXT("SwapItem"));
   float ScrollValue = value.Get<float>();
+
   if (ScrollValue > 0.0f)
   {
-    UE_LOG(LogTemp, Log, TEXT("Swapping Forward"));
+    UE_LOG(LogTemp, Log, TEXT("Swapping Forward [%f]"), ScrollValue);
   }
   else if (ScrollValue < 0.0f)
   {
-    UE_LOG(LogTemp, Log, TEXT("Swapping Backward"));
+    UE_LOG(LogTemp, Log, TEXT("Swapping Backward [%f]"), ScrollValue);
   }
 }
 
@@ -216,7 +259,7 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
   {
     EnhancedInput->BindAction(
       PlayerController->CrouchAction,
-      ETriggerEvent::Triggered,
+      ETriggerEvent::Started,
       this,
       &APepCharacter::Crouching
     );
@@ -262,7 +305,7 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
       PlayerController->SwapAction,
       ETriggerEvent::Triggered,
       this,
-      &APepCharacter::Swap
+      &APepCharacter::SwapItem
     );
   }
 }

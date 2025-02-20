@@ -21,12 +21,6 @@ class PEPCCINE_API APepCharacter : public ACharacter
 public:
 	APepCharacter();
 
-	/*
-	BaseStatComponent {Speed 기타 등등 몬스터와 공유할 부분}
-	PlayerStatComponent
-	PlayerCharacter {}
-	*/
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -62,5 +56,18 @@ protected:
 	UFUNCTION()
 	void OpenInventory();
 	UFUNCTION()
-	void Swap(const FInputActionValue& value);
+	void SwapItem(const FInputActionValue& value);
+
+private:
+	float CameraArmLength = 300.0f;
+	
+	bool bIsfire = false;
+	bool bIsJumping = false;
+	bool bIsCrouching = false;
+	bool bIsSpringting = false;
+	bool bIsReloading = false;
+	bool bIsInteracting = false;
+	bool bIsInventoryOpened = false;
+
+	void DefineCharacterMovement();
 };

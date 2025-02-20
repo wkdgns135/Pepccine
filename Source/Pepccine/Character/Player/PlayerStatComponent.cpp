@@ -6,9 +6,11 @@ UPlayerStatComponent::UPlayerStatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	MaxHealth = 0;
-	MovementSpeed = 0;
-	AttackDamage = 0;
+	MaxHealth = 100;
+	MovementSpeed = 100;
+	AttackDamage = 100;
+	CrouchSpeed = 50;
+	SprintSpeed = 200;
 	CurrentHealth = MaxHealth;
 	HealthDecelerationSpeed = 0;
 	Stamina = 0;
