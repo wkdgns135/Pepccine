@@ -4,27 +4,45 @@
 #include "PepccinePlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Character/Player/CrosshairHUDComponent.h"
 
 APepccinePlayerController::APepccinePlayerController()
 {
   InputMappingContext = nullptr;
   MoveAction = nullptr;
+  JumpAction = nullptr;
+  LookAction = nullptr;
+  SprintAction = nullptr;
+  ItemUseAction = nullptr;
+  CrouchAction = nullptr;
+  ReloadingAction = nullptr;
+  SwapAction = nullptr;
+  InteractiveAction = nullptr;
+  MenuAction = nullptr;
+  InventoryAction = nullptr;
+  FireAction = nullptr;
+  ZoomAction = nullptr;
 }
 
 void APepccinePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* SubSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
-		{
-			if (InputMappingContext)
-			{
-				SubSystem->AddMappingContext(InputMappingContext, 0);
-			}
-		}
-	}
+  AddMappingContext();
+}
+
+void APepccinePlayerController::AddMappingContext()
+{
+  if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+  {
+    if (UEnhancedInputLocalPlayerSubsystem* SubSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+    {
+      if (InputMappingContext)
+      {
+        SubSystem->AddMappingContext(InputMappingContext, 0);
+      }
+    }
+  }
 }
 
 void APepccinePlayerController::SetupInputComponent()
