@@ -1,7 +1,51 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Room/RoomGenerator.h"
+
+class FUnionFind
+{
+public:
+	TArray<int> Parent, Rank;
+
+	FUnionFind(int InSize)
+	{
+		Parent.SetNum(InSize);
+		Rank.SetNum(InSize, 1);
+		for (int i = 0; i < InSize; i++)
+		{
+			Parent[i] = i;
+		}
+	}
+
+	int Find(int X)
+	{
+		if (Parent[X] == X)
+		{
+			return X;
+		}
+		return Parent[X] = Find(Parent[X]);
+	}
+
+	void Unite(int X, int Y)
+	{
+		int RootX = Find(X);
+		int RootY = Find(Y);
+		if (RootX != RootY)
+		{
+			if (Rank[RootX] > Rank[RootY])
+			{
+				Parent[RootY] = RootX;
+			}
+			else if (Rank[RootX] < Rank[RootY])
+			{
+				Parent[RootX] = RootY;
+			}
+			else
+			{
+				Parent[RootY] = RootX;
+				Rank[RootX]++;
+			}
+		}
+	}
+};
 
 ARoomGenerator::ARoomGenerator()
 {
@@ -15,28 +59,38 @@ ARoomGenerator::ARoomGenerator()
 void ARoomGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!GenerateEndPoints())
+	{
+		return;
+	}
 
-	GenerateEndPoints();
-	BackTracking(0);
+	GenerateMST();
+
+	if (!Rooms.IsEmpty())
+	{
+		UE_LOG(LogTemp, Display, TEXT("Generate finish"));
+		PrintGrid();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("Failed to generate"));
+	}
 }
 
 void ARoomGenerator::GetParameters()
 {
+	// Implementation here
 }
 
-bool ARoomGenerator::GetFindNeighbor(int X, int Y)
+bool ARoomGenerator::GetFindNeighbor(const FIntPoint& Point)
 {
-	int Offset[9][2] = { {0,0},{0,1},{0,-1},{1,0},{-1,0},{1,1},{1,-1},{-1,1},{-1,-1} };
-	for (int i = 0; i < 9; i++)
+	TArray<FIntPoint> Offsets = { {0,0},{0,1},{0,-1},{1,0},{-1,0},{1,1},{1,-1},{-1,1},{-1,-1} };
+	for (const FIntPoint& Offset : Offsets)
 	{
-		int XX = X + Offset[i][0];
-		int YY = Y + Offset[i][1];
-		for (const TTuple<int, int, int>& EndPoint : EndPoints)
+		FIntPoint Next = Point + Offset;
+		if (EndPoints.Contains(Next))
 		{
-			if (XX == EndPoint.Get<0>() && YY == EndPoint.Get<1>())
-			{
-				return true;
-			}
+			return true;
 		}
 	}
 	return false;
@@ -44,57 +98,156 @@ bool ARoomGenerator::GetFindNeighbor(int X, int Y)
 
 bool ARoomGenerator::GenerateEndPoints()
 {
-	for (int i = 0; i < EndPointCount; i++)
-	{
-		int Count = 0;
-		while (Count < LoopThreshold)
-		{
-			Count++;
-			int X = FMath::RandRange(1, MapSize - 2);
-			int Y = FMath::RandRange(1, MapSize - 2);
-			int Direction = FMath::RandRange(0, 3);
+	if (MapSize < 3 || EndPointCount <= 0) return false;
 
-			if (!GetFindNeighbor(X, Y))
-			{
-				EndPoints.Push({ X, Y , -1});
-				break;
-			}
-		}
-		if (Count >= LoopThreshold)
+	int32 DivisionSize = FMath::Max(3, MapSize / FMath::CeilToInt(FMath::Sqrt((float)EndPointCount)));
+	TArray<FIntPoint> Divisions;
+
+	for (int32 X = 0; X < MapSize; X += DivisionSize)
+	{
+		for (int32 Y = 0; Y < MapSize; Y += DivisionSize)
 		{
-			return false;
+			Divisions.Add({ X, Y });
 		}
-		
 	}
+
+	if (Divisions.Num() < EndPointCount) return false;
+
+	TArray<FIntPoint> SelectedDivisions = Divisions;
+	SelectedDivisions.SetNum(EndPointCount);
+
+	for (const FIntPoint& Division : SelectedDivisions)
+	{
+		int32 X = FMath::RandRange(Division.X, FMath::Min(Division.X + DivisionSize - 1, MapSize - 1));
+		int32 Y = FMath::RandRange(Division.Y, FMath::Min(Division.Y + DivisionSize - 1, MapSize - 1));
+
+		EndPoints.Push({ X, Y });
+	}
+
 	return true;
 }
 
-void ARoomGenerator::BackTracking(int Depth)
+void ARoomGenerator::GenerateMST()
 {
-	if (!RoomPositions.IsEmpty())return;
-	if (Depth == EndPointCount)
+	TArray<TTuple<int, int, int>> Edges;
+	for (int i = 0; i < EndPoints.Num(); i++)
 	{
-		GenerateGrid();
-		PrintGrid();
-		if (!CheckEndPointsConnect())return;
-		RoomPositions = FindAllEndPointsShortestPath();
-		UE_LOG(LogTemp, Display, TEXT("Generate finish"));
-		PrintRoom();
-	}
-	for (int i = 0; i < EndPointCount; i++)
-	{
-		TTuple<int, int, int> &Node = EndPoints[i];
-		if (Node.Get<2>() != -1)continue;
-		for (int j = 0; j < 4; j++)
+		for (int j = i + 1; j < EndPoints.Num(); j++)
 		{
-			Node.Get<2>() = j;
-			BackTracking(Depth + 1);
-			Node.Get<2>() = -1;
+			Edges.Add({ i, j, GetLengthBetweenPoint(EndPoints[i], EndPoints[j])});
+		}
+	}
+
+	Edges.Sort([](const TTuple<int, int, int>& A, const TTuple<int, int, int>& B) { return A.Get<2>() < B.Get<2>(); });
+
+	FUnionFind UF(EndPoints.Num());
+	for (const TTuple<int, int, int>& Edge : Edges)
+	{
+		int U = Edge.Get<0>();
+		int V = Edge.Get<1>();
+		if (UF.Find(U) != UF.Find(V))
+		{
+			UF.Unite(U, V);
+			TArray<FIntPoint> Path = FindShortestPath(EndPoints[U], EndPoints[V]);
+			Rooms.Append(Path);
+		}
+	}
+
+	InitializeGrid();
+
+	for (const FIntPoint& Point : Rooms)
+	{
+		Grid[Point.Y][Point.X] = 1;
+	}
+
+	PrintGrid();
+
+	MarkEndRooms();
+
+	PrintGrid();
+
+	AddAdditionalEndRooms();
+}
+
+void ARoomGenerator::InitializeGrid()
+{
+	Grid.SetNum(MapSize);
+	for (int i = 0; i < MapSize; i++)
+	{
+		Grid[i].SetNum(MapSize);
+		for (int j = 0; j < MapSize; j++)
+		{
+			Grid[i][j] = 0;
 		}
 	}
 }
 
-void ARoomGenerator::PrintGrid() const
+void ARoomGenerator::MarkEndRooms()
+{
+	TArray<FIntPoint> Offsets = { {0,1},{0,-1},{1,0},{-1,0} };
+	for (const FIntPoint& Point : Rooms)
+	{
+		int NeighborCount = 0;
+		for (const FIntPoint& Offset : Offsets)
+		{
+			FIntPoint Next = Point + Offset;
+			if (IsPointValid(Next) && Grid[Next.Y][Next.X] >= 1)
+			{
+				NeighborCount++;
+			}
+		}
+		if (NeighborCount == 1)
+		{
+			Grid[Point.Y][Point.X] = 2;
+			EndRooms.Add(Point);
+		}
+	}
+}
+
+void ARoomGenerator::AddAdditionalEndRooms()
+{
+	if (EndRooms.Num() < EndPointCount)
+	{
+		TArray<FIntPoint> RemainingPositions = Rooms.Array();
+		RemainingPositions.RemoveAll([&](const FIntPoint& Point) { return Grid[Point.Y][Point.X] == 2; });
+		
+		ShuffleArray(RemainingPositions);
+		TArray<FIntPoint> Offsets = { {0,1},{0,-1},{1,0},{-1,0} };
+		for (const FIntPoint& Point : RemainingPositions)
+		{
+			if (EndRooms.Num() == EndPointCount)
+			{
+				break;
+			}
+			ShuffleArray(Offsets);
+			for (const FIntPoint& Offset : Offsets)
+			{
+				FIntPoint Next = Point + Offset;
+				if (IsPointValid(Next) && Grid[Next.Y][Next.X] == 0)
+				{
+					int NeighborCount = 0;
+					for (const FIntPoint& Offset2 : Offsets)
+					{
+						FIntPoint NextNext = Next + Offset2;
+						if (IsPointValid(NextNext) && Grid[NextNext.Y][NextNext.X] >= 1)
+						{
+							NeighborCount++;
+						}
+					}
+					if (NeighborCount == 1)
+					{
+						Grid[Next.Y][Next.X] = 2;
+						Rooms.Add(Next);
+						EndRooms.Add(Next);
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
+void ARoomGenerator::PrintGrid()
 {
 	for (int Y = 0; Y < MapSize; Y++)
 	{
@@ -108,109 +261,6 @@ void ARoomGenerator::PrintGrid() const
 	UE_LOG(LogTemp, Display, TEXT(" "));
 }
 
-void ARoomGenerator::PrintRoom()
-{
-	Grid.SetNum(MapSize);
-	for (int i = 0; i < MapSize; i++)
-	{
-		Grid[i].SetNum(MapSize);
-		for (int j = 0; j < MapSize; j++)
-		{
-			Grid[i][j] = 0;
-		}
-	}
-	for (const FIntPoint& Point : RoomPositions)
-	{
-		Grid[Point.Y][Point.X] = 1;
-	}
-	PrintGrid();
-}
-
-void ARoomGenerator::GenerateGrid()
-{
-	Grid.SetNum(MapSize);
-	for (int i = 0; i < MapSize; i++)
-	{
-		Grid[i].SetNum(MapSize);
-		for (int j = 0; j < MapSize; j++)
-		{
-			Grid[i][j] = 0;
-		}
-	}
-
-	int Offset[4][2] = { {0,1},{0,-1},{1,0},{-1,0} };
-	for (const TTuple<int, int, int> EndPoint : EndPoints)
-	{
-		int EndPointX = EndPoint.Get<0>();
-		int EndPointY = EndPoint.Get<1>();
-		int EndPointDirection = EndPoint.Get<2>();
-		Grid[EndPointY][EndPointX] = 1;
-
-		for (int i = 0; i < 4; i++)
-		{
-			if (EndPointDirection == i)continue;
-			int X = EndPointX + Offset[i][0];
-			int Y = EndPointY + Offset[i][1];
-			Grid[Y][X] = -1;
-		}
-	}
-}
-
-bool ARoomGenerator::CheckEndPointsConnect()
-{
-	TArray<FIntPoint> Visited;
-	TQueue<FIntPoint> Queue;
-
-	if (EndPoints.Num() == 0)
-	{
-		return true;
-	}
-
-	FIntPoint Start(EndPoints[0].Get<0>(), EndPoints[0].Get<1>());
-	Queue.Enqueue(Start);
-	Visited.Add(Start);
-
-	int Offset[4][2] = { {0,1},{0,-1},{1,0},{-1,0} };
-
-	while (!Queue.IsEmpty())
-	{
-		FIntPoint Current;
-		Queue.Dequeue(Current);
-
-		for (int i = 0; i < 4; i++)
-		{
-			FIntPoint Next(Current.X + Offset[i][0], Current.Y + Offset[i][1]);
-
-			if (Next.X < 0 || Next.X >= MapSize || Next.Y < 0 || Next.Y >= MapSize)
-			{
-				continue;
-			}
-
-			if (Grid[Next.Y][Next.X] == -1)
-			{
-				continue;
-			}
-
-			if (!Visited.Contains(Next))
-			{
-				Queue.Enqueue(Next);
-				Visited.Add(Next);
-			}
-		}
-	}
-
-	for (const TTuple<int, int, int>& EndPoint : EndPoints)
-	{
-		FIntPoint Point(EndPoint.Get<0>(), EndPoint.Get<1>());
-		if (!Visited.Contains(Point))
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
 TArray<FIntPoint> ARoomGenerator::FindShortestPath(FIntPoint Start, FIntPoint End)
 {
 	TArray<FIntPoint> Path;
@@ -219,7 +269,7 @@ TArray<FIntPoint> ARoomGenerator::FindShortestPath(FIntPoint Start, FIntPoint En
 	Frontier.Enqueue(Start);
 	CameFrom.Add(Start, Start);
 
-	int Offset[4][2] = { {0,1},{0,-1},{1,0},{-1,0} };
+	TArray<FIntPoint> Offsets = { {0,1},{0,-1},{1,0},{-1,0} };
 
 	while (!Frontier.IsEmpty())
 	{
@@ -231,20 +281,9 @@ TArray<FIntPoint> ARoomGenerator::FindShortestPath(FIntPoint Start, FIntPoint En
 			break;
 		}
 
-		for (int i = 0; i < 4; i++)
+		for (const FIntPoint& Offset : Offsets)
 		{
-			FIntPoint Next(Current.X + Offset[i][0], Current.Y + Offset[i][1]);
-
-			if (Next.X < 0 || Next.X >= MapSize || Next.Y < 0 || Next.Y >= MapSize)
-			{
-				continue;
-			}
-
-			if (Grid[Next.Y][Next.X] == -1)
-			{
-				continue;
-			}
-
+			FIntPoint Next = Current + Offset;
 			if (!CameFrom.Contains(Next))
 			{
 				Frontier.Enqueue(Next);
@@ -261,28 +300,31 @@ TArray<FIntPoint> ARoomGenerator::FindShortestPath(FIntPoint Start, FIntPoint En
 	}
 	Path.Add(Start);
 	Algo::Reverse(Path);
-
 	return Path;
 }
 
-TArray<FIntPoint> ARoomGenerator::FindAllEndPointsShortestPath()
+void ARoomGenerator::AssignEndRooms()
 {
-	TArray<FIntPoint> AllPaths;
-	TArray<FIntPoint> EndPointPositions;
+	// HERE [장훈]: 특수방 생성 로직 
+	ShuffleArray(EndRooms);
 
-	for (const TTuple<int, int, int>& EndPoint : EndPoints)
-	{
-		EndPointPositions.Add(FIntPoint(EndPoint.Get<0>(), EndPoint.Get<1>()));
-	}
+	int MaxDistance = 0;
+	FIntPoint StartRoom, BossRoom;
 
-	for (int i = 0; i < EndPointPositions.Num() - 1; i++)
+	for (int i = 0; i < EndRooms.Num(); i++)
 	{
-		TArray<FIntPoint> Path = FindShortestPath(EndPointPositions[i], EndPointPositions[i + 1]);
-		AllPaths.Append(Path);
-		for (int j = i + 1; j < EndPointPositions.Num(); j++)
+		for (int j = i + 1; j < EndRooms.Num(); j++)
 		{
+			int Distance = GetLengthBetweenPoint(EndRooms[i], EndRooms[j]);
+			if (Distance > MaxDistance)
+			{
+				MaxDistance = Distance;
+				StartRoom = EndRooms[i];
+				BossRoom = EndRooms[j];
+			}
 		}
 	}
 
-	return AllPaths;
+	EndRooms.Remove(StartRoom);
+	EndRooms.Remove(BossRoom);
 }

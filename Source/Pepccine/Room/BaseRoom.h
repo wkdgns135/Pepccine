@@ -30,7 +30,7 @@ protected:
 
 public:
 	void ClearRoom();
-		
+	
 public:
 	FORCEINLINE bool GetIsRoomClear() const { return bIsRoomClear; }
 

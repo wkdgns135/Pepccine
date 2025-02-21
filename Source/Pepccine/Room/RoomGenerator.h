@@ -13,15 +13,16 @@ class PEPCCINE_API ARoomGenerator : public AActor
 	
 private:
 	UPROPERTY(EditAnywhere)
-	int MapSize; // MapSize > 5
+	int MapSize; // MapSize > 6
 	UPROPERTY(EditAnywhere)
-	int EndPointCount; // EndPointCount <= MapSize / 2
+	int EndPointCount; // EndPointCount <= (MapSize + MapSize) / 3
 	UPROPERTY(EditAnywhere)
 	int LoopThreshold;
 
-	TArray<TTuple<int, int, int>> EndPoints; // {{X, Y}}
+	TArray<FIntPoint> EndPoints; // {{X, Y}}
 	TArray<TArray<int>> Grid;
-	TArray<FIntPoint> RoomPositions;
+	TSet<FIntPoint> Rooms;
+	TArray<FIntPoint> EndRooms;
 
 public:	
 	ARoomGenerator();
@@ -31,13 +32,18 @@ protected:
 
 private:
 	void GetParameters();
-	bool GetFindNeighbor(int X, int Y);
-	void BackTracking(int Depth);
+	bool GetFindNeighbor(const FIntPoint& Point);
 	bool GenerateEndPoints();
-	void GenerateGrid();
-	bool CheckEndPointsConnect();
-	void PrintGrid() const;
-	void PrintRoom();
+	void InitializeGrid();
+	void GenerateMST();
+	void MarkEndRooms();
+	void AddAdditionalEndRooms();
+	void PrintGrid();
 	TArray<FIntPoint> FindShortestPath(FIntPoint Start, FIntPoint End);
-	TArray<FIntPoint> FindAllEndPointsShortestPath();
+	void AssignEndRoom();
+
+	FORCEINLINE bool IsPointValid(const FIntPoint& Point) { return Point.X >= 0 && Point.X < MapSize && Point.Y >= 0 && Point.Y < MapSize; };
+	FORCEINLINE void ShuffleArray(TArray<FIntPoint>& Array) { Array.Sort([](const FIntPoint& A, const FIntPoint& B) { return FMath::RandRange(0, 1) == 0; }); };
+	FORCEINLINE int GetLengthBetweenPoint(const FIntPoint& A, const FIntPoint& B) { return FMath::Abs(A.X - B.X) + FMath::Abs(A.Y - B.Y); };
+	
 };
