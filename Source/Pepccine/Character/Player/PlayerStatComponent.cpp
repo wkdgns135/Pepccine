@@ -119,7 +119,6 @@ void UPlayerStatComponent::NotifyStaminaObservers()
 	{
 		if (Observer)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("NotifyStaminaObservers"));
 			Observer->OnStaminaChanged(Stamina, MaxStamina);
 		}
 	}

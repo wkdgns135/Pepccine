@@ -7,7 +7,6 @@ UCrosshairHUDComponent::UCrosshairHUDComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-  CrosshairWidgetClass = nullptr;
   CrosshairWidget = nullptr;
 }
 
@@ -15,55 +14,62 @@ void UCrosshairHUDComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-  GetPlayerController();
+  if (CrosshairWidget) CrosshairWidget->AddToViewport();
+  CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UCrosshairHUDComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
   Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+  UpdateCrosshair(DeltaTime);
 }
 
-void UCrosshairHUDComponent::GetPlayerController()
+void UCrosshairHUDComponent::UpdateCrosshair(float DeltaTime)
 {
-  if (CrosshairWidget)
-  {
-    CrosshairWidget->RemoveFromParent();
-    CrosshairWidget = nullptr;
-  }
+  if (!CrosshairWidget) return;
 
-  if (CrosshairWidgetClass)
+  AActor* Owner = GetOwner();
+  if (Owner)
   {
-    CrosshairWidget = CreateWidget<UUserWidget>(GetWorld(), CrosshairWidgetClass);
-    if (CrosshairWidget)
-    {
-      CrosshairWidget->AddToViewport();
+    FVector Velocity = Owner->GetVelocity();
+    float Speed = Velocity.Size();
+    if (Speed == 0 && FMath::IsNearlyZero(AimSize, 1.0f)) return;
+
+    APepCharacter* PepCharacter = Cast<APepCharacter>(Owner);
+    if (!PepCharacter) return;
+
+    bool IsJumping = PepCharacter->IsJumping();
+
+    if (IsJumping) {
+      AimSize += 2000.f * DeltaTime;
+    }
+    else {
+      if (Speed > 100)
+      {
+        AimSize += Speed * DeltaTime;
+      }
+      else if (Speed > 0)
+      {
+        AimSize -= FMath::Clamp(Speed * DeltaTime * 50, 0.0f, AimSize);
+      }
+      else
+      {
+        AimSize -= FMath::Clamp(2000.f * DeltaTime, 0.0f, AimSize);
+      }
     }
 
-    CrosshairImage = Cast<UImage>(CrosshairWidget->GetWidgetFromName(TEXT("CrosshairImage")));
-    if (CrosshairImage)
-    {
-      CrosshairImage->SetVisibility(ESlateVisibility::Hidden);
-    }
-    else
-    {
-      UE_LOG(LogTemp, Error, TEXT("CrosshairImage is NULL! Check your widget!"));
-    }
+    AimSize = FMath::Clamp(AimSize, MinAimSize, MaxAimSize);
+    CrosshairWidget->UpdateCrosshairSize(AimSize);
   }
 }
 
 void UCrosshairHUDComponent::ShowCrosshair()
 {
-  if (CrosshairImage)
-  {
-    CrosshairImage->SetVisibility(ESlateVisibility::Visible);
-  }
+  CrosshairWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UCrosshairHUDComponent::HideCrosshair()
 {
-  if (CrosshairImage)
-  {
-    CrosshairImage->SetVisibility(ESlateVisibility::Hidden);
-  }
+  CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
 }
-

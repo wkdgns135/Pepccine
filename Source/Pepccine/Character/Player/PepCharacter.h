@@ -27,6 +27,8 @@ public:
 
 	virtual void OnStaminaChanged(float NewStamina, float MaxStamina) override;
 
+	// inline
+	FORCEINLINE_DEBUGGABLE bool IsJumping() const { return bIsJumping; }
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

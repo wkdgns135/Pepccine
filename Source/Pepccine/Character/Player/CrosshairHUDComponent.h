@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Image.h"
+#include "DynamicCrosshairWidget.h"
 #include "CrosshairHUDComponent.generated.h"
 
 
@@ -17,23 +17,23 @@ class PEPCCINE_API UCrosshairHUDComponent : public UActorComponent
 public:	
 	UCrosshairHUDComponent();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD|Crosshair", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UUserWidget> CrosshairWidgetClass;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HUD|Crosshair", meta = (AllowPrivateAccess = "true"))
-	UUserWidget* CrosshairWidget;
+	float GetAimSize() const { return AimSize; }
+	void SetAimSize(float Size) { AimSize = Size; }
 
-	UFUNCTION(BlueprintCallable)
+	UPROPERTY(EditAnywhere, Category = "UI")
+	UDynamicCrosshairWidget* CrosshairWidget;
+
 	void ShowCrosshair();
-	UFUNCTION(BlueprintCallable)
 	void HideCrosshair();
-	UFUNCTION(BlueprintCallable)
-	void GetPlayerController();
-
-	UImage* CrosshairImage;
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	void UpdateCrosshair(float DeltaTime);
+
+	float AimSize;
+	float MaxAimSize;
+	float MinAimSize;
 };
