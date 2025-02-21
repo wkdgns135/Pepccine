@@ -14,5 +14,5 @@ class PEPCCINE_API UPepccineGameInstance : public UGameInstance
 	GENERATED_BODY()
 	
 private:
-	TArray<ABaseRoom*> Rooms;
+	TArray<TArray<TSubclassOf<ABaseRoom>>> Map;
 };
