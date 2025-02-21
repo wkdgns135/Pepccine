@@ -67,5 +67,4 @@ private:
 
 	TArray<IIStaminaObserver*> StaminaObservers;
 	FTimerHandle IncreaseStaminaTimerHandle;
-
 };

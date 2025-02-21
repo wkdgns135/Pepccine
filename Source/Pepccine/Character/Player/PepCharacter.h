@@ -96,7 +96,7 @@ private:
 	bool bIsZooming = false;
 	bool bIsJumping = false;
 	bool bIsCrouching = false;
-	bool bIsSpringting = false;
+	bool bIsSprinting = false;
 	bool bIsSprintable = true;
 	bool bIsReloading = false;
 	bool bIsInteracting = false;
@@ -117,6 +117,9 @@ private:
 	void ToggleCameraView();
 	void UpdateHUD();
 	void AddObservers();
+
+	void SetCharacterSpeed(float Speed);
+	void CheckSprinting();
 
 	FVector GetRollDirection();
 };

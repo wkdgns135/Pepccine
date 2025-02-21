@@ -16,8 +16,8 @@ UPlayerStatComponent::UPlayerStatComponent()
 	
 	MaxStamina = 100.0f;
 	Stamina = MaxStamina;
-	StaminaRecoveryRate = 2.0f;
-	StaminaRecoveryTime = 2.0f;
+	StaminaRecoveryRate = 10.0f;
+	StaminaRecoveryTime = 1.0f;
 
 	InvincibilityTime = 0;
 	Defence = 0;  
@@ -45,7 +45,6 @@ void UPlayerStatComponent::StartRepeatingTimer()
 		true);
 }
 
-
 void UPlayerStatComponent::IncreaseStamina(float Amount)
 {
 	if (Amount <= 0.0f) return;
@@ -65,8 +64,7 @@ void UPlayerStatComponent::IncreaseStaminaByPercentage(float Percentage)
 
 bool UPlayerStatComponent::DecreaseStamina(float Amount)
 {
-	if (Amount <= 0.0f) return false;
-	if (Stamina < Amount) return false;
+	if (Amount <= 0.0f || Stamina < Amount) return false;
 
 	Stamina = FMath::Clamp(Stamina - Amount, 0.0f, MaxStamina);
 
@@ -74,6 +72,19 @@ bool UPlayerStatComponent::DecreaseStamina(float Amount)
 
 	return true;
 }
+
+//bool UPlayerStatComponent::DecreaseStaminaByTime(float Amount, float time)
+//{
+//	if (Amount <= 0.0f || Stamina < Amount) return false;
+//
+//	GetWorld()->GetTimerManager().SetTimer(
+//		DecreaseStaminaTimerHandle,
+//		DecreaseStamina(Amount),
+//		time,
+//		true);
+//
+//	GetWorld()->GetTimerManager().PauseTimer(DecreaseStaminaTimerHandle);
+//}
 
 bool UPlayerStatComponent::DecreaseStaminaByPercentage(float Percentage)
 {
@@ -84,6 +95,8 @@ bool UPlayerStatComponent::DecreaseStaminaByPercentage(float Percentage)
 	return DecreaseStamina(Amount);
 }
 
+// Observers
+#pragma region
 void UPlayerStatComponent::AddStaminaObserver(IIStaminaObserver* Observer)
 {
 	if (Observer && !StaminaObservers.Contains(Observer))
@@ -111,3 +124,4 @@ void UPlayerStatComponent::NotifyStaminaObservers()
 		}
 	}
 }
+#pragma endregion

@@ -1,5 +1,6 @@
 #include "Character/Player/CrosshairHUDComponent.h"
 #include "Character/Controller/PepccinePlayerController.h"
+#include "Components/Image.h"
 
 UCrosshairHUDComponent::UCrosshairHUDComponent()
 {
@@ -34,11 +35,11 @@ void UCrosshairHUDComponent::GetPlayerController()
   if (CrosshairWidgetClass)
   {
     CrosshairWidget = CreateWidget<UUserWidget>(PepccinePlayerController, CrosshairWidgetClass);
-    if (CrosshairWidget)
-    {
-      CrosshairWidget->AddToViewport();
-      CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
-    }
+
+    UImage* CrosshairImage = Cast<UImage>(CrosshairWidget->GetWidgetFromName(TEXT("CrosshairImage")))
+
+     CrosshairImage->AddToViewport();
+     CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
   }
 }
 

@@ -25,7 +25,7 @@ APepCharacter::APepCharacter()
   FirstPersonCamera->bUsePawnControlRotation = false;
 
   PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
-  
+
   CrosshairHUDComponent = CreateDefaultSubobject<UCrosshairHUDComponent>(TEXT("CrosshairHUDComponent"));
 }
 
@@ -38,38 +38,43 @@ void APepCharacter::BeginPlay()
   AddObservers();
 }
 
+// Initialize Character Status
+#pragma region
+void APepCharacter::InitializeCharacterMovement()
+{
+  if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+  {
+    MovementComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
+    MovementComponent->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
+    MovementComponent->JumpZVelocity = PlayerStatComponent->JumpZVelocity;
+  }
+}
+#pragma endregion
+
 void APepCharacter::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
 
+  CheckSprinting();
 }
 
-void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
+// Tick Method
+#pragma region
+void APepCharacter::CheckSprinting()
 {
-  UE_LOG(LogTemp, Warning, TEXT("Stamina Updated: %f / %f"), NewStamina, MaxStamina);
-}
-
-void APepCharacter::ToggleCameraView()
-{
-  if (!PlayerController) return;
-
-  bIsFirstPersonView = !bIsFirstPersonView;
-
-  if (bIsFirstPersonView)
-  {
-    FirstPersonCamera->SetActive(true);
-    ThirdPersonCamera->SetActive(false);
-    UE_LOG(LogTemp, Log, TEXT("1인칭 모드 활성화"));
+  if (bIsSprinting) {
+    if (!PlayerStatComponent->DecreaseStamina(0.25))
+    {
+      bIsSprinting = false;
+      return;
+    }
+    SetCharacterSpeed(PlayerStatComponent->SprintSpeed);
   }
-  else
-  {
-    ThirdPersonCamera->SetActive(true);
-    FirstPersonCamera->SetActive(false);
-    UE_LOG(LogTemp, Log, TEXT("3인칭 모드 활성화"));
+  else {
+    SetCharacterSpeed(PlayerStatComponent->MovementSpeed);
   }
-
-  UpdateHUD();
 }
+#pragma endregion
 
 // 임시
 void APepCharacter::UpdateHUD()
@@ -109,21 +114,22 @@ void APepCharacter::InitializeCharacterCamera()
   //UpdateHUD();
 }
 
+// Observers
+#pragma region
 void APepCharacter::AddObservers()
 {
   PlayerStatComponent->AddStaminaObserver(this);
 }
 
-void APepCharacter::InitializeCharacterMovement()
+void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
 {
-  if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
-  {
-    MovementComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
-    MovementComponent->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
-    MovementComponent->JumpZVelocity = PlayerStatComponent->JumpZVelocity;
-  }
+  UE_LOG(LogTemp, Warning, TEXT("Stamina Updated: %f / %f"), NewStamina, MaxStamina);
 }
+#pragma endregion
 
+// TODO: 분류 세분화 필요
+// Action
+#pragma region
 void APepCharacter::Move(const FInputActionValue& Value)
 {
   FVector2D MoveInput = Value.Get<FVector2D>();
@@ -191,49 +197,31 @@ void APepCharacter::StartSprint(const FInputActionValue& value)
   if (bIsRollable)
   {
     SprintHoldStartTime = GetWorld()->GetTimeSeconds();
-    UE_LOG(LogTemp, Log, TEXT("StartSprint HoldTime! [%f]"), SprintHoldStartTime);
   }
 
   if (!bIsSprintable) return;
-
-  bIsSpringting = true;
-
-  UE_LOG(LogTemp, Log, TEXT("StartSprint!"));
-
-  if (GetCharacterMovement())
-  {
-    if (!PlayerStatComponent->DecreaseStamina(2))
-    {
-      bIsSpringting = false;
-      return;
-    }
-    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->SprintSpeed;
-  }
+  bIsSprinting = true;
 }
 
 void APepCharacter::StopSprint(const FInputActionValue& value)
 {
   float HoldTime = GetWorld()->GetTimeSeconds() - SprintHoldStartTime;
-  UE_LOG(LogTemp, Log, TEXT("SprintHoldStartTime! [%f]"), SprintHoldStartTime);
-  UE_LOG(LogTemp, Log, TEXT("HoldTime! [%f]"), HoldTime);
-  bIsSpringting = false;
+  bIsSprinting = false;
 
-  if (HoldTime > SprintHoldThreshold)
+  if (HoldTime <= SprintHoldThreshold)
   {
-    UE_LOG(LogTemp, Log, TEXT("StopSprint!"));
-
-    if (GetCharacterMovement())
-    {
-      GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
-    }
-  }
-  else
-  {
-    UE_LOG(LogTemp, Log, TEXT("Rolling!"));
     Roll();
   }
 
   SprintHoldStartTime = 0.0f; // 초기화
+}
+
+void APepCharacter::SetCharacterSpeed(float Speed)
+{
+  if (GetCharacterMovement())
+  {
+    GetCharacterMovement()->MaxWalkSpeed = Speed;
+  }
 }
 
 void APepCharacter::Roll()
@@ -339,7 +327,7 @@ void APepCharacter::OpenInventory()
   // HUD
   if (bIsInventoryOpened)
   {
-    
+
   }
   else
   {
@@ -382,6 +370,19 @@ void APepCharacter::ZoomOut()
   ToggleCameraView();
 }
 
+void APepCharacter::ToggleCameraView()
+{
+  if (!PlayerController) return;
+
+  bIsFirstPersonView = !bIsFirstPersonView;
+
+  FirstPersonCamera->SetActive(bIsFirstPersonView);
+  ThirdPersonCamera->SetActive(!bIsFirstPersonView);
+}
+#pragma endregion
+
+// Key Mapping
+#pragma region
 void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
   Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -555,3 +556,5 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
     );
   }
 }
+
+#pragma endregion
