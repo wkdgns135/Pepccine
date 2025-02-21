@@ -20,6 +20,8 @@ public:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+	void SetProjectileVelocity(FVector Direction);
+
 	// getter
 	FORCEINLINE USphereComponent* GetCollisionComp() const { return CollisionComp; }
 	FORCEINLINE UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }

@@ -39,3 +39,8 @@ void APepccineProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 	}
 }
 
+void APepccineProjectile::SetProjectileVelocity(FVector Direction)
+{
+	ProjectileMovement->Velocity = Direction * ProjectileMovement->InitialSpeed;
+}
+

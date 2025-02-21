@@ -73,6 +73,11 @@ Plugins/**/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 
+# Jetbrain Rider specific files
+.idea/
+Plugins/**/RiderLink/*
+*.sln.DotSettings.user
+
 # Content 폴더의 모든 파일과 폴더 무시
 Content/*
 

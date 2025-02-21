@@ -26,7 +26,4 @@ public:
 	// 스폰할 때 보여질 메시
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "스폰 메시"))
 	TObjectPtr<UStaticMesh> MeshToSpawn;
-
-	UFUNCTION(BlueprintCallable)
-	virtual void UseItem(class UPepccineItemManagerComponent* ItemManagerComp) {};
 };

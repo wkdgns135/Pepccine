@@ -1,127 +1,141 @@
 ﻿#include "Item/PepccineItemManagerComponent.h"
 #include "Item/PepccineItemDataAssetBase.h"
 #include "GameFramework/Character.h"
+#include "Weapon/PepccineWeaponItemType.h"
+#include "Weapon/WeaponStatModifier.h"
 
 UPepccineItemManagerComponent::UPepccineItemManagerComponent()
+	: WeaponItemComp(nullptr), ItemDataAsset(nullptr)
 {
 	PrimaryComponentTick.bCanEverTick = true;
+}
+
+void UPepccineItemManagerComponent::PickUpWeaponItem(UPepccineWeaponItemData* WeaponItemData)
+{
+	if (WeaponItemData->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main)
+	{
+		MainWeaponData = WeaponItemData;
+	}
+	else
+	{
+		SubWeaponData = WeaponItemData;
+	}
 }
 
 void UPepccineItemManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetWeaponActor();
+	// 무기 컴포넌트 등록
+	SetWeaponItemComponent();
 
-	InitializeWeapon();
+	// 기본 무기 장착
+	EquipDefaultWeapon();
 }
 
-void UPepccineItemManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UPepccineItemManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                                  FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UPepccineItemManagerComponent::InitializeWeapon()
+void UPepccineItemManagerComponent::EquipDefaultWeapon()
 {
-	if (ItemDataAsset)
+	if (ItemDataAsset && ItemDataAsset->WeaponsItems.Num() > 0)
 	{
 		// 디버그용 임시 메인 무기 장착
-		if (UPepccineWeaponItemData* Weapon = DuplicateObject<UPepccineWeaponItemData>(ItemDataAsset->Weapons[1], this))
+		if (UPepccineWeaponItemData* Weapon = DuplicateObject<UPepccineWeaponItemData>(ItemDataAsset->WeaponsItems[1], this))
 		{
-			MainWeapon = Weapon;
+			PickUpWeaponItem(Weapon);
 
-			UE_LOG(LogTemp, Warning, TEXT("%s 등록!"), *MainWeapon->DisplayName);
+			UE_LOG(LogTemp, Warning, TEXT("%s 등록!"), *MainWeaponData->DisplayName);
 		}
 
 		// 기본 무기는 0번 인덱스
-		if (UPepccineWeaponItemData* Weapon = DuplicateObject<UPepccineWeaponItemData>(ItemDataAsset->Weapons[0], this))
+		if (UPepccineWeaponItemData* Weapon = DuplicateObject<UPepccineWeaponItemData>(ItemDataAsset->WeaponsItems[0], this))
 		{
-			SubWeapon = Weapon;
+			PickUpWeaponItem(Weapon);
 
-			UE_LOG(LogTemp, Warning, TEXT("%s 등록!"), *SubWeapon->DisplayName);
+			UE_LOG(LogTemp, Warning, TEXT("%s 등록!"), *SubWeaponData->DisplayName);
 
-			EquipWeapon(SubWeapon);
+			EquipWeapon(SubWeaponData);
 		}
 	}
 }
 
 void UPepccineItemManagerComponent::EquipWeapon(UPepccineWeaponItemData* Weapon)
 {
-	// 무기가 없을 경우 장착 X
-	if (!Weapon)
+	// 무기가 없고 무기 컴포넌트가 없을 경우 장착 X
+	if (!Weapon && !WeaponItemComp)
 	{
 		return;
 	}
 
-	EquippedWeapon = Weapon;
+	// 무기 장착
+	WeaponItemComp->EquipWeapon(Weapon);
 
 	// 메시 변경
 	ChangeWeaponEquippedMesh();
 
-	UE_LOG(LogTemp, Warning, TEXT("%s 장착!"), *EquippedWeapon->DisplayName);
+	UE_LOG(LogTemp, Warning, TEXT("%s 장착!"), *Weapon->DisplayName);
 }
 
 void UPepccineItemManagerComponent::SwapWeapon(EPepccineWeaponItemType WeaponType)
 {
-	if (EquippedWeapon->WeaponItemType != WeaponType)
+	if (GetEquippedWeaponData()->GetWeaponItemType() != WeaponType)
 	{
-		EquipWeapon(WeaponType == EPepccineWeaponItemType::EPWIT_Main ? MainWeapon : SubWeapon);
+		EquipWeapon(WeaponType == EPepccineWeaponItemType::EPWIT_Main ? MainWeaponData : SubWeaponData);
 	}
 }
 
-void UPepccineItemManagerComponent::ChangeWeaponEquippedMesh()
+void UPepccineItemManagerComponent::ChangeWeaponEquippedMesh() const
 {
-	if (WeaponActor)
+	if (WeaponItemComp)
 	{
-		if (USkeletalMeshComponent* WeaponEquippedMesh = WeaponActor->GetComponentByClass<USkeletalMeshComponent>())
+		if (USkeletalMesh* Mesh = GetEquippedWeaponData()->GetEquippedMesh())
 		{
-			if (USkeletalMesh* Mesh = EquippedWeapon->GetEquippedMesh())
-			{
-				WeaponEquippedMesh->SetSkeletalMesh(Mesh);
-			}
+			WeaponItemComp->SetSkeletalMesh(Mesh);
 		}
 	}
 }
 
-void UPepccineItemManagerComponent::FireWeapon()
+void UPepccineItemManagerComponent::FireWeapon() const
 {
-	// 장착중인 무기가 있을 경우만 실행
-	if (EquippedWeapon)
+	// 무기 컴포넌트가 있고 장착된 무기가 있을 경우만 발사
+	if (WeaponItemComp && GetEquippedWeaponData())
 	{
-		GetEquippedWeapon()->UseItem(this);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("현재 장착중인 무기가 없습니다."));
+		WeaponItemComp->Fire();
 	}
 }
 
 void UPepccineItemManagerComponent::ReloadWeapon() const
 {
-	// 장착중인 무기가 있을 경우만 실행
-	if (EquippedWeapon)
+	// 무기 컴포넌트가 있고 장착된 무기가 있을 경우만 재장전
+	if (WeaponItemComp && GetEquippedWeaponData())
 	{
-		GetEquippedWeapon()->Reload();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("현재 장착중인 무기가 없습니다."));
+		WeaponItemComp->Reload();
 	}
 }
 
-void UPepccineItemManagerComponent::SetWeaponActor()
+void UPepccineItemManagerComponent::SetWeaponItemComponent()
 {
 	TArray<AActor*> AttachedActors;
 	GetOwner()->GetAttachedActors(AttachedActors);
 
 	for (AActor* Actor : AttachedActors)
 	{
-		if (Actor->IsA(WeaponActorClass))
+		if (Actor)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("무기 액터 설정 완료!"));
-			WeaponActor = Actor;
-			break;
+			if (UPepccineWeaponItemComponent* Comp = Actor->FindComponentByClass<UPepccineWeaponItemComponent>())
+			{
+				// 무기 컴포넌트 등록
+				WeaponItemComp = Comp;
+				// 캐릭터 설정
+				WeaponItemComp->SetCharacter(Cast<ACharacter>(GetOwner()));
+
+				UE_LOG(LogTemp, Warning, TEXT("무기 컴포넌트 설정 완료!"));
+				break;
+			}
 		}
 	}
 }
-

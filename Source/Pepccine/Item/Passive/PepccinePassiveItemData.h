@@ -10,19 +10,17 @@ UCLASS(BlueprintType)
 class PEPCCINE_API UPepccinePassiveItemData : public UPepccineItemDataBase
 {
 	GENERATED_BODY()
-	
+
 public:
-
-	// 무기 스텟 수정 목록
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Passive", meta = (DisplayName = "무기 스텟 수정 목록"))
-	TMap<EPepccineWeaponStatName, float> ModifyWeaponStats;
-
-	// 캐릭터 스텟 수정 목록
-	//TMap<type, float> ModifyCharacterStats;
-
-	// 캐릭터 기능 추가 목록
+	// 스탯 적용
 
 
-	// 패시브 발동
-	virtual void UseItem(class UPepccineItemManagerComponent* ItemManagerComp) override;
+	
+	// getter
+	FORCEINLINE FPepccineWeaponStatModifier GetModifyWeaponStats() const { return ModifyWeaponStats; };
+
+protected:
+	// 무기 스탯 수정 목록
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Passive", meta = (DisplayName = "무기 스탯 수정 목록"))
+	FPepccineWeaponStatModifier ModifyWeaponStats;
 };
