@@ -22,7 +22,7 @@ APepCharacter::APepCharacter()
 
   FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
   FirstPersonCamera->SetupAttachment(RootComponent);
-  FirstPersonCamera->bUsePawnControlRotation = false;
+  FirstPersonCamera->bUsePawnControlRotation = true;
 
   PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
 
@@ -186,7 +186,7 @@ void APepCharacter::Look(const FInputActionValue& value)
 {
   FVector2D LookInput = value.Get<FVector2D>();
 
-  //UE_LOG(LogTemp, Log, TEXT("LookInput[%s]"), *LookInput.ToString());
+  UE_LOG(LogTemp, Log, TEXT("LookInput[%s]"), *LookInput.ToString());
 
   AddControllerYawInput(LookInput.X);
   AddControllerPitchInput(LookInput.Y);
