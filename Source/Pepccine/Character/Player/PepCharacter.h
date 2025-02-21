@@ -15,6 +15,7 @@ class UInputMappingContext;
 class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
+class UPepccineMontageComponent;
 
 UCLASS()
 class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver

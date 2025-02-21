@@ -16,6 +16,11 @@ public:
 	// Sets default values for this component's properties
 	UPepccineMontageComponent();
 
+	UFUNCTION()
+	void Fire();
+	UFUNCTION()
+	void Reloading();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -29,7 +34,4 @@ protected:
 	UAnimMontage* FireMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* ReloadMontage;
-
-	void Fire();
-	void Reloading();
 };

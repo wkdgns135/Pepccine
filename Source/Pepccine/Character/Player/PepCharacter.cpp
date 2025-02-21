@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "CrosshairHUDComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Character/Animation/PepccineMontageComponent.h"
 
 APepCharacter::APepCharacter()
 {
@@ -27,6 +28,8 @@ APepCharacter::APepCharacter()
   PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
 
   CrosshairComponent = CreateDefaultSubobject<UCrosshairHUDComponent>(TEXT("CrosshairHUDComponent"));
+
+  PepccineMontageComponent = CreateDefaultSubobject<UPepccineMontageComponent>(TEXT("MontageComponent"));
 }
 
 void APepCharacter::BeginPlay()
@@ -186,7 +189,7 @@ void APepCharacter::Look(const FInputActionValue& value)
 {
   FVector2D LookInput = value.Get<FVector2D>();
 
-  UE_LOG(LogTemp, Log, TEXT("LookInput[%s]"), *LookInput.ToString());
+  //UE_LOG(LogTemp, Log, TEXT("LookInput[%s]"), *LookInput.ToString());
 
   AddControllerYawInput(LookInput.X);
   AddControllerPitchInput(LookInput.Y);
@@ -296,9 +299,11 @@ void APepCharacter::Reload()
 {
   UE_LOG(LogTemp, Log, TEXT("Reload!"));
 
+  PepccineMontageComponent->Reloading();
+
   if (bIsReloading)
   {
-
+    
   }
   else
   {
@@ -352,6 +357,8 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 void APepCharacter::Fire()
 {
   UE_LOG(LogTemp, Log, TEXT("Fire!"));
+
+  PepccineMontageComponent->Fire();
 }
 
 void APepCharacter::ZoomIn()
