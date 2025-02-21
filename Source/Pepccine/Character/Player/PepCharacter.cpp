@@ -238,6 +238,7 @@ void APepCharacter::Roll()
     bIsRolling = false;
     return;
   }
+  // 점프도중 롤 금지 날라가는 현상
   GetCharacterMovement()->AddImpulse(GetRollDirection(), true);
   GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 0.1f, false);
 }
