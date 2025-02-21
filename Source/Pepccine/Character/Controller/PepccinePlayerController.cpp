@@ -4,6 +4,7 @@
 #include "PepccinePlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Character/Player/CrosshairHUDComponent.h"
 
 APepccinePlayerController::APepccinePlayerController()
 {

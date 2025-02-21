@@ -1,10 +1,14 @@
 #include "Character/Player/CrosshairHUDComponent.h"
-#include "Character/Controller/PepccinePlayerController.h"
+#include "PepCharacter.h"
 #include "Components/Image.h"
+#include "Blueprint/UserWidget.h"
 
 UCrosshairHUDComponent::UCrosshairHUDComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
+  CrosshairWidgetClass = nullptr;
+  CrosshairWidget = nullptr;
 }
 
 void UCrosshairHUDComponent::BeginPlay()
@@ -21,11 +25,6 @@ void UCrosshairHUDComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void UCrosshairHUDComponent::GetPlayerController()
 {
-  APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-  if (!PlayerController) return;
-  APepccinePlayerController* PepccinePlayerController = Cast<APepccinePlayerController>(PlayerController);
-  if (!PepccinePlayerController) return;
-
   if (CrosshairWidget)
   {
     CrosshairWidget->RemoveFromParent();
@@ -34,28 +33,37 @@ void UCrosshairHUDComponent::GetPlayerController()
 
   if (CrosshairWidgetClass)
   {
-    CrosshairWidget = CreateWidget<UUserWidget>(PepccinePlayerController, CrosshairWidgetClass);
+    CrosshairWidget = CreateWidget<UUserWidget>(GetWorld(), CrosshairWidgetClass);
+    if (CrosshairWidget)
+    {
+      CrosshairWidget->AddToViewport();
+    }
 
-    UImage* CrosshairImage = Cast<UImage>(CrosshairWidget->GetWidgetFromName(TEXT("CrosshairImage")))
-
-     CrosshairImage->AddToViewport();
-     CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
+    CrosshairImage = Cast<UImage>(CrosshairWidget->GetWidgetFromName(TEXT("CrosshairImage")));
+    if (CrosshairImage)
+    {
+      CrosshairImage->SetVisibility(ESlateVisibility::Hidden);
+    }
+    else
+    {
+      UE_LOG(LogTemp, Error, TEXT("CrosshairImage is NULL! Check your widget!"));
+    }
   }
 }
 
 void UCrosshairHUDComponent::ShowCrosshair()
 {
-  if (CrosshairWidget)
+  if (CrosshairImage)
   {
-    CrosshairWidget->SetVisibility(ESlateVisibility::Visible);
+    CrosshairImage->SetVisibility(ESlateVisibility::Visible);
   }
 }
 
 void UCrosshairHUDComponent::HideCrosshair()
 {
-  if (CrosshairWidget)
+  if (CrosshairImage)
   {
-    CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
+    CrosshairImage->SetVisibility(ESlateVisibility::Hidden);
   }
 }
 

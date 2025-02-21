@@ -47,7 +47,7 @@ void UPlayerStatComponent::StartRepeatingTimer()
 
 void UPlayerStatComponent::IncreaseStamina(float Amount)
 {
-	if (Amount <= 0.0f) return;
+	if (Amount <= 0.0f || Stamina >= MaxStamina) return;
 
 	Stamina = FMath::Clamp(Stamina + Amount, 0.0f, MaxStamina);
 

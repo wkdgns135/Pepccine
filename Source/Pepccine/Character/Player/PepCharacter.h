@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "Pepccine/Character/Controller/PepccinePlayerController.h"
 #include "PlayerStatComponent.h"
+#include "CrosshairHUDComponent.h"
 #include "Character/Interfaces/IStaminaObserver.h"
 #include "PepCharacter.generated.h"
 
@@ -39,6 +40,8 @@ protected:
 	UCameraComponent* ThirdPersonCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPlayerStatComponent* PlayerStatComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UCrosshairHUDComponent* CrosshairComponent;
 
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
@@ -88,7 +91,6 @@ protected:
 	void ZoomOut();
 
 	APepccinePlayerController* PlayerController;
-	class UCrosshairHUDComponent* CrosshairHUDComponent;
 
 private:
 	float CameraArmLength = 300.0f;

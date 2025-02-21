@@ -26,7 +26,7 @@ APepCharacter::APepCharacter()
 
   PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
 
-  CrosshairHUDComponent = CreateDefaultSubobject<UCrosshairHUDComponent>(TEXT("CrosshairHUDComponent"));
+  CrosshairComponent = CreateDefaultSubobject<UCrosshairHUDComponent>(TEXT("CrosshairHUDComponent"));
 }
 
 void APepCharacter::BeginPlay()
@@ -359,7 +359,11 @@ void APepCharacter::ZoomIn()
   UE_LOG(LogTemp, Log, TEXT("ZoomIn!"));
 
   bIsZooming = true;
+  
   ToggleCameraView();
+
+  if (!CrosshairComponent) return;
+  CrosshairComponent->ShowCrosshair();
 }
 
 void APepCharacter::ZoomOut()
@@ -367,7 +371,11 @@ void APepCharacter::ZoomOut()
   UE_LOG(LogTemp, Log, TEXT("ZoomOut!"));
 
   bIsZooming = false;
+  
   ToggleCameraView();
+
+  if (!CrosshairComponent) return;
+  CrosshairComponent->HideCrosshair();
 }
 
 void APepCharacter::ToggleCameraView()
