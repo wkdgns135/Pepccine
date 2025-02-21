@@ -42,6 +42,8 @@ protected:
 	UPlayerStatComponent* PlayerStatComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UCrosshairHUDComponent* CrosshairComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UPepccineMontageComponent* PepccineMontageComponent;
 
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
