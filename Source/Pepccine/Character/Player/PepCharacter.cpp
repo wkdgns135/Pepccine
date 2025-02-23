@@ -5,6 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "CrosshairHUDComponent.h"
+#include "PrograssBarHUDComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Character/Animation/PepccineMontageComponent.h"
 
@@ -28,6 +29,7 @@ APepCharacter::APepCharacter()
   PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
 
   CrosshairComponent = CreateDefaultSubobject<UCrosshairHUDComponent>(TEXT("CrosshairHUDComponent"));
+  PrograssBarComponent = CreateDefaultSubobject<UPrograssBarHUDComponent>(TEXT("PrograssBarComponent"));
 
   PepccineMontageComponent = CreateDefaultSubobject<UPepccineMontageComponent>(TEXT("MontageComponent"));
 }
@@ -37,7 +39,6 @@ void APepCharacter::BeginPlay()
   Super::BeginPlay();
 
   InitializeCharacterMovement();
-  InitializeCharacterCamera();
   AddObservers();
 }
 
@@ -79,44 +80,6 @@ void APepCharacter::CheckSprinting()
 }
 #pragma endregion
 
-// ÀÓ½Ã
-void APepCharacter::UpdateHUD()
-{
-  //if (PlayerController && CrosshairWidget)
-  //{
-  //  if (bIsFirstPersonView)
-  //  {
-  //    // 1ÀÎÄªÀÌ¸é Å©·Î½ºÇì¾î Ç¥½Ã
-  //    CrosshairWidget->SetVisibility(ESlateVisibility::Visible);
-  //  }
-  //  else
-  //  {
-  //    // 3ÀÎÄªÀÌ¸é Å©·Î½ºÇì¾î ¼û±è
-  //    CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
-  //  }
-  //}
-}
-
-void APepCharacter::InitializeCharacterCamera()
-{
-  //PlayerController = Cast<APepccinePlayerController>(GetController());
-
-  //if (CrosshairWidgetClass && PlayerController)
-  //{
-  //  CrosshairWidget = CreateWidget<UUserWidget>(PlayerController, CrosshairWidgetClass);
-  //  if (CrosshairWidget)
-  //  {
-  //    CrosshairWidget->AddToViewport();
-  //    CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
-  //  }
-  //}
-
-  //ThirdPersonCamera->SetActive(true);
-  //FirstPersonCamera->SetActive(false);
-
-  //UpdateHUD();
-}
-
 // Observers
 #pragma region
 void APepCharacter::AddObservers()
@@ -126,7 +89,9 @@ void APepCharacter::AddObservers()
 
 void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
 {
-  UE_LOG(LogTemp, Warning, TEXT("Stamina Updated: %f / %f"), NewStamina, MaxStamina);
+  if (!PrograssBarComponent) return;
+  //UE_LOG(LogTemp, Warning, TEXT("Stamina Updated: %f / %f"), NewStamina, MaxStamina);
+  PrograssBarComponent->SetStamina(NewStamina, MaxStamina);
 }
 #pragma endregion
 
@@ -229,7 +194,7 @@ void APepCharacter::SetCharacterSpeed(float Speed)
 
 void APepCharacter::Roll()
 {
-  if (!GetCharacterMovement() || bIsRolling) return;
+  if (!GetCharacterMovement() || bIsRolling || bIsJumping) return;
 
   bIsRolling = true;
 

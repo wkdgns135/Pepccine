@@ -23,7 +23,7 @@ UPlayerStatComponent::UPlayerStatComponent()
 	Defence = 0;  
 	FireRate = 0;
 	RollingDistance = 10000.0f;
-	JumpZVelocity = 600.0f;
+	JumpZVelocity = 400.0f;
 }
 
 void UPlayerStatComponent::BeginPlay()

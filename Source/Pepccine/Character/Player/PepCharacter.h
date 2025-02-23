@@ -16,6 +16,7 @@ class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
 class UPepccineMontageComponent;
+class UPrograssBarHUDComponent;
 
 UCLASS()
 class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver
@@ -45,6 +46,8 @@ protected:
 	UPlayerStatComponent* PlayerStatComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UCrosshairHUDComponent* CrosshairComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UPrograssBarHUDComponent* PrograssBarComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineMontageComponent* PepccineMontageComponent;
 
@@ -120,9 +123,7 @@ private:
 	FTimerHandle RollTimerHandle;
 
 	void InitializeCharacterMovement();
-	void InitializeCharacterCamera();
 	void ToggleCameraView();
-	void UpdateHUD();
 	void AddObservers();
 
 	void SetCharacterSpeed(float Speed);

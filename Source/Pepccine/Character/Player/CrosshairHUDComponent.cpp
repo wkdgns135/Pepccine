@@ -5,9 +5,12 @@
 
 UCrosshairHUDComponent::UCrosshairHUDComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
   CrosshairWidget = nullptr;
+  AimSize = 0;
+  MaxAimSize = 1000;
+  MinAimSize = 100;
 }
 
 void UCrosshairHUDComponent::BeginPlay()
@@ -42,10 +45,10 @@ void UCrosshairHUDComponent::UpdateCrosshair(float DeltaTime)
     bool IsJumping = PepCharacter->IsJumping();
 
     if (IsJumping) {
-      AimSize += 2000.f * DeltaTime;
+      AimSize += 200.f * DeltaTime;
     }
     else {
-      if (Speed > 100)
+      if (Speed > 300)
       {
         AimSize += Speed * DeltaTime;
       }
@@ -60,6 +63,7 @@ void UCrosshairHUDComponent::UpdateCrosshair(float DeltaTime)
     }
 
     AimSize = FMath::Clamp(AimSize, MinAimSize, MaxAimSize);
+
     CrosshairWidget->UpdateCrosshairSize(AimSize);
   }
 }
