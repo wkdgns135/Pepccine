@@ -31,19 +31,18 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	void GetParameters();
-	bool GetFindNeighbor(const FIntPoint& Point);
+	static void GetParameters();
 	bool GenerateEndPoints();
 	void InitializeGrid();
 	void GenerateMST();
 	void MarkEndRooms();
 	void AddAdditionalEndRooms();
 	void PrintGrid();
-	TArray<FIntPoint> FindShortestPath(FIntPoint Start, FIntPoint End);
-	void AssignEndRoom();
-
-	FORCEINLINE bool IsPointValid(const FIntPoint& Point) { return Point.X >= 0 && Point.X < MapSize && Point.Y >= 0 && Point.Y < MapSize; };
-	FORCEINLINE void ShuffleArray(TArray<FIntPoint>& Array) { Array.Sort([](const FIntPoint& A, const FIntPoint& B) { return FMath::RandRange(0, 1) == 0; }); };
-	FORCEINLINE int GetLengthBetweenPoint(const FIntPoint& A, const FIntPoint& B) { return FMath::Abs(A.X - B.X) + FMath::Abs(A.Y - B.Y); };
+	void AssignEndRooms();
 	
+	static TArray<FIntPoint> FindShortestPath(const FIntPoint Start, const FIntPoint End);
+	static void ShuffleArray(TArray<FIntPoint>& Array);;
+	static int GetLengthBetweenPoint(const FIntPoint& A, const FIntPoint& B);
+
+	FORCEINLINE bool IsPointValid(const FIntPoint& Point) const { return Point.X >= 0 && Point.X < MapSize && Point.Y >= 0 && Point.Y < MapSize; };
 };

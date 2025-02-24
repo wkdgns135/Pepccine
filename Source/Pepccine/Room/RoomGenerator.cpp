@@ -5,17 +5,17 @@ class FUnionFind
 public:
 	TArray<int> Parent, Rank;
 
-	FUnionFind(int InSize)
+	FUnionFind(const int InSize)
 	{
 		Parent.SetNum(InSize);
-		Rank.SetNum(InSize, 1);
+		Rank.Init(InSize, 1);
 		for (int i = 0; i < InSize; i++)
 		{
 			Parent[i] = i;
 		}
 	}
 
-	int Find(int X)
+	int Find(const int X)
 	{
 		if (Parent[X] == X)
 		{
@@ -24,10 +24,10 @@ public:
 		return Parent[X] = Find(Parent[X]);
 	}
 
-	void Unite(int X, int Y)
+	void Unite(const int X, const int Y)
 	{
-		int RootX = Find(X);
-		int RootY = Find(Y);
+		const int RootX = Find(X);
+		const int RootY = Find(Y);
 		if (RootX != RootY)
 		{
 			if (Rank[RootX] > Rank[RootY])
@@ -52,7 +52,7 @@ ARoomGenerator::ARoomGenerator()
 	PrimaryActorTick.bCanEverTick = false;
 
 	MapSize = 6;
-	EndPointCount = 3;
+	EndPointCount = 4;
 	LoopThreshold = 1000;
 }
 
@@ -68,6 +68,7 @@ void ARoomGenerator::BeginPlay()
 
 	if (!Rooms.IsEmpty())
 	{
+
 		UE_LOG(LogTemp, Display, TEXT("Generate finish"));
 		PrintGrid();
 	}
@@ -82,30 +83,17 @@ void ARoomGenerator::GetParameters()
 	// Implementation here
 }
 
-bool ARoomGenerator::GetFindNeighbor(const FIntPoint& Point)
-{
-	TArray<FIntPoint> Offsets = { {0,0},{0,1},{0,-1},{1,0},{-1,0},{1,1},{1,-1},{-1,1},{-1,-1} };
-	for (const FIntPoint& Offset : Offsets)
-	{
-		FIntPoint Next = Point + Offset;
-		if (EndPoints.Contains(Next))
-		{
-			return true;
-		}
-	}
-	return false;
-}
 
 bool ARoomGenerator::GenerateEndPoints()
 {
 	if (MapSize < 3 || EndPointCount <= 0) return false;
 
-	int32 DivisionSize = FMath::Max(3, MapSize / FMath::CeilToInt(FMath::Sqrt((float)EndPointCount)));
+	const int DivisionSize = FMath::Max(3, MapSize / FMath::CeilToInt(FMath::Sqrt(static_cast<float>(EndPointCount))));
 	TArray<FIntPoint> Divisions;
 
-	for (int32 X = 0; X < MapSize; X += DivisionSize)
+	for (int X = 0; X < MapSize; X += DivisionSize)
 	{
-		for (int32 Y = 0; Y < MapSize; Y += DivisionSize)
+		for (int Y = 0; Y < MapSize; Y += DivisionSize)
 		{
 			Divisions.Add({ X, Y });
 		}
@@ -118,8 +106,8 @@ bool ARoomGenerator::GenerateEndPoints()
 
 	for (const FIntPoint& Division : SelectedDivisions)
 	{
-		int32 X = FMath::RandRange(Division.X, FMath::Min(Division.X + DivisionSize - 1, MapSize - 1));
-		int32 Y = FMath::RandRange(Division.Y, FMath::Min(Division.Y + DivisionSize - 1, MapSize - 1));
+		int X = FMath::RandRange(Division.X, FMath::Min(Division.X + DivisionSize - 1, MapSize - 1));
+		int Y = FMath::RandRange(Division.Y, FMath::Min(Division.Y + DivisionSize - 1, MapSize - 1));
 
 		EndPoints.Push({ X, Y });
 	}
@@ -140,14 +128,14 @@ void ARoomGenerator::GenerateMST()
 
 	Edges.Sort([](const TTuple<int, int, int>& A, const TTuple<int, int, int>& B) { return A.Get<2>() < B.Get<2>(); });
 
-	FUnionFind UF(EndPoints.Num());
+	FUnionFind UnionFind(EndPoints.Num());
 	for (const TTuple<int, int, int>& Edge : Edges)
 	{
-		int U = Edge.Get<0>();
-		int V = Edge.Get<1>();
-		if (UF.Find(U) != UF.Find(V))
+		const int U = Edge.Get<0>();
+		const int V = Edge.Get<1>();
+		if (UnionFind.Find(U) != UnionFind.Find(V))
 		{
-			UF.Unite(U, V);
+			UnionFind.Unite(U, V);
 			TArray<FIntPoint> Path = FindShortestPath(EndPoints[U], EndPoints[V]);
 			Rooms.Append(Path);
 		}
@@ -261,7 +249,7 @@ void ARoomGenerator::PrintGrid()
 	UE_LOG(LogTemp, Display, TEXT(" "));
 }
 
-TArray<FIntPoint> ARoomGenerator::FindShortestPath(FIntPoint Start, FIntPoint End)
+TArray<FIntPoint> ARoomGenerator::FindShortestPath(const FIntPoint Start, const FIntPoint End)
 {
 	TArray<FIntPoint> Path;
 	TMap<FIntPoint, FIntPoint> CameFrom;
@@ -303,9 +291,19 @@ TArray<FIntPoint> ARoomGenerator::FindShortestPath(FIntPoint Start, FIntPoint En
 	return Path;
 }
 
+int ARoomGenerator::GetLengthBetweenPoint(const FIntPoint& A, const FIntPoint& B)
+{
+	return FMath::Abs(A.X - B.X) + FMath::Abs(A.Y - B.Y);
+}
+
+void ARoomGenerator::ShuffleArray(TArray<FIntPoint>& Array)
+{
+	Array.Sort([](const FIntPoint& A, const FIntPoint& B) { return FMath::RandRange(0, 1) == 0; });
+}
+
+
 void ARoomGenerator::AssignEndRooms()
 {
-	// HERE [장훈]: 특수방 생성 로직 
 	ShuffleArray(EndRooms);
 
 	int MaxDistance = 0;
@@ -315,7 +313,7 @@ void ARoomGenerator::AssignEndRooms()
 	{
 		for (int j = i + 1; j < EndRooms.Num(); j++)
 		{
-			int Distance = GetLengthBetweenPoint(EndRooms[i], EndRooms[j]);
+			const int Distance = GetLengthBetweenPoint(EndRooms[i], EndRooms[j]);
 			if (Distance > MaxDistance)
 			{
 				MaxDistance = Distance;
