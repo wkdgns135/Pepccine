@@ -25,7 +25,7 @@ public:
   // Space
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
   UInputAction* JumpAction;
-  // Mouse
+  // Mouse 3D
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
   UInputAction* LookAction;
   // Shift
@@ -52,6 +52,12 @@ public:
   // Tab
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
   UInputAction* InventoryAction;
+  // Mouse Left
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+  UInputAction* FireAction;
+  // Mouse Right
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+  UInputAction* ZoomAction;
 
 protected:
   virtual void BeginPlay() override;
@@ -59,4 +65,8 @@ protected:
 
   UFUNCTION()
   virtual void OpenMenu();
+
+private:
+  void AddMappingContext();
+  void AddCrosshairHUD();
 };
