@@ -286,7 +286,7 @@ void APepCharacter::Roll()
     return;
   }
 
-  PepccineMontageComponent->Roll();
+  PepccineMontageComponent->Roll(0);
   GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 1.0f, false);
 }
 

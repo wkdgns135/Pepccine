@@ -43,10 +43,11 @@ void UPepccineMontageComponent::Attack()
 	}
 }
 
-void UPepccineMontageComponent::Roll()
+void UPepccineMontageComponent::Roll(int32 dir)
 {
 	if (AnimInstance && RollMontage)
 	{
 		AnimInstance->Montage_Play(RollMontage);
+		AnimInstance->Montage_JumpToSection(FName(FString::FromInt(dir)), RollMontage);
 	}
 }

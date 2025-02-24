@@ -82,3 +82,4 @@ Content/*
 !Content/LevelPrototyping/
 !Content/StarterContent/
 !Content/ThirdPerson/
+Source/Pepccine/Character/Player/PrograssBarHUDComponent.h
