@@ -34,3 +34,19 @@ void UPepccineMontageComponent::Reloading()
 		AnimInstance->Montage_Play(ReloadMontage);
 	}
 }
+
+void UPepccineMontageComponent::Attack()
+{
+	if (AnimInstance && AttackMontage)
+	{
+		AnimInstance->Montage_Play(AttackMontage);
+	}
+}
+
+void UPepccineMontageComponent::Roll()
+{
+	if (AnimInstance && RollMontage)
+	{
+		AnimInstance->Montage_Play(RollMontage);
+	}
+}

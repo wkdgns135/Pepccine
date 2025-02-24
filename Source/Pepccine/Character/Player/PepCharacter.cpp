@@ -258,8 +258,9 @@ void APepCharacter::Roll()
     return;
   }
 
-  GetCharacterMovement()->AddImpulse(GetActorForwardVector() * PlayerStatComponent->RollingDistance, true);
-  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 0.3f, false);
+  GetCharacterMovement()->AddForce(GetActorForwardVector() * PlayerStatComponent->RollingDistance);
+  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 1.0f, false);
+  PepccineMontageComponent->Roll();
 }
 
 void APepCharacter::EndRoll()
