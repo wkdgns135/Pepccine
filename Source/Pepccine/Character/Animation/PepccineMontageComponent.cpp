@@ -34,3 +34,20 @@ void UPepccineMontageComponent::Reloading()
 		AnimInstance->Montage_Play(ReloadMontage);
 	}
 }
+
+void UPepccineMontageComponent::Attack()
+{
+	if (AnimInstance && AttackMontage)
+	{
+		AnimInstance->Montage_Play(AttackMontage);
+	}
+}
+
+void UPepccineMontageComponent::Roll(int32 dir)
+{
+	if (AnimInstance && RollMontage)
+	{
+		AnimInstance->Montage_Play(RollMontage);
+		AnimInstance->Montage_JumpToSection(FName(FString::FromInt(dir)), RollMontage);
+	}
+}

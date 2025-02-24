@@ -24,6 +24,6 @@ public:
   UPROPERTY(meta = (BindWidget))
   UImage* LineRight;
 
-  UFUNCTION(BlueprintCallable, Category = "Crosshair")
+  UFUNCTION(BlueprintCallable, Category = "UI|Crosshair")
   void UpdateCrosshairSize(const float Speed);
 };

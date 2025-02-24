@@ -16,6 +16,12 @@ class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
 class UPepccineMontageComponent;
+class UPrograssBarHUDComponent;
+
+class URadorComponent;
+class UCollisionRadarComponent;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, CurrentHealth);
 
 UCLASS()
 class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver
@@ -25,7 +31,18 @@ class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver
 public:
 	APepCharacter();
 
+	bool bIsFirstPersonView = false;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnHealthChanged OnHealthChanged;
+
 	virtual void OnStaminaChanged(float NewStamina, float MaxStamina) override;
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		class AController* EventInstigator,
+		AActor* DamageCauser
+	) override;
 
 	// inline
 	FORCEINLINE_DEBUGGABLE bool IsJumping() const { return bIsJumping; }
@@ -45,6 +62,12 @@ protected:
 	UPlayerStatComponent* PlayerStatComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UCrosshairHUDComponent* CrosshairComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UPrograssBarHUDComponent* PrograssBarComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	URadorComponent* RadarComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UCollisionRadarComponent* EnhancedRadarComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineMontageComponent* PepccineMontageComponent;
 
@@ -112,21 +135,26 @@ private:
 	bool bIsRollable = true;
 	bool bIsMoving = false;
 
-	bool bIsFirstPersonView = false;
-
 	float SprintHoldStartTime = 0.0f;
 	float SprintHoldThreshold = 0.2f;
 
+	FVector RollDirection;
+
 	FTimerHandle RollTimerHandle;
 
+	UFUNCTION()
+	void OnActorDetected(const AActor* DetectedActor);
+
+	UFUNCTION()
+	void OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors);
+
 	void InitializeCharacterMovement();
-	void InitializeCharacterCamera();
 	void ToggleCameraView();
-	void UpdateHUD();
 	void AddObservers();
 
 	void SetCharacterSpeed(float Speed);
 	void CheckSprinting();
+	void CheckRolling(float DeltaTime);
 
 	FVector GetRollDirection();
 };

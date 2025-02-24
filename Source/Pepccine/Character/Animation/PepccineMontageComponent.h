@@ -20,6 +20,10 @@ public:
 	void Fire();
 	UFUNCTION()
 	void Reloading();
+	UFUNCTION()
+	void Attack();
+	UFUNCTION()
+	void Roll(int32 dir);
 
 protected:
 	// Called when the game starts
@@ -34,4 +38,8 @@ protected:
 	UAnimMontage* FireMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* ReloadMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* AttackMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* RollMontage;
 };
