@@ -123,11 +123,13 @@ void APepCharacter::AddObservers()
   {
     PlayerStatComponent->AddStaminaObserver(this);
   }
-  
+
+  /*
   if (RadarComponent)
   {
     RadarComponent->OnActorDetected.AddDynamic(this, &APepCharacter::OnActorDetected);
   }
+  */
 
   if (EnhancedRadarComponent)
   {
@@ -142,7 +144,7 @@ void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
   PrograssBarComponent->SetStamina(NewStamina, MaxStamina);
 }
 
-void APepCharacter::OnActorDetected(AActor* DetectedActor)
+void APepCharacter::OnActorDetected(const AActor* DetectedActor)
 {
   if (DetectedActor)
   {
@@ -150,11 +152,19 @@ void APepCharacter::OnActorDetected(AActor* DetectedActor)
   }
 }
 
-void APepCharacter::OnActorDetectedEnhanced(AActor* DetectedActor)
+void APepCharacter::OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors)
 {
-  if (DetectedActor)
+  if (DetectedActors.DetectedActors.Num() == 0) return;
+
+  UE_LOG(LogTemp, Warning, TEXT("Number of dectedActor: %d"), DetectedActors.DetectedActors.Num());
+
+
+  for (AActor* DetectedActor : DetectedActors.DetectedActors)
   {
-    UE_LOG(LogTemp, Warning, TEXT("OnActorDetectedEnhanced: %s"), *DetectedActor->GetName());
+    if (DetectedActor)
+    {
+      UE_LOG(LogTemp, Warning, TEXT("Detected Actors: %s"), *DetectedActor->GetName());
+    }
   }
 }
 #pragma endregion

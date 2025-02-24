@@ -143,10 +143,10 @@ private:
 	FTimerHandle RollTimerHandle;
 
 	UFUNCTION()
-	void OnActorDetected(AActor* DetectedActor);
+	void OnActorDetected(const AActor* DetectedActor);
 
 	UFUNCTION()
-	void OnActorDetectedEnhanced(AActor* DetectedActor);
+	void OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors);
 
 	void InitializeCharacterMovement();
 	void ToggleCameraView();

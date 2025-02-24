@@ -44,7 +44,7 @@ void UCollisionRadarComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
   if (AActor* Owner = GetOwner())
   {
     DetectActors();
-    // DrawDebugVisualization();
+    DrawDebugVisualization();
   }
 }
 
@@ -62,7 +62,7 @@ void UCollisionRadarComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedCom
   if (OtherActor && OtherActor != GetOwner())
   {
     NearbyActors.AddUnique(OtherActor);
-
+    /* For DEBUG
     // 감지된 액터의 이름 출력
     UE_LOG(LogTemp, Warning, TEXT("Dected Actor: %s"), *OtherActor->GetName());
 
@@ -78,6 +78,7 @@ void UCollisionRadarComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedCom
       UE_LOG(LogTemp, Warning, TEXT("Collision Enabled: %s"),
         OtherActor->GetRootComponent()->IsCollisionEnabled() ? TEXT("YES") : TEXT("NO"));
     }
+    */
   }
 }
 
@@ -108,14 +109,21 @@ bool UCollisionRadarComponent::IsInFieldOfView(AActor* TargetActor) const
 // 감지 시스템 (NearbyActors 내에서만 체크)
 void UCollisionRadarComponent::DetectActors()
 {
+  FDetectedActorList DetectedActorList;
+
   for (AActor* Actor : NearbyActors)
   {
     if (!Actor) continue;
 
     if (IsInFieldOfView(Actor))
     {
-      OnActorDetectedEnhanced.Broadcast(Actor);
+      DetectedActorList.DetectedActors.Add(Actor);
     }
+  }
+
+  if (DetectedActorList.DetectedActors.Num() > 0)
+  {
+    OnActorDetectedEnhanced.Broadcast(DetectedActorList);
   }
 }
 
