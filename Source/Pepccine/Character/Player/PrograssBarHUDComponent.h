@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "StaminaWidget.h"
+#include "Character/Widget/StaminaWidget.h"
 #include "PrograssBarHUDComponent.generated.h"
 
 

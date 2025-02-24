@@ -1,4 +1,4 @@
-#include "Character/Player/CrosshairHUDComponent.h"
+#include "CrosshairHUDComponent.h"
 #include "PepCharacter.h"
 #include "Components/Image.h"
 #include "Blueprint/UserWidget.h"

@@ -1,4 +1,4 @@
-#include "Character/Player/StaminaWidget.h"
+#include "Character/Widget/StaminaWidget.h"
 
 void UStaminaWidget::UpdateStaminaVolumne(const float stamina, const float maxStamina)
 {

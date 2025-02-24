@@ -8,12 +8,12 @@ UPlayerStatComponent::UPlayerStatComponent()
 
 	MaxHealth = 100;
 	CurrentHealth = MaxHealth;
+	HealthDecelerationSpeed = 0;
 
 	MovementSpeed = 400;
 	AttackDamage = 100;
 	CrouchSpeed = MovementSpeed / 2;
 	SprintSpeed = MovementSpeed * 2;
-	HealthDecelerationSpeed = 0;
 	
 	MaxStamina = 100.0f;
 	Stamina = MaxStamina;

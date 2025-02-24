@@ -1,4 +1,4 @@
-#include "Character/Player/DynamicCrosshairWidget.h"
+#include "Character/Widget/DynamicCrosshairWidget.h"
 
 void UDynamicCrosshairWidget::UpdateCrosshairSize(const float Speed)
 {

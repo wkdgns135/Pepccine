@@ -57,6 +57,7 @@ void APepCharacter::InitializeCharacterMovement()
 {
   if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
   {
+    if (!PlayerStatComponent) return;
     MovementComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
     MovementComponent->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
     MovementComponent->JumpZVelocity = PlayerStatComponent->JumpZVelocity;
@@ -85,6 +86,8 @@ float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 #pragma region
 void APepCharacter::CheckSprinting()
 {
+  if (!PlayerStatComponent) return;
+
   if (bIsSprinting) {
     if (!PlayerStatComponent->DecreaseStamina(0.25))
     {
@@ -275,6 +278,8 @@ void APepCharacter::EndRoll()
 
 FVector APepCharacter::GetRollDirection()
 {
+  if (!PlayerStatComponent) return FVector::ZeroVector;
+
   FVector Velocity = GetCharacterMovement()->Velocity;
   FVector RollDirection;
 
@@ -292,7 +297,7 @@ FVector APepCharacter::GetRollDirection()
 
 void APepCharacter::Crouching()
 {
-  if (!GetCharacterMovement() || bIsRolling)
+  if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent)
     return;
 
   bIsCrouching = GetCharacterMovement()->IsCrouching();
