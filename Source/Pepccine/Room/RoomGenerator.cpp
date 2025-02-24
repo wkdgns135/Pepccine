@@ -1,14 +1,17 @@
 #include "Room/RoomGenerator.h"
+#include "PepccineGameInstance.h"
+#include "RoomManager.h"
+#include "Kismet/GameplayStatics.h"
 
 class FUnionFind
 {
 public:
 	TArray<int> Parent, Rank;
 
-	FUnionFind(const int InSize)
+	explicit FUnionFind(const int InSize)
 	{
 		Parent.SetNum(InSize);
-		Rank.Init(InSize, 1);
+		Rank.Init(1, InSize);
 		for (int i = 0; i < InSize; i++)
 		{
 			Parent[i] = i;
@@ -64,18 +67,16 @@ void ARoomGenerator::BeginPlay()
 		return;
 	}
 
-	GenerateMST();
-
-	if (!Rooms.IsEmpty())
-	{
-
-		UE_LOG(LogTemp, Display, TEXT("Generate finish"));
-		PrintGrid();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Display, TEXT("Failed to generate"));
-	}
+	GenerateRooms();
+	InitializeGrid();
+	PrintGrid();
+	MarkEndRooms();
+	PrintGrid();
+	AddAdditionalEndRooms();
+	PrintGrid();
+	AssignEndRooms();
+	PrintGrid();
+	StartNextFloor();
 }
 
 void ARoomGenerator::GetParameters()
@@ -115,7 +116,7 @@ bool ARoomGenerator::GenerateEndPoints()
 	return true;
 }
 
-void ARoomGenerator::GenerateMST()
+void ARoomGenerator::GenerateRooms()
 {
 	TArray<TTuple<int, int, int>> Edges;
 	for (int i = 0; i < EndPoints.Num(); i++)
@@ -140,21 +141,6 @@ void ARoomGenerator::GenerateMST()
 			Rooms.Append(Path);
 		}
 	}
-
-	InitializeGrid();
-
-	for (const FIntPoint& Point : Rooms)
-	{
-		Grid[Point.Y][Point.X] = 1;
-	}
-
-	PrintGrid();
-
-	MarkEndRooms();
-
-	PrintGrid();
-
-	AddAdditionalEndRooms();
 }
 
 void ARoomGenerator::InitializeGrid()
@@ -168,9 +154,13 @@ void ARoomGenerator::InitializeGrid()
 			Grid[i][j] = 0;
 		}
 	}
+	for (const FIntPoint& Room : Rooms)
+	{
+		Grid[Room.Y][Room.X] = 1;
+	}
 }
-
 void ARoomGenerator::MarkEndRooms()
+
 {
 	TArray<FIntPoint> Offsets = { {0,1},{0,-1},{1,0},{-1,0} };
 	for (const FIntPoint& Point : Rooms)
@@ -249,7 +239,7 @@ void ARoomGenerator::PrintGrid()
 	UE_LOG(LogTemp, Display, TEXT(" "));
 }
 
-TArray<FIntPoint> ARoomGenerator::FindShortestPath(const FIntPoint Start, const FIntPoint End)
+TArray<FIntPoint> ARoomGenerator::FindShortestPath(const FIntPoint Start, const FIntPoint End) const
 {
 	TArray<FIntPoint> Path;
 	TMap<FIntPoint, FIntPoint> CameFrom;
@@ -269,15 +259,25 @@ TArray<FIntPoint> ARoomGenerator::FindShortestPath(const FIntPoint Start, const 
 			break;
 		}
 
+		// 이미 방에 추가된 경로부터 우선적으로 탐색
 		for (const FIntPoint& Offset : Offsets)
 		{
 			FIntPoint Next = Current + Offset;
-			if (!CameFrom.Contains(Next))
+			if (!CameFrom.Contains(Next) && Rooms.Contains(Next))
 			{
 				Frontier.Enqueue(Next);
 				CameFrom.Add(Next, Current);
 			}
 		}
+		for (const FIntPoint& Offset : Offsets)
+		{
+			FIntPoint Next = Current + Offset;
+			if (!CameFrom.Contains(Next) && !Rooms.Contains(Next))
+			{
+				Frontier.Enqueue(Next);
+				CameFrom.Add(Next, Current);
+			}
+		}		
 	}
 
 	FIntPoint Current = End;
@@ -304,16 +304,16 @@ void ARoomGenerator::ShuffleArray(TArray<FIntPoint>& Array)
 
 void ARoomGenerator::AssignEndRooms()
 {
-	ShuffleArray(EndRooms);
-
+	InitializeGrid();
+	
 	int MaxDistance = 0;
 	FIntPoint StartRoom, BossRoom;
-
 	for (int i = 0; i < EndRooms.Num(); i++)
 	{
 		for (int j = i + 1; j < EndRooms.Num(); j++)
 		{
-			const int Distance = GetLengthBetweenPoint(EndRooms[i], EndRooms[j]);
+			//TODO: 수정
+			const int Distance = FindShortestPath(EndRooms[i], EndRooms[j]).Num();
 			if (Distance > MaxDistance)
 			{
 				MaxDistance = Distance;
@@ -322,7 +322,36 @@ void ARoomGenerator::AssignEndRooms()
 			}
 		}
 	}
-
 	EndRooms.Remove(StartRoom);
 	EndRooms.Remove(BossRoom);
+	
+	// 방 할당 0: 벽, 1: 기본 방, 2: 시작지점, 3: 보스방, 4: 아이템 방, 5: 상점 방
+	// 시작 방
+	Grid[StartRoom.Y][StartRoom.X] = 2;
+	// 보스 방
+	Grid[BossRoom.Y][BossRoom.X] = 3;
+	// 아이템 방
+	Grid[EndRooms[0].Y][EndRooms[0].X] = 4;
+	// 상점 방
+	Grid[EndRooms[1].Y][EndRooms[1].X] = 5;
+}
+
+void ARoomGenerator::StartNextFloor()
+{
+	TArray<TArray<TPair<int, bool>>> Map;
+	Map.SetNum(MapSize);
+	for (int i = 0; i < MapSize; i++)
+	{
+		Map[i].SetNum(MapSize);
+		for (int j = 0; j < MapSize; j++)
+		{
+			Map[i][j] = {Grid[i][j], false};	
+		}
+	}
+	
+	if (UPepccineGameInstance *PepccineGameInstance = Cast<UPepccineGameInstance>(GetGameInstance()))
+	{
+		PepccineGameInstance->GetRoomManager()->SetMap(Map);
+		UGameplayStatics::OpenLevel(GetWorld(),"StartRoom");
+	}
 }

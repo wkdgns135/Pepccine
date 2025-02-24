@@ -10,6 +10,10 @@ UCLASS()
 class PEPCCINE_API ABaseDoor : public AActor
 {
 	GENERATED_BODY()
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Components")
+	int Direction;
 	
 public:	
 	ABaseDoor();

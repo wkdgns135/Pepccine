@@ -31,17 +31,18 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	static void GetParameters();
+	void GetParameters();
 	bool GenerateEndPoints();
 	void InitializeGrid();
-	void GenerateMST();
+	void GenerateRooms();
 	void MarkEndRooms();
 	void AddAdditionalEndRooms();
 	void PrintGrid();
 	void AssignEndRooms();
+	void StartNextFloor();
+	TArray<FIntPoint> FindShortestPath(const FIntPoint Start, const FIntPoint End) const;
 	
-	static TArray<FIntPoint> FindShortestPath(const FIntPoint Start, const FIntPoint End);
-	static void ShuffleArray(TArray<FIntPoint>& Array);;
+	static void ShuffleArray(TArray<FIntPoint>& Array);
 	static int GetLengthBetweenPoint(const FIntPoint& A, const FIntPoint& B);
 
 	FORCEINLINE bool IsPointValid(const FIntPoint& Point) const { return Point.X >= 0 && Point.X < MapSize && Point.Y >= 0 && Point.Y < MapSize; };
