@@ -5,9 +5,8 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Blueprint/UserWidget.h"
-#include "DynamicCrosshairWidget.h"
+#include "Character/Widget/DynamicCrosshairWidget.h"
 #include "CrosshairHUDComponent.generated.h"
-
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PEPCCINE_API UCrosshairHUDComponent : public UActorComponent

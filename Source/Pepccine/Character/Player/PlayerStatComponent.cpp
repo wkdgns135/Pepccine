@@ -7,12 +7,13 @@ UPlayerStatComponent::UPlayerStatComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 
 	MaxHealth = 100;
+	CurrentHealth = MaxHealth;
+	HealthDecelerationSpeed = 0;
+
 	MovementSpeed = 400;
 	AttackDamage = 100;
 	CrouchSpeed = MovementSpeed / 2;
 	SprintSpeed = MovementSpeed * 2;
-	CurrentHealth = MaxHealth;
-	HealthDecelerationSpeed = 0;
 	
 	MaxStamina = 100.0f;
 	Stamina = MaxStamina;
@@ -22,8 +23,11 @@ UPlayerStatComponent::UPlayerStatComponent()
 	InvincibilityTime = 0;
 	Defence = 0;  
 	FireRate = 0;
-	RollingDistance = 10000.0f;
-	JumpZVelocity = 600.0f;
+
+	RollingDistance = 200.0f;
+	RollElapsedTime = 0.0f;
+
+	JumpZVelocity = 400.0f;
 }
 
 void UPlayerStatComponent::BeginPlay()

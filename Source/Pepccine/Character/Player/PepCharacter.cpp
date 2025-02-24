@@ -5,6 +5,11 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "CrosshairHUDComponent.h"
+#include "PrograssBarHUDComponent.h"
+
+#include "RadorComponent.h"
+#include "CollisionRadarComponent.h"
+
 #include "GameFramework/SpringArmComponent.h"
 #include "Character/Animation/PepccineMontageComponent.h"
 
@@ -28,6 +33,12 @@ APepCharacter::APepCharacter()
   PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
 
   CrosshairComponent = CreateDefaultSubobject<UCrosshairHUDComponent>(TEXT("CrosshairHUDComponent"));
+  PrograssBarComponent = CreateDefaultSubobject<UPrograssBarHUDComponent>(TEXT("PrograssBarComponent"));
+
+  //RadarComponent = CreateDefaultSubobject<URadorComponent>(TEXT("RadarComponent"));
+  //RadarComponent->DetectionClass = AActor::StaticClass();
+
+  EnhancedRadarComponent = CreateDefaultSubobject<UCollisionRadarComponent>(TEXT("EnhancedRadarComponent"));
 
   PepccineMontageComponent = CreateDefaultSubobject<UPepccineMontageComponent>(TEXT("MontageComponent"));
 }
@@ -37,7 +48,6 @@ void APepCharacter::BeginPlay()
   Super::BeginPlay();
 
   InitializeCharacterMovement();
-  InitializeCharacterCamera();
   AddObservers();
 }
 
@@ -47,6 +57,7 @@ void APepCharacter::InitializeCharacterMovement()
 {
   if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
   {
+    if (!PlayerStatComponent) return;
     MovementComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
     MovementComponent->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
     MovementComponent->JumpZVelocity = PlayerStatComponent->JumpZVelocity;
@@ -59,12 +70,25 @@ void APepCharacter::Tick(float DeltaTime)
   Super::Tick(DeltaTime);
 
   CheckSprinting();
+  CheckRolling(DeltaTime);
+}
+
+// Delegate
+float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+  OnHealthChanged.Broadcast(0.1f);
+
+  // OnHealthChanged.AddDynamic(this, &AMyCharacter::OnHealthChangedFunction);
+
+  return 0.0f;
 }
 
 // Tick Method
 #pragma region
 void APepCharacter::CheckSprinting()
 {
+  if (!PlayerStatComponent) return;
+
   if (bIsSprinting) {
     if (!PlayerStatComponent->DecreaseStamina(0.25))
     {
@@ -77,56 +101,71 @@ void APepCharacter::CheckSprinting()
     SetCharacterSpeed(PlayerStatComponent->MovementSpeed);
   }
 }
+
+void APepCharacter::CheckRolling(float DeltaTime)
+{
+  if (bIsRolling && PlayerStatComponent)
+  {
+    float RollTime = PlayerStatComponent->RollElapsedTime;
+    RollTime += DeltaTime;
+
+    float RollSpeed = PlayerStatComponent->RollingDistance;
+    AddMovementInput(RollDirection, RollSpeed * DeltaTime);
+  }
+}
 #pragma endregion
-
-// ÀÓ½Ã
-void APepCharacter::UpdateHUD()
-{
-  //if (PlayerController && CrosshairWidget)
-  //{
-  //  if (bIsFirstPersonView)
-  //  {
-  //    // 1ÀÎÄªÀÌ¸é Å©·Î½ºÇì¾î Ç¥½Ã
-  //    CrosshairWidget->SetVisibility(ESlateVisibility::Visible);
-  //  }
-  //  else
-  //  {
-  //    // 3ÀÎÄªÀÌ¸é Å©·Î½ºÇì¾î ¼û±è
-  //    CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
-  //  }
-  //}
-}
-
-void APepCharacter::InitializeCharacterCamera()
-{
-  //PlayerController = Cast<APepccinePlayerController>(GetController());
-
-  //if (CrosshairWidgetClass && PlayerController)
-  //{
-  //  CrosshairWidget = CreateWidget<UUserWidget>(PlayerController, CrosshairWidgetClass);
-  //  if (CrosshairWidget)
-  //  {
-  //    CrosshairWidget->AddToViewport();
-  //    CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
-  //  }
-  //}
-
-  //ThirdPersonCamera->SetActive(true);
-  //FirstPersonCamera->SetActive(false);
-
-  //UpdateHUD();
-}
 
 // Observers
 #pragma region
 void APepCharacter::AddObservers()
 {
-  PlayerStatComponent->AddStaminaObserver(this);
+  if (PlayerStatComponent)
+  {
+    PlayerStatComponent->AddStaminaObserver(this);
+  }
+
+  /*
+  if (RadarComponent)
+  {
+    RadarComponent->OnActorDetected.AddDynamic(this, &APepCharacter::OnActorDetected);
+  }
+  */
+
+  if (EnhancedRadarComponent)
+  {
+    EnhancedRadarComponent->OnActorDetectedEnhanced.AddDynamic(this, &APepCharacter::OnActorDetectedEnhanced);
+  }
 }
 
 void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
 {
-  UE_LOG(LogTemp, Warning, TEXT("Stamina Updated: %f / %f"), NewStamina, MaxStamina);
+  if (!PrograssBarComponent) return;
+  //UE_LOG(LogTemp, Warning, TEXT("Stamina Updated: %f / %f"), NewStamina, MaxStamina);
+  PrograssBarComponent->SetStamina(NewStamina, MaxStamina);
+}
+
+void APepCharacter::OnActorDetected(const AActor* DetectedActor)
+{
+  if (DetectedActor)
+  {
+    UE_LOG(LogTemp, Warning, TEXT("OnActorDetected: %s"), *DetectedActor->GetName());
+  }
+}
+
+void APepCharacter::OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors)
+{
+  if (DetectedActors.DetectedActors.Num() == 0) return;
+
+  UE_LOG(LogTemp, Warning, TEXT("Number of dectedActor: %d"), DetectedActors.DetectedActors.Num());
+
+
+  for (AActor* DetectedActor : DetectedActors.DetectedActors)
+  {
+    if (DetectedActor)
+    {
+      UE_LOG(LogTemp, Warning, TEXT("Detected Actors: %s"), *DetectedActor->GetName());
+    }
+  }
 }
 #pragma endregion
 
@@ -135,6 +174,8 @@ void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
 #pragma region
 void APepCharacter::Move(const FInputActionValue& Value)
 {
+  if (bIsRolling) return;
+
   FVector2D MoveInput = Value.Get<FVector2D>();
 
   //UE_LOG(LogTemp, Log, TEXT("MovementVector: [%s]"), *MoveInput.ToString());
@@ -165,6 +206,8 @@ void APepCharacter::OnMovementStopped()
 
 void APepCharacter::JumpStart()
 {
+  if (bIsRolling) return;
+
   Super::Jump();
 
   UE_LOG(LogTemp, Log, TEXT("JumpStart!"));
@@ -197,6 +240,8 @@ void APepCharacter::Look(const FInputActionValue& value)
 
 void APepCharacter::StartSprint(const FInputActionValue& value)
 {
+  if (bIsRolling) return;
+
   if (bIsRollable)
   {
     SprintHoldStartTime = GetWorld()->GetTimeSeconds();
@@ -229,17 +274,20 @@ void APepCharacter::SetCharacterSpeed(float Speed)
 
 void APepCharacter::Roll()
 {
-  if (!GetCharacterMovement() || bIsRolling) return;
+  if (!GetCharacterMovement() || bIsRolling || bIsJumping || !PlayerStatComponent) return;
 
   bIsRolling = true;
+  PlayerStatComponent->RollElapsedTime = 0.0f;
+  RollDirection = GetActorForwardVector();
 
   if (!PlayerStatComponent->DecreaseStaminaByPercentage(30))
   {
     bIsRolling = false;
     return;
   }
-  GetCharacterMovement()->AddImpulse(GetRollDirection(), true);
-  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 0.1f, false);
+
+  PepccineMontageComponent->Roll(0);
+  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 1.0f, false);
 }
 
 void APepCharacter::EndRoll()
@@ -251,14 +299,13 @@ void APepCharacter::EndRoll()
   {
     GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
   }
-
-  UE_LOG(LogTemp, Log, TEXT("Roll Ended!"));
 }
 
 FVector APepCharacter::GetRollDirection()
 {
+  if (!PlayerStatComponent) return FVector::ZeroVector;
+
   FVector Velocity = GetCharacterMovement()->Velocity;
-  FVector RollDirection;
 
   if (!Velocity.IsNearlyZero())
   {
@@ -269,14 +316,12 @@ FVector APepCharacter::GetRollDirection()
     RollDirection = GetActorForwardVector() * PlayerStatComponent->RollingDistance;
   }
 
-  UE_LOG(LogTemp, Log, TEXT("RollDirection! [%s]"), *RollDirection.ToString());
-
   return RollDirection;
 }
 
 void APepCharacter::Crouching()
 {
-  if (!GetCharacterMovement())
+  if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent)
     return;
 
   bIsCrouching = GetCharacterMovement()->IsCrouching();
@@ -284,13 +329,11 @@ void APepCharacter::Crouching()
   if (bIsCrouching)
   {
     UnCrouch();
-    UE_LOG(LogTemp, Log, TEXT("UnCrouch! [%d][%f]"), bIsCrouching, PlayerStatComponent->MovementSpeed);
     GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
   }
   else
   {
     Crouch();
-    UE_LOG(LogTemp, Log, TEXT("Crouch! [%d][%f]"), bIsCrouching, PlayerStatComponent->CrouchSpeed);
     GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->CrouchSpeed;
   }
 }
@@ -329,6 +372,8 @@ void APepCharacter::OpenInventory()
 {
   UE_LOG(LogTemp, Log, TEXT("OpenInventory!"));
 
+  if (bIsRolling) return;
+
   // HUD
   if (bIsInventoryOpened)
   {
@@ -358,12 +403,16 @@ void APepCharacter::Fire()
 {
   UE_LOG(LogTemp, Log, TEXT("Fire!"));
 
+  if (bIsRolling) return;
+
   PepccineMontageComponent->Fire();
 }
 
 void APepCharacter::ZoomIn()
 {
   UE_LOG(LogTemp, Log, TEXT("ZoomIn!"));
+
+  if (bIsRolling) return;
 
   bIsZooming = true;
   
