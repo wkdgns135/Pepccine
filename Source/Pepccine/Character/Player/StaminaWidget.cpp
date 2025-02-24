@@ -8,5 +8,5 @@ void UStaminaWidget::UpdateStaminaVolumne(const float stamina, const float maxSt
 
   StaminaPrograssBar->SetPercent(StaminaPercent);
 
-  UE_LOG(LogTemp, Log, TEXT("stamina [%f]/[%f] - Percent: %f"), stamina, maxStamina, StaminaPercent);
+  // UE_LOG(LogTemp, Log, TEXT("stamina [%f]/[%f] - Percent: %f"), stamina, maxStamina, StaminaPercent);
 }

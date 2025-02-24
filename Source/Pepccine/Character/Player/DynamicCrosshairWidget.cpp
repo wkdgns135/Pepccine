@@ -7,7 +7,7 @@ void UDynamicCrosshairWidget::UpdateCrosshairSize(const float Speed)
 
   float Offset = FMath::Clamp(Speed * 0.1f, 0, 50.0f);
 
-  UE_LOG(LogTemp, Log, TEXT("UpdateCrosshairSize Offset [%f]"), Offset);
+  //UE_LOG(LogTemp, Log, TEXT("UpdateCrosshairSize Offset [%f]"), Offset);
 
   LineTop->SetRenderTranslation(FVector2D(0, -Offset));
   LineBottom->SetRenderTranslation(FVector2D(0, Offset));
