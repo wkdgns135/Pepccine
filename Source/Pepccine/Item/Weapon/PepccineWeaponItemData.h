@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "PepccineWeaponItemType.h"
 #include "Item/PepccineItemDataBase.h"
 #include "Item/Weapon/PepccineWeaponStat.h"
 
@@ -19,11 +18,8 @@ public:
 	// getter
 	FORCEINLINE EPepccineWeaponItemType GetWeaponItemType() const { return WeaponItemType; };
 	FORCEINLINE TObjectPtr<USkeletalMesh> GetEquippedMesh() const { return EquippedMesh; };
-	FORCEINLINE FPepccineWeaponStat* GetWeaponStats() { return &WeaponStats; };
+	FORCEINLINE FPepccineWeaponStat GetWeaponStats() const { return WeaponStats; };
 	FORCEINLINE TSubclassOf<APepccineProjectile> GetProjectileClass() const { return ProjectileClass; };
-
-	// 디버그용 예비 탄약 수
-	FORCEINLINE FString GetSpareAmmoString() const { return WeaponItemType == EPepccineWeaponItemType::EPWIT_Main ? FString::FromInt(WeaponStats.SpareAmmo) : "INF"; };
 
 protected:
 	// 무기 타입(주 무기, 보조 무기)

@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "PepccineStatModifyType.h"
 #include "Item/Weapon/PepccineWeaponStat.h"
 
 #include "WeaponStatModifier.generated.h"
@@ -14,35 +13,43 @@ class PEPCCINE_API UWeaponStatModifier : public UObject
 	GENERATED_BODY()
 
 public:
-	// 합연산
-	static float Additive(float& Stat, float Amount);
-	// 곱연산
-	static float Multiplicative(float& Stat, float Amount);
-
 	// 이름으로 무기 스탯 찾기
-	float& GetWeaponStatByName(EPepccineWeaponStatName StatName) const;
+	static float& GetWeaponItemStatByName(FPepccineWeaponStat* WeaponItemStats, EPepccineWeaponStatName StatName);
+	// 무기 스탯 설정
+	void SetWeaponItemStats(const UPepccineWeaponItemData* WeaponItemData);
 
-	// 무기 스탯 수정
-	UFUNCTION()
-	void ModifyStat(EPepccineStatModifyType StatModifyType, EPepccineWeaponStatName StatName, float Amount) const;
 	// 무기 스탯 수정자 추가
-	void AddWeaponStatModifier(FPepccineWeaponStatModifier WeaponStatModifier);;
+	void AddWeaponStatModifier(FPepccineWeaponStatModifier WeaponStatModifier);
+	// 수정자 제거
+	void RemoveWeaponStatModifier(const FPepccineWeaponStatModifier& WeaponStatModifier);
 
-	// setter
-	FORCEINLINE void SetEquippedWeaponItemStats(FPepccineWeaponStat* WeaponStats)
+	// 무기 타입에 맞는 전체 스탯 수정자 적용
+	void ApplyAllStatModifiers(EPepccineWeaponItemType WeaponItemType);
+
+	// 무기 타입에 맞는 단일 스탯 수정자 적용
+	void ApplyStatModifier(FPepccineWeaponStatModifier WeaponItemModifier, bool IsNewModifier);
+
+	// getter
+	FPepccineWeaponStat* GetEquippedWeaponItemStats(EPepccineWeaponItemType WeaponItemType)
 	{
-		EquippedWeaponItemStats = WeaponStats;
-	};
+		return WeaponItemType == EPepccineWeaponItemType::EPWIT_Main
+			       ? &ModifiedMainWeaponItemStats
+			       : &ModifiedSubWeaponItemStats;
+	}
 
-	FORCEINLINE void RemoveWeaponStatModifierById(const int32 Id) { AppliedWeaponStatModifiers.Remove(Id); };
+	FORCEINLINE FPepccineWeaponStat GetModifiedMainWeaponItemStats() const { return ModifiedMainWeaponItemStats; };
+	FORCEINLINE FPepccineWeaponStat GetModifiedSubWeaponItemStats() const { return ModifiedSubWeaponItemStats; };
 
 private:
-	// 현재 장착된 무기 스탯
-	FPepccineWeaponStat* EquippedWeaponItemStats;
+	// 수정된 주 무기 스탯
+	FPepccineWeaponStat ModifiedMainWeaponItemStats;
+	// 수정된 보조 무기 스탯
+	FPepccineWeaponStat ModifiedSubWeaponItemStats;
 
 	// 무기 스탯 수정자 아이디
 	int32 WeaponStatModifierId = 0;
-	
-	// 현재 적용되어 있는 무기 스탯 수정자(Key = Id, Value = 수정자)
-	TMap<int32, FPepccineWeaponStatModifier> AppliedWeaponStatModifiers;
+
+	// 현재 적용되어 있는 무기 스탯 수정자(Key = 수정할 스탯 이름, Value = 적용 되어있는 수정자 목록)
+	TMap<EPepccineWeaponStatName, TMap<int32, FPepccineWeaponStatModifier>> AppliedMainWeaponItemStatModifiers; // 주무기
+	TMap<EPepccineWeaponStatName, TMap<int32, FPepccineWeaponStatModifier>> AppliedSubWeaponItemStatModifiers; // 보조 무기
 };

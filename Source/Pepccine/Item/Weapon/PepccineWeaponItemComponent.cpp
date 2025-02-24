@@ -16,15 +16,15 @@ void UPepccineWeaponItemComponent::BeginPlay()
 void UPepccineWeaponItemComponent::Fire() const
 {
 	// 현재 탄창에 탄약이 없을 경우 발사 실패
-	if (EquippedWeaponData->GetWeaponStats()->MagazineAmmo == 0.0f)
+	if (EquippedWeaponItemStats->MagazineAmmo == 0.0f)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("탄창에 남은 탄약이 없습니다."));
 		return;
 	}
-	
+
 	if (TSubclassOf<APepccineProjectile> Projectile = EquippedWeaponData->GetProjectileClass())
 	{
-		if (UWorld* const World = GetWorld())
+		if (UWorld* World = GetWorld())
 		{
 			const FName SoketName = TEXT("Muzzle");
 			if (DoesSocketExist(SoketName))
@@ -44,13 +44,15 @@ void UPepccineWeaponItemComponent::Fire() const
 					Projectile, MuzzleLocation, MuzzleRotation, ActorSpawnParams);
 				SpawnedProjectile->SetProjectileVelocity(GetFireDirection(MuzzleLocation));
 
-				WeaponStatsModifier->ModifyStat(EPepccineStatModifyType::EPSMT_Add,
-				                               EPepccineWeaponStatName::EPWSN_MagazineAmmo, -1);
+				// 탄약 사용
+				EquippedWeaponItemStats->MagazineAmmo--;
 
-				UE_LOG(LogTemp, Warning, TEXT("%s 발사! %.0f / %.0f"), *EquippedWeaponData->DisplayName,
-					   WeaponStatsModifier->GetWeaponStatByName(EPepccineWeaponStatName::EPWSN_MagazineAmmo),
-					   WeaponStatsModifier->GetWeaponStatByName(EPepccineWeaponStatName::EPWSN_SpareAmmo));
-				
+				UE_LOG(LogTemp, Warning, TEXT("%s 발사! %.0f / %.0f"), *EquippedWeaponData->GetDisplayName(),
+				       WeaponStatsModifier->GetWeaponItemStatByName(EquippedWeaponItemStats, EPepccineWeaponStatName::
+					       EPWSN_MagazineAmmo),
+				       WeaponStatsModifier->GetWeaponItemStatByName(EquippedWeaponItemStats, EPepccineWeaponStatName::
+					       EPWSN_SpareAmmo));
+
 				//WeaponData->GetWeaponStat().MagazineAmmo--;
 
 				//// Try and play the sound if specified
@@ -81,23 +83,27 @@ void UPepccineWeaponItemComponent::Reload() const
 		return;
 	}
 
-	FPepccineWeaponStat* WeaponStat = EquippedWeaponData->GetWeaponStats();
+	// 탄창 용량
+	const float MagazineSize = WeaponStatsModifier->GetEquippedWeaponItemStats(EquippedWeaponData->GetWeaponItemType())
+	                                              ->MagazineSize;
 
-	if (WeaponStat->SpareAmmo > 0 && WeaponStat->MagazineAmmo == WeaponStat->MagazineSize)
+	if (EquippedWeaponItemStats->SpareAmmo > 0 && EquippedWeaponItemStats->MagazineAmmo == MagazineSize)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("이미 탄약이 최대 입니다."));
 		return;
 	}
-	
+
 	// 주 무기의 경우
 	if (EquippedWeaponData->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main)
 	{
-		if (WeaponStat->SpareAmmo > 0)
+		if (EquippedWeaponItemStats->SpareAmmo > 0)
 		{
-			const int32 ModifyValue = WeaponStat->MagazineSize - WeaponStat->MagazineAmmo;
+			const int32 ModifyValue = MagazineSize - EquippedWeaponItemStats->MagazineAmmo;
 
-			WeaponStat->MagazineAmmo += WeaponStat->SpareAmmo >= ModifyValue ? ModifyValue : WeaponStat->SpareAmmo;
-			WeaponStat->SpareAmmo = FMath::Clamp(WeaponStat->SpareAmmo - ModifyValue, 0, 999);
+			EquippedWeaponItemStats->MagazineAmmo += EquippedWeaponItemStats->SpareAmmo >= ModifyValue
+				                                         ? ModifyValue
+				                                         : EquippedWeaponItemStats->SpareAmmo;
+			EquippedWeaponItemStats->SpareAmmo = FMath::Clamp(EquippedWeaponItemStats->SpareAmmo - ModifyValue, 0, 999);
 		}
 		else
 		{
@@ -108,17 +114,19 @@ void UPepccineWeaponItemComponent::Reload() const
 	// 보조 무기의 경우
 	else
 	{
-		WeaponStat->MagazineAmmo = WeaponStat->MagazineSize;
+		EquippedWeaponItemStats->MagazineAmmo = MagazineSize;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("%s 재장전! %.0f / %s"), *EquippedWeaponData->DisplayName, WeaponStat->MagazineAmmo,
-	       *EquippedWeaponData->GetSpareAmmoString());
+	UE_LOG(LogTemp, Warning, TEXT("%s 재장전! %.0f / %.0f"),
+	       *EquippedWeaponData->GetDisplayName(),
+	       EquippedWeaponItemStats->MagazineAmmo,
+	       EquippedWeaponItemStats->SpareAmmo);
 }
 
-void UPepccineWeaponItemComponent::EquipWeapon(UPepccineWeaponItemData* WeaponData)
+void UPepccineWeaponItemComponent::EquipWeapon(UPepccineWeaponItemData* WeaponItemData)
 {
-	EquippedWeaponData = WeaponData;
-	WeaponStatsModifier->SetEquippedWeaponItemStats(EquippedWeaponData->GetWeaponStats());
+	EquippedWeaponData = WeaponItemData;
+	EquippedWeaponItemStats = WeaponStatsModifier->GetEquippedWeaponItemStats(WeaponItemData->GetWeaponItemType());
 }
 
 FVector UPepccineWeaponItemComponent::GetFireDirection(const FVector& MuzzleLocation) const

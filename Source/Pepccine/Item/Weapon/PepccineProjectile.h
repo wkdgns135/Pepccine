@@ -8,7 +8,7 @@
 class USphereComponent;
 class UProjectileMovementComponent;
 
-UCLASS()
+UCLASS(Abstract)
 class PEPCCINE_API APepccineProjectile : public AActor
 {
 	GENERATED_BODY()

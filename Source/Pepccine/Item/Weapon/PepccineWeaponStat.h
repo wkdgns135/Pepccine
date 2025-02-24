@@ -5,6 +5,14 @@
 
 #include "PepccineWeaponStat.generated.h"
 
+// 무기 타입
+UENUM(BlueprintType)
+enum class EPepccineWeaponItemType : uint8
+{
+	EPWIT_Main UMETA(DisplayName = "주 무기"),
+	EPWIT_Sub UMETA(DisplayName = "보조 무기")
+};
+
 // 무기 스탯 이름
 UENUM(BlueprintType)
 enum class EPepccineWeaponStatName : uint8
@@ -83,7 +91,8 @@ struct FPepccineWeaponStat
 		meta = (DisplayName = "무게", ClampMin = "0.1", ClampMax = "10.0"))
 	float Weight;
 
-	FPepccineWeaponStat(): AttackMultiplier(1.0f), RangeMultiplier(1.0f), FireRateMultiplier(1.0f), ZoomMultiplier(1.0f),
+	FPepccineWeaponStat(): AttackMultiplier(1.0f), RangeMultiplier(1.0f), FireRateMultiplier(1.0f),
+	                       ZoomMultiplier(1.0f),
 	                       MagazineSize(12.0f),
 	                       MagazineAmmo(12.0f), SpareAmmo(48.0f),
 	                       BulletSpeed(1.0f),
@@ -100,17 +109,21 @@ USTRUCT(BlueprintType)
 struct FPepccineWeaponStatModifier
 {
 	GENERATED_BODY()
-	
+
 	// 수정자 아이디
 	int32 Id;
-	
+
 	// 연산 타입
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier",
 		meta = (DisplayName = "연산 타입"))
 	EPepccineStatModifyType StatModifyType;
-	// 스탯 이름
+	// 무기 타입
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier",
-		meta = (DisplayName = "스탯 이름"))
+		meta = (DisplayName = "무기 타입"))
+	EPepccineWeaponItemType WeaponItemType;
+	// 무기 스탯 이름
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier",
+		meta = (DisplayName = "무기 스탯 이름"))
 	EPepccineWeaponStatName WeaponStatName;
 	// 수정 값
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier",
@@ -119,6 +132,7 @@ struct FPepccineWeaponStatModifier
 
 	// 기본 생성자
 	FPepccineWeaponStatModifier(): Id(0), StatModifyType(EPepccineStatModifyType::EPSMT_Add),
+	                               WeaponItemType(EPepccineWeaponItemType::EPWIT_Main),
 	                               WeaponStatName(EPepccineWeaponStatName::EPWSN_AttackMultiplier),
 	                               StatModifyValue(0.0f)
 	{

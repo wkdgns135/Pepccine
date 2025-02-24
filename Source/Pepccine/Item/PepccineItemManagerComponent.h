@@ -1,12 +1,15 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "PepccineItemSpawner.h"
 #include "Components/ActorComponent.h"
 #include "Item/Weapon/PepccineWeaponItemData.h"
 #include "Item/Weapon/PepccineWeaponItemComponent.h"
 
 #include "PepccineItemManagerComponent.generated.h"
 
+class UPepccinePassiveItemData;
+class UPepccineItemSpawner;
 class UPepccineItemDataAssetBase;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -17,48 +20,67 @@ class PEPCCINE_API UPepccineItemManagerComponent : public UActorComponent
 public:
 	UPepccineItemManagerComponent();
 
+	virtual void BeginPlay() override;
+
 	// 무기 획득
-	void PickUpWeaponItem(UPepccineWeaponItemData* WeaponItemData);
+	void PickUpWeaponItem(const UPepccineWeaponItemData* WeaponItemData);
+
+	// 패시브 아이템 추가
+	void AddPassiveItemData(UPepccinePassiveItemData* PassiveItemData);
+	// 패시브 아이템 제거
+	void RemovePassiveItemDataById(const int32 Id);
 
 	// int 값처럼 사용하기 위한 소수점 아래 버림
 	static FORCEINLINE void TruncateFloatStat(float& FloatStat) { FloatStat = FMath::TruncToFloat(FloatStat); };
 
 	// getter
-	FORCEINLINE TObjectPtr<UPepccineWeaponItemData> GetMainWeaponData() const { return MainWeaponData; };
-	FORCEINLINE TObjectPtr<UPepccineWeaponItemData> GetSubWeaponData() const { return SubWeaponData; };
+	UFUNCTION(BlueprintCallable, Category = "Item|Spawner")
+	UPepccineItemSpawner* GetItemSpawner() const { return ItemSpawner; };
+	FORCEINLINE UPepccineWeaponItemComponent* GetWeaponItemComp() const { return WeaponItemComp; };
+	FORCEINLINE TObjectPtr<UPepccineWeaponItemData> GetMainWeaponData() const { return MainWeaponItemData; };
+	FORCEINLINE TObjectPtr<UPepccineWeaponItemData> GetSubWeaponData() const { return SubWeaponItemData; };
 	FORCEINLINE TObjectPtr<UPepccineWeaponItemData> GetEquippedWeaponData() const
 	{
 		return WeaponItemComp->GetEquippedWeaponData();
 	};
-	FORCEINLINE UPepccineWeaponItemComponent* GetWeaponItemComp() const { return WeaponItemComp; };
+	FORCEINLINE TMap<int32, TObjectPtr<UPepccinePassiveItemData>> GetPassiveItemDatas() { return PassiveItemDatas; };
+	FORCEINLINE TObjectPtr<UPepccinePassiveItemData> GetPassiveItemById(const int32 Id) { return PassiveItemDatas[Id]; };
 
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	UPepccineItemDataAssetBase* GetItemData() const { return ItemSpawner->GetItemDataAsset(); };
+	
 protected:
+	// 아이템 스포너 클래스
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	TSubclassOf<UPepccineItemSpawner> ItemSpawnerClass;
+	
+	// 임시 아이템 스포너
+	UPROPERTY()
+	UPepccineItemSpawner* ItemSpawner;
+
 	// 무기 컴포넌트
-	UPROPERTY(VisibleInstanceOnly, Category = "Item")
+	UPROPERTY(VisibleInstanceOnly, Category = "Item|Weapon")
 	UPepccineWeaponItemComponent* WeaponItemComp;
 
-	// 원본 데이터 에셋
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	UPepccineItemDataAssetBase* ItemDataAsset;
+	// 주 무기 데이터 원본
+	UPROPERTY(VisibleInstanceOnly, Category = "Item|Weapon", meta = (DisplayName = "주 무기"))
+	TObjectPtr<UPepccineWeaponItemData> MainWeaponItemData;
+	// 보조 무기 데이터 원본
+	UPROPERTY(VisibleInstanceOnly, Category = "Item|Weapon", meta = (DisplayName = "보조 무기"))
+	TObjectPtr<UPepccineWeaponItemData> SubWeaponItemData;
 
-	// 주 무기
-	UPROPERTY(VisibleInstanceOnly, Category = "Item", meta = (DisplayName = "주 무기"))
-	TObjectPtr<UPepccineWeaponItemData> MainWeaponData;
-	// 보조 무기
-	UPROPERTY(VisibleInstanceOnly, Category = "Item", meta = (DisplayName = "보조 무기"))
-	TObjectPtr<UPepccineWeaponItemData> SubWeaponData;
+	// 패시브 아이템 아이디
+	int32 PassiveItemId = 0;
+	
+	// 패시브 아이템 목록
+	UPROPERTY(VisibleInstanceOnly, Category = "Item|Passive", meta = (DisplayName = "패시브 아이템 목록"))
+	TMap<int32, TObjectPtr<UPepccinePassiveItemData>> PassiveItemDatas;
 
 	// 액티브 아이템
 
 	// 카드키
 
 	// 돈
-
-	// 패시브 아이템 목록
-
-	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 	// 기본 무기 초기화
 	UFUNCTION()
