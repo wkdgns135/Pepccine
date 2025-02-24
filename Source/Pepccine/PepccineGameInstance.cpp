@@ -2,4 +2,10 @@
 
 
 #include "PepccineGameInstance.h"
+#include "Room/RoomManager.h"
 
+void UPepccineGameInstance::Init()
+{
+	Super::Init();
+	RoomManager = NewObject<URoomManager>(this);
+}

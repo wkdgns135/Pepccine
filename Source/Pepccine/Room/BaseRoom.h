@@ -25,9 +25,8 @@ private:
 	bool bIsRoomClear;
 
 protected:
-	virtual void PostInitializeComponents();
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
-
 public:
 	void ClearRoom();
 	
