@@ -13,13 +13,19 @@ UCLASS(BlueprintType)
 class PEPCCINE_API UPepccineWeaponItemData : public UPepccineItemDataBase
 {
 	GENERATED_BODY()
-	
+
 public:
 	// getter
 	FORCEINLINE EPepccineWeaponItemType GetWeaponItemType() const { return WeaponItemType; };
 	FORCEINLINE TObjectPtr<USkeletalMesh> GetEquippedMesh() const { return EquippedMesh; };
-	FORCEINLINE FPepccineWeaponStat GetWeaponStats() const { return WeaponStats; };
+	UFUNCTION(BlueprintCallable, category = "Item|Weapon")
+	FORCEINLINE FPepccineWeaponStat GetWeaponItemStats() const { return WeaponStats; };
 	FORCEINLINE TSubclassOf<APepccineProjectile> GetProjectileClass() const { return ProjectileClass; };
+	FORCEINLINE FPepccineWeaponStat* GetWeaponItemStatsPointer() { return &WeaponStats; };
+
+	// setter
+	// 무기 스탯 설정
+	FORCEINLINE void SetWeaponStats(const FPepccineWeaponStat& InWeaponStats) { WeaponStats = InWeaponStats; };
 
 protected:
 	// 무기 타입(주 무기, 보조 무기)

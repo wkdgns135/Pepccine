@@ -30,7 +30,7 @@ public:
 	void ApplyStatModifier(FPepccineWeaponStatModifier WeaponItemModifier, bool IsNewModifier);
 
 	// getter
-	FPepccineWeaponStat* GetEquippedWeaponItemStats(EPepccineWeaponItemType WeaponItemType)
+	FPepccineWeaponStat* GetEquippedWeaponItemStats(const EPepccineWeaponItemType WeaponItemType)
 	{
 		return WeaponItemType == EPepccineWeaponItemType::EPWIT_Main
 			       ? &ModifiedMainWeaponItemStats

@@ -19,16 +19,15 @@ public:
 	virtual void BeginPlay() override;
 
 	// 무기 발사
-	void Fire() const;
+	bool Fire() const;
 	// 무기 재장전
-	void Reload() const;
+	bool Reload() const;
 
 	// 무기 장착
 	void EquipWeapon(UPepccineWeaponItemData* WeaponItemData);
 
 	// getter
 	FORCEINLINE TObjectPtr<UPepccineWeaponItemData> GetEquippedWeaponData() const { return EquippedWeaponData; };
-	FORCEINLINE UWeaponStatModifier* GetWeaponStatsModifier() const { return WeaponStatsModifier; };
 
 	// setter
 	FORCEINLINE void SetCharacter(ACharacter* Character) { OwnerCharacter = Character; };
@@ -41,12 +40,6 @@ private:
 	// 현재 장착중인 무기 데이터
 	UPROPERTY()
 	TObjectPtr<UPepccineWeaponItemData> EquippedWeaponData;
-	// 현재 장착중인 무기 스탯(수정자가 적용된 스탯)
-	FPepccineWeaponStat* EquippedWeaponItemStats;
-
-	// 무기 스탯 수정자
-	UPROPERTY()
-	UWeaponStatModifier* WeaponStatsModifier;
 
 	// 발사 방향 가져오기
 	FVector GetFireDirection(const FVector& MuzzleLocation) const;

@@ -32,11 +32,11 @@ void UWeaponStatModifier::SetWeaponItemStats(const UPepccineWeaponItemData* Weap
 {
 	if (WeaponItemData->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main)
 	{
-		ModifiedMainWeaponItemStats = WeaponItemData->GetWeaponStats();
+		ModifiedMainWeaponItemStats = WeaponItemData->GetWeaponItemStats();
 	}
 	else
 	{
-		ModifiedSubWeaponItemStats = WeaponItemData->GetWeaponStats();
+		ModifiedSubWeaponItemStats = WeaponItemData->GetWeaponItemStats();
 	}
 
 	ApplyAllStatModifiers(WeaponItemData->GetWeaponItemType());
@@ -45,13 +45,13 @@ void UWeaponStatModifier::SetWeaponItemStats(const UPepccineWeaponItemData* Weap
 void UWeaponStatModifier::AddWeaponStatModifier(FPepccineWeaponStatModifier WeaponStatModifier)
 {
 	WeaponStatModifier.Id = WeaponStatModifierId;
-	AppliedMainWeaponItemStatModifiers.FindOrAdd(WeaponStatModifier.WeaponStatName)
+	AppliedMainWeaponItemStatModifiers.FindOrAdd(WeaponStatModifier.WeaponItemStatName)
 	                                  .Add(WeaponStatModifierId++, WeaponStatModifier);
 }
 
 void UWeaponStatModifier::RemoveWeaponStatModifier(const FPepccineWeaponStatModifier& WeaponStatModifier)
 {
-	const EPepccineWeaponStatName StatName = WeaponStatModifier.WeaponStatName;
+	const EPepccineWeaponStatName StatName = WeaponStatModifier.WeaponItemStatName;
 	const int32 Id = WeaponStatModifier.Id;
 
 	if (WeaponStatModifier.WeaponItemType == EPepccineWeaponItemType::EPWIT_Main)
@@ -89,7 +89,7 @@ void UWeaponStatModifier::ApplyStatModifier(const FPepccineWeaponStatModifier We
 		WeaponItemModifier.WeaponItemType == EPepccineWeaponItemType::EPWIT_Main
 			? &ModifiedMainWeaponItemStats
 			: &ModifiedSubWeaponItemStats,
-			WeaponItemModifier.WeaponStatName);
+			WeaponItemModifier.WeaponItemStatName);
 
 	const float BeforeStat = ModifiedStat;
 
@@ -101,7 +101,7 @@ void UWeaponStatModifier::ApplyStatModifier(const FPepccineWeaponStatModifier We
 	// 곱연산
 	else
 	{
-		ModifiedStat *= 1.0f + WeaponItemModifier.StatModifyValue;
+		ModifiedStat *= WeaponItemModifier.StatModifyValue;
 	}
 
 	// 새 수정자는 추가
@@ -111,11 +111,11 @@ void UWeaponStatModifier::ApplyStatModifier(const FPepccineWeaponStatModifier We
 	}
 
 	// 디버그용
-	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EPepccineWeaponStatName"), true);
+	const UEnum* EnumPtr = FindObject<UEnum>(nullptr, TEXT("/Script/Pepccine.EPepccineWeaponStatName"), true);
 	FString StatName = "";
 	if (EnumPtr)
 	{
-		StatName = EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(WeaponItemModifier.WeaponStatName)).ToString();
+		StatName = EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(WeaponItemModifier.WeaponItemStatName)).ToString();
 	}
 	else
 	{

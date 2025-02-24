@@ -124,7 +124,7 @@ struct FPepccineWeaponStatModifier
 	// 무기 스탯 이름
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier",
 		meta = (DisplayName = "무기 스탯 이름"))
-	EPepccineWeaponStatName WeaponStatName;
+	EPepccineWeaponStatName WeaponItemStatName;
 	// 수정 값
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier",
 		meta = (DisplayName = "수정 값"))
@@ -133,7 +133,7 @@ struct FPepccineWeaponStatModifier
 	// 기본 생성자
 	FPepccineWeaponStatModifier(): Id(0), StatModifyType(EPepccineStatModifyType::EPSMT_Add),
 	                               WeaponItemType(EPepccineWeaponItemType::EPWIT_Main),
-	                               WeaponStatName(EPepccineWeaponStatName::EPWSN_AttackMultiplier),
+	                               WeaponItemStatName(EPepccineWeaponStatName::EPWSN_AttackMultiplier),
 	                               StatModifyValue(0.0f)
 	{
 	}

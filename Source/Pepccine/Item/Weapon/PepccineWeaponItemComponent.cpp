@@ -8,18 +8,15 @@
 void UPepccineWeaponItemComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// 무기 스탯 매니저 생성
-	WeaponStatsModifier = NewObject<UWeaponStatModifier>();
 }
 
-void UPepccineWeaponItemComponent::Fire() const
+bool UPepccineWeaponItemComponent::Fire() const
 {
 	// 현재 탄창에 탄약이 없을 경우 발사 실패
-	if (EquippedWeaponItemStats->MagazineAmmo == 0.0f)
+	if (EquippedWeaponData->GetWeaponItemStats().MagazineAmmo == 0.0f)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("탄창에 남은 탄약이 없습니다."));
-		return;
+		return false;
 	}
 
 	if (TSubclassOf<APepccineProjectile> Projectile = EquippedWeaponData->GetProjectileClass())
@@ -44,17 +41,6 @@ void UPepccineWeaponItemComponent::Fire() const
 					Projectile, MuzzleLocation, MuzzleRotation, ActorSpawnParams);
 				SpawnedProjectile->SetProjectileVelocity(GetFireDirection(MuzzleLocation));
 
-				// 탄약 사용
-				EquippedWeaponItemStats->MagazineAmmo--;
-
-				UE_LOG(LogTemp, Warning, TEXT("%s 발사! %.0f / %.0f"), *EquippedWeaponData->GetDisplayName(),
-				       WeaponStatsModifier->GetWeaponItemStatByName(EquippedWeaponItemStats, EPepccineWeaponStatName::
-					       EPWSN_MagazineAmmo),
-				       WeaponStatsModifier->GetWeaponItemStatByName(EquippedWeaponItemStats, EPepccineWeaponStatName::
-					       EPWSN_SpareAmmo));
-
-				//WeaponData->GetWeaponStat().MagazineAmmo--;
-
 				//// Try and play the sound if specified
 				//if (FireSound != nullptr)
 				//{
@@ -71,26 +57,33 @@ void UPepccineWeaponItemComponent::Fire() const
 				//		AnimInstance->Montage_Play(FireAnimation, 1.f);
 				//	}
 				//}
+
+				return true;
 			}
 		}
 	}
+
+	return false;
 }
 
-void UPepccineWeaponItemComponent::Reload() const
+static float MaxSpareAmmo = 999.0f;
+bool UPepccineWeaponItemComponent::Reload() const
 {
 	if (!EquippedWeaponData)
 	{
-		return;
+		UE_LOG(LogTemp, Warning, TEXT("장착 무기 데이터가 없습니다."));
+		return false;
 	}
 
+	FPepccineWeaponStat* EquippedWeaponItemStats = EquippedWeaponData->GetWeaponItemStatsPointer();
+	
 	// 탄창 용량
-	const float MagazineSize = WeaponStatsModifier->GetEquippedWeaponItemStats(EquippedWeaponData->GetWeaponItemType())
-	                                              ->MagazineSize;
+	float& MagazineSize = EquippedWeaponItemStats->MagazineSize;
 
 	if (EquippedWeaponItemStats->SpareAmmo > 0 && EquippedWeaponItemStats->MagazineAmmo == MagazineSize)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("이미 탄약이 최대 입니다."));
-		return;
+		return false;
 	}
 
 	// 주 무기의 경우
@@ -103,12 +96,12 @@ void UPepccineWeaponItemComponent::Reload() const
 			EquippedWeaponItemStats->MagazineAmmo += EquippedWeaponItemStats->SpareAmmo >= ModifyValue
 				                                         ? ModifyValue
 				                                         : EquippedWeaponItemStats->SpareAmmo;
-			EquippedWeaponItemStats->SpareAmmo = FMath::Clamp(EquippedWeaponItemStats->SpareAmmo - ModifyValue, 0, 999);
+			EquippedWeaponItemStats->SpareAmmo = FMath::Clamp(EquippedWeaponItemStats->SpareAmmo - ModifyValue, 0.0f, MaxSpareAmmo);
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("남은 예비 탄약이 없습니다."));
-			return;
+			return false;
 		}
 	}
 	// 보조 무기의 경우
@@ -117,16 +110,12 @@ void UPepccineWeaponItemComponent::Reload() const
 		EquippedWeaponItemStats->MagazineAmmo = MagazineSize;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("%s 재장전! %.0f / %.0f"),
-	       *EquippedWeaponData->GetDisplayName(),
-	       EquippedWeaponItemStats->MagazineAmmo,
-	       EquippedWeaponItemStats->SpareAmmo);
+	return true;
 }
 
 void UPepccineWeaponItemComponent::EquipWeapon(UPepccineWeaponItemData* WeaponItemData)
 {
 	EquippedWeaponData = WeaponItemData;
-	EquippedWeaponItemStats = WeaponStatsModifier->GetEquippedWeaponItemStats(WeaponItemData->GetWeaponItemType());
 }
 
 FVector UPepccineWeaponItemComponent::GetFireDirection(const FVector& MuzzleLocation) const

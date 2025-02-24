@@ -34,4 +34,7 @@ protected:
 	// 스폰할 때 보여질 메시
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "스폰 메시"))
 	TObjectPtr<UStaticMesh> MeshToSpawn;
+	// UI에 보여질 이미지
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "아이콘 텍스쳐"))
+	TObjectPtr<UTexture2D> IconTexture;
 };
