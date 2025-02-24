@@ -148,6 +148,8 @@ void APepCharacter::OnActorDetectedEnhanced(AActor* DetectedActor)
 #pragma region
 void APepCharacter::Move(const FInputActionValue& Value)
 {
+  if (bIsRolling) return;
+
   FVector2D MoveInput = Value.Get<FVector2D>();
 
   //UE_LOG(LogTemp, Log, TEXT("MovementVector: [%s]"), *MoveInput.ToString());
@@ -178,6 +180,8 @@ void APepCharacter::OnMovementStopped()
 
 void APepCharacter::JumpStart()
 {
+  if (bIsRolling) return;
+
   Super::Jump();
 
   UE_LOG(LogTemp, Log, TEXT("JumpStart!"));
@@ -210,6 +214,8 @@ void APepCharacter::Look(const FInputActionValue& value)
 
 void APepCharacter::StartSprint(const FInputActionValue& value)
 {
+  if (bIsRolling) return;
+
   if (bIsRollable)
   {
     SprintHoldStartTime = GetWorld()->GetTimeSeconds();
@@ -242,7 +248,7 @@ void APepCharacter::SetCharacterSpeed(float Speed)
 
 void APepCharacter::Roll()
 {
-  if (!GetCharacterMovement() || bIsRolling || bIsJumping) return;
+  if (!GetCharacterMovement() || bIsRolling || bIsJumping || !PlayerStatComponent) return;
 
   bIsRolling = true;
 
@@ -252,8 +258,8 @@ void APepCharacter::Roll()
     return;
   }
 
-  GetCharacterMovement()->AddImpulse(GetRollDirection(), true);
-  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 0.1f, false);
+  GetCharacterMovement()->AddImpulse(GetActorForwardVector() * PlayerStatComponent->RollingDistance, true);
+  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 0.3f, false);
 }
 
 void APepCharacter::EndRoll()
@@ -286,7 +292,7 @@ FVector APepCharacter::GetRollDirection()
 
 void APepCharacter::Crouching()
 {
-  if (!GetCharacterMovement())
+  if (!GetCharacterMovement() || bIsRolling)
     return;
 
   bIsCrouching = GetCharacterMovement()->IsCrouching();
@@ -337,6 +343,8 @@ void APepCharacter::OpenInventory()
 {
   UE_LOG(LogTemp, Log, TEXT("OpenInventory!"));
 
+  if (bIsRolling) return;
+
   // HUD
   if (bIsInventoryOpened)
   {
@@ -366,12 +374,16 @@ void APepCharacter::Fire()
 {
   UE_LOG(LogTemp, Log, TEXT("Fire!"));
 
+  if (bIsRolling) return;
+
   PepccineMontageComponent->Fire();
 }
 
 void APepCharacter::ZoomIn()
 {
   UE_LOG(LogTemp, Log, TEXT("ZoomIn!"));
+
+  if (bIsRolling) return;
 
   bIsZooming = true;
   
