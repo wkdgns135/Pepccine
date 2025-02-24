@@ -23,7 +23,10 @@ UPlayerStatComponent::UPlayerStatComponent()
 	InvincibilityTime = 0;
 	Defence = 0;  
 	FireRate = 0;
-	RollingDistance = 10000.0f;
+
+	RollingDistance = 200.0f;
+	RollElapsedTime = 0.0f;
+
 	JumpZVelocity = 400.0f;
 }
 

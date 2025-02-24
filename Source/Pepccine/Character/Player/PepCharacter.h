@@ -138,6 +138,8 @@ private:
 	float SprintHoldStartTime = 0.0f;
 	float SprintHoldThreshold = 0.2f;
 
+	FVector RollDirection;
+
 	FTimerHandle RollTimerHandle;
 
 	UFUNCTION()
@@ -152,6 +154,7 @@ private:
 
 	void SetCharacterSpeed(float Speed);
 	void CheckSprinting();
+	void CheckRolling(float DeltaTime);
 
 	FVector GetRollDirection();
 };

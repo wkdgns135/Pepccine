@@ -70,6 +70,7 @@ void APepCharacter::Tick(float DeltaTime)
   Super::Tick(DeltaTime);
 
   CheckSprinting();
+  CheckRolling(DeltaTime);
 }
 
 // Delegate
@@ -98,6 +99,18 @@ void APepCharacter::CheckSprinting()
   }
   else {
     SetCharacterSpeed(PlayerStatComponent->MovementSpeed);
+  }
+}
+
+void APepCharacter::CheckRolling(float DeltaTime)
+{
+  if (bIsRolling && PlayerStatComponent)
+  {
+    float RollTime = PlayerStatComponent->RollElapsedTime;
+    RollTime += DeltaTime;
+
+    float RollSpeed = PlayerStatComponent->RollingDistance;
+    AddMovementInput(RollDirection, RollSpeed * DeltaTime);
   }
 }
 #pragma endregion
@@ -254,6 +267,8 @@ void APepCharacter::Roll()
   if (!GetCharacterMovement() || bIsRolling || bIsJumping || !PlayerStatComponent) return;
 
   bIsRolling = true;
+  PlayerStatComponent->RollElapsedTime = 0.0f;
+  RollDirection = GetActorForwardVector();
 
   if (!PlayerStatComponent->DecreaseStaminaByPercentage(30))
   {
@@ -261,9 +276,8 @@ void APepCharacter::Roll()
     return;
   }
 
-  GetCharacterMovement()->AddForce(GetActorForwardVector() * PlayerStatComponent->RollingDistance);
-  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 1.0f, false);
   PepccineMontageComponent->Roll();
+  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 1.0f, false);
 }
 
 void APepCharacter::EndRoll()
@@ -282,7 +296,6 @@ FVector APepCharacter::GetRollDirection()
   if (!PlayerStatComponent) return FVector::ZeroVector;
 
   FVector Velocity = GetCharacterMovement()->Velocity;
-  FVector RollDirection;
 
   if (!Velocity.IsNearlyZero())
   {

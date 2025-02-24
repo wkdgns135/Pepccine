@@ -41,6 +41,8 @@ public:
 	float RollingDistance;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float JumpZVelocity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
+	float RollElapsedTime;
 
 	bool DecreaseStamina(float Amount);
 	bool DecreaseStaminaByPercentage(float Percentage);
