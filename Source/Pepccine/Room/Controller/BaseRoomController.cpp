@@ -1,21 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Room/BaseRoom.h"
+#include "BaseRoomController.h"
 #include "PepccineGameState.h"
 #include "Kismet/GameplayStatics.h"
 
-void ABaseRoom::PostInitializeComponents()
+void ABaseRoomController::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	APepccineGameState* GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	if (GameState)
 	{
-		GameState->SetCurrentRoom(this);
+		GameState->SetRoomController(this);
 	}
 }
 
-void ABaseRoom::BeginPlay()
+void ABaseRoomController::BeginPlay()
 {
 	Super::BeginPlay();
 	GetWorldTimerManager().SetTimerForNextTick([this]()
@@ -24,7 +24,7 @@ void ABaseRoom::BeginPlay()
 		});
 }
 
-void ABaseRoom::ClearRoom()
+void ABaseRoomController::ClearRoom()
 {
 	OnRoomCleared.Broadcast();
 }

@@ -4,6 +4,7 @@
 #include "RoomManager.h"
 
 #include "FloorRoomData.h"
+#include "Kismet/GameplayStatics.h"
 
 void URoomManager::GenerateMap(const TArray<TArray<int>>& Grid)
 {
