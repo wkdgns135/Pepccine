@@ -262,7 +262,7 @@ void APepCharacter::Roll()
 
   bIsRolling = true;
   PlayerStatComponent->RollElapsedTime = 0.0f;
-  RollDirection = GetActorForwardVector();
+  RollDirection = GetRollDirection();
 
   if (!PlayerStatComponent->DecreaseStaminaByPercentage(30))
   {
@@ -270,7 +270,7 @@ void APepCharacter::Roll()
     return;
   }
   
-  PepccineMontageComponent->Roll(GetRollDirection());
+  PepccineMontageComponent->Roll(GetRollDirection(), GetActorRotation());
   GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 1.0f, false);
 }
 

@@ -42,11 +42,68 @@ void UPepccineMontageComponent::Attack()
 	}
 }
 
-void UPepccineMontageComponent::Roll(FVector dir)
+void UPepccineMontageComponent::Roll(FVector Dir, FRotator ActorRotation)
 {
+	float ForwardDeltaDegree = 0;
+
+	if (!Dir.IsNearlyZero())
+	{
+		FMatrix RotMatrix = FRotationMatrix(ActorRotation);
+		FVector ForwardVector = RotMatrix.GetScaledAxis(EAxis::X);
+		FVector RightVector = RotMatrix.GetScaledAxis(EAxis::Y);
+		FVector NormalizedVel = Dir.GetSafeNormal2D();
+
+		float ForwardCosAngle = FVector::DotProduct(ForwardVector, NormalizedVel);
+		// now get the alpha and convert to degree
+		ForwardDeltaDegree = FMath::RadiansToDegrees(FMath::Acos(ForwardCosAngle));
+
+		// depending on where right vector is, flip it
+		float RightCosAngle = FVector::DotProduct(RightVector, NormalizedVel);
+		if (RightCosAngle < 0)
+		{
+			ForwardDeltaDegree *= -1;
+		}
+
+		if (ForwardDeltaDegree < 25.0f && ForwardDeltaDegree > -25.0f)
+		{
+			ForwardDeltaDegree = 0.0f;
+		}
+		if (ForwardDeltaDegree < 75.0f && ForwardDeltaDegree > 25.0f)
+		{
+			ForwardDeltaDegree = 45.0f;
+		}
+		if (ForwardDeltaDegree < 115.0f && ForwardDeltaDegree > 75.0f)
+		{
+			ForwardDeltaDegree = 90.0f;
+		}
+		if (ForwardDeltaDegree < 155.0f && ForwardDeltaDegree > 115.0f)
+		{
+			ForwardDeltaDegree = 135.0f;
+		}
+		if (ForwardDeltaDegree < -155.0f || ForwardDeltaDegree > 155.0f)
+		{
+			ForwardDeltaDegree = 180.0f;
+		}
+		if (ForwardDeltaDegree > -75.0f && ForwardDeltaDegree < -25.0f)
+		{
+			ForwardDeltaDegree = -45.0f;
+		}
+		if (ForwardDeltaDegree > -115.0f && ForwardDeltaDegree < -75.0f)
+		{
+			ForwardDeltaDegree = -90.0f;
+		}
+		if (ForwardDeltaDegree > -155.0f && ForwardDeltaDegree < -115.0f)
+		{
+			ForwardDeltaDegree = -135.0f;
+		}
+	}
+
 	if (AnimInstance && RollMontage)
 	{
 		AnimInstance->Montage_Play(RollMontage);
-		AnimInstance->Montage_JumpToSection(FName(FString::FromInt(0)), RollMontage);
+		AnimInstance->Montage_JumpToSection(FName(FString::SanitizeFloat(ForwardDeltaDegree)), RollMontage);
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("%s"), *Dir.ToString());
+	UE_LOG(LogTemp, Log, TEXT("%.0f"), ForwardDeltaDegree);
 }
