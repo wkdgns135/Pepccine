@@ -76,7 +76,7 @@ DerivedDataCache/*
 # Jetbrain Rider specific files
 Plugins/**/RiderLink/*
 *.sln.DotSettings.user
-#.idea/
+.idea/
 
 # Content 폴더의 모든 파일과 폴더 무시
 Content/*
