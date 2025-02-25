@@ -355,9 +355,15 @@ void APepCharacter::OpenInventory()
 {
   UE_LOG(LogTemp, Log, TEXT("OpenInventory!"));
 
-  if (bIsRolling) return;
-
+  if (bIsRolling || !InventoryComponent) return;
+  
   InventoryComponent->ToggleInventory();
+  
+  UTexture2D* SampleItemTexture = LoadObject<UTexture2D>(nullptr, TEXT("/Game/PA_UrbanCity/Textures/T_Graffiti03"));
+  if (SampleItemTexture)
+  {
+    InventoryComponent->AddItem(SampleItemTexture, TEXT("Graffiti03"));
+  }
 }
 
 void APepCharacter::SwapItem(const FInputActionValue& value)

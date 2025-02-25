@@ -47,6 +47,6 @@ void UPepccineMontageComponent::Roll(FVector dir)
 	if (AnimInstance && RollMontage)
 	{
 		AnimInstance->Montage_Play(RollMontage);
-		AnimInstance->Montage_JumpToSection(FName(FString::FromInt(dir)), RollMontage);
+		AnimInstance->Montage_JumpToSection(FName(FString::FromInt(0)), RollMontage);
 	}
 }

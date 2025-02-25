@@ -1,6 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
@@ -8,6 +6,7 @@
 
 class UButton;
 class UTextBlock;
+class UImage;
 
 UCLASS()
 class PEPCCINE_API UInventoryItemWidget : public UUserWidget
@@ -25,6 +24,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* TooltipInfo;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* ItemImageWidget;
 
 private:
 	UFUNCTION()

@@ -27,6 +27,7 @@ void UInventoryComponent::AddItem(UTexture2D* ItemImage, const FString& ItemName
 	if (InventoryWidget)
 	{
 		InventoryWidget->AddItemToInventory(ItemImage, ItemName);
+		UE_LOG(LogTemp, Log, TEXT("Item Added: %s"), *ItemName);
 	}
 }
 

@@ -1,6 +1,7 @@
 ﻿#include "InventoryItemWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
 
 void UInventoryItemWidget::NativeConstruct()
 {
@@ -19,6 +20,19 @@ void UInventoryItemWidget::SetItem(UTexture2D* ItemImage, const FString& ItemNam
 	{
 		TooltipInfo->SetText(FText::FromString(ItemName));
 		TooltipInfo->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	if (ItemImageWidget && ItemImage)
+	{
+		ItemImageWidget->SetBrushFromTexture(ItemImage);
+		ItemImageWidget->SetVisibility(ESlateVisibility::Visible);
+
+		ItemImageWidget->SetColorAndOpacity(FLinearColor(1, 0, 0, 1));
+		UE_LOG(LogTemp, Log, TEXT("Item Image Set Successfully: %s"), *ItemName);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ItemImageWidget or ItemImage is nullptr!"));
 	}
 }
 

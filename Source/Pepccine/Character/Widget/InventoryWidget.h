@@ -6,6 +6,7 @@
 
 class UInventoryItemWidget;
 class UUniformGridPanel;
+class UImage;
 
 UCLASS()
 class PEPCCINE_API UInventoryWidget : public UUserWidget
@@ -25,6 +26,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	TSubclassOf<UInventoryItemWidget> ItemWidgetClass;
 
+	UPROPERTY(meta=(BindWidget))
+	UImage* BackgroundImage;
 private:
 	int32 CurrentRow = 0;
 	int32 CurrentColumn = 0;
