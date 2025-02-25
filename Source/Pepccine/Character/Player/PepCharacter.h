@@ -45,7 +45,7 @@ public:
 	) override;
 
 	// inline
-	FORCEINLINE_DEBUGGABLE bool IsJumping() const { return bIsJumping; }
+	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -124,7 +124,6 @@ private:
 	float CameraArmLength = 300.0f;
 	
 	bool bIsZooming = false;
-	bool bIsJumping = false;
 	bool bIsCrouching = false;
 	bool bIsSprinting = false;
 	bool bIsSprintable = true;

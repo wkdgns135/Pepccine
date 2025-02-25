@@ -194,17 +194,14 @@ void APepCharacter::JumpStart()
 
   Super::Jump();
 
-  UE_LOG(LogTemp, Log, TEXT("JumpStart!"));
-  bIsJumping = true;
   Jump();
 }
 
 void APepCharacter::JumpStop()
 {
   Super::StopJumping();
-  bIsJumping = false;
+  
   StopJumping();
-  UE_LOG(LogTemp, Log, TEXT("JumpStop!"));
 }
 
 void APepCharacter::UseItem()
@@ -215,8 +212,6 @@ void APepCharacter::UseItem()
 void APepCharacter::Look(const FInputActionValue& value)
 {
   FVector2D LookInput = value.Get<FVector2D>();
-
-  //UE_LOG(LogTemp, Log, TEXT("LookInput[%s]"), *LookInput.ToString());
 
   AddControllerYawInput(LookInput.X);
   AddControllerPitchInput(LookInput.Y);
@@ -245,7 +240,7 @@ void APepCharacter::StopSprint(const FInputActionValue& value)
     Roll();
   }
 
-  SprintHoldStartTime = 0.0f; // �ʱ�ȭ
+  SprintHoldStartTime = 0.0f;
 }
 
 void APepCharacter::SetCharacterSpeed(float Speed)
@@ -258,8 +253,8 @@ void APepCharacter::SetCharacterSpeed(float Speed)
 
 void APepCharacter::Roll()
 {
-  if (!GetCharacterMovement() || bIsRolling || bIsJumping || !PlayerStatComponent) return;
-
+  if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling()) return;
+  
   bIsRolling = true;
   PlayerStatComponent->RollElapsedTime = 0.0f;
   RollDirection = GetRollDirection();
@@ -271,7 +266,7 @@ void APepCharacter::Roll()
   }
   
   PepccineMontageComponent->Roll(GetRollDirection(), GetActorRotation());
-  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 1.0f, false);
+  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 0.5f, false);
 }
 
 void APepCharacter::EndRoll()
@@ -353,8 +348,6 @@ void APepCharacter::Interactive()
 
 void APepCharacter::OpenInventory()
 {
-  UE_LOG(LogTemp, Log, TEXT("OpenInventory!"));
-
   if (bIsRolling || !InventoryComponent) return;
   
   InventoryComponent->ToggleInventory();

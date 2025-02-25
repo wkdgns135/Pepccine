@@ -3,6 +3,9 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 
+#include "Styling/SlateBrush.h"
+#include "Styling/SlateTypes.h"
+
 void UInventoryItemWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -12,6 +15,28 @@ void UInventoryItemWidget::NativeConstruct()
 		ItemButton->OnHovered.AddDynamic(this, &UInventoryItemWidget::OnHovered);
 		ItemButton->OnUnhovered.AddDynamic(this, &UInventoryItemWidget::OnUnhovered);
 	}
+
+	if (bIsEmpty)
+	{
+		SetEmpty();
+	}
+}
+
+void UInventoryItemWidget::SetEmpty()
+{
+	if (ItemImageWidget)
+	{
+		ItemImageWidget->SetBrushFromTexture(nullptr);
+		ItemImageWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+	
+	if (TooltipInfo)
+	{
+		TooltipInfo->SetText(FText::FromString(""));
+		TooltipInfo->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	bIsEmpty = true;
 }
 
 void UInventoryItemWidget::SetItem(UTexture2D* ItemImage, const FString& ItemName)
@@ -21,18 +46,12 @@ void UInventoryItemWidget::SetItem(UTexture2D* ItemImage, const FString& ItemNam
 		TooltipInfo->SetText(FText::FromString(ItemName));
 		TooltipInfo->SetVisibility(ESlateVisibility::Hidden);
 	}
-
+	
 	if (ItemImageWidget && ItemImage)
 	{
+		//ItemImageWidget->SetToolTipText(FText::FromString(ItemName));
 		ItemImageWidget->SetBrushFromTexture(ItemImage);
 		ItemImageWidget->SetVisibility(ESlateVisibility::Visible);
-
-		ItemImageWidget->SetColorAndOpacity(FLinearColor(1, 0, 0, 1));
-		UE_LOG(LogTemp, Log, TEXT("Item Image Set Successfully: %s"), *ItemName);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ItemImageWidget or ItemImage is nullptr!"));
 	}
 }
 
@@ -40,6 +59,7 @@ void UInventoryItemWidget::OnHovered()
 {
 	if (TooltipInfo)
 	{
+		UE_LOG(LogTemp, Display, TEXT("OnHovered"));
 		TooltipInfo->SetVisibility(ESlateVisibility::Visible);
 	}
 }
@@ -48,6 +68,7 @@ void UInventoryItemWidget::OnUnhovered()
 {
 	if (TooltipInfo)
 	{
+		UE_LOG(LogTemp, Display, TEXT("OnUnhovered"));
 		TooltipInfo->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

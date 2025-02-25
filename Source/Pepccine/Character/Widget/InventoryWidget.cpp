@@ -1,6 +1,7 @@
 #include "InventoryWidget.h"
-#include "Components/UniformGridPanel.h"
 #include "InventoryItemWidget.h"
+#include "Components/UniformGridPanel.h"
+#include "Components/UniformGridSlot.h"
 #include "Components/Image.h"
 
 void UInventoryWidget::NativeConstruct()
@@ -19,27 +20,46 @@ void UInventoryWidget::NativeConstruct()
 
 	if (!BackgroundImage)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("❌ BackgroundImage is nullptr! Check if it's assigned in the widget blueprint."));
+		UE_LOG(LogTemp, Error, TEXT("❌ BackgroundImage is nullptr! Ensure it is assigned in the blueprint or loaded properly."));
+	}
+
+	SetEmptySpace();
+}
+
+void UInventoryWidget::SetEmptySpace()
+{
+	for (int32 row = 0; row < MaxRows; row++)
+	{
+		for (int32 col = 0; col < MaxColumns; col++)
+		{
+			UInventoryItemWidget* EmptySlot = CreateWidget<UInventoryItemWidget>(this, ItemWidgetClass);
+			EmptySlot->SetEmpty();
+			//InventoryGrid->AddChildToUniformGrid(EmptySlot, row, col);
+			if (UUniformGridSlot* GridSlot = InventoryGrid->AddChildToUniformGrid(EmptySlot, row, col))
+			{
+				GridSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
+				GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Fill);
+			}
+			GridSlots.Add(EmptySlot);
+		}
 	}
 }
 
 void UInventoryWidget::AddItemToInventory(UTexture2D* ItemImage, const FString& ItemName)
 {
-	if (!InventoryGrid || !ItemWidgetClass) return;
-	
-	UInventoryItemWidget* NewItem = CreateWidget<UInventoryItemWidget>(this, ItemWidgetClass);
-	if (NewItem)
+	if (!InventoryGrid || !ItemWidgetClass)
 	{
-		NewItem->SetItem(ItemImage, ItemName);
-		
-		UUniformGridSlot* GridSlot = InventoryGrid->AddChildToUniformGrid(NewItem, CurrentRow, CurrentColumn);
-        
-		if (++CurrentColumn >= 5)
-		{
-			CurrentColumn = 0;
-			++CurrentRow;
-		}
+		UE_LOG(LogTemp, Warning, TEXT("❌ InventoryGrid or ItemWidgetClass is nullptr!"));
+		return;
+	}
 
-		UE_LOG(LogTemp, Warning, TEXT("Inventory Widget: [%d][%d]"), CurrentRow, CurrentColumn);
+	for (int32 i = 0; i < GridSlots.Num(); i++)
+	{
+		if (GridSlots[i]->bIsEmpty)
+		{
+			GridSlots[i]->SetItem(ItemImage, ItemName);
+			GridSlots[i]->bIsEmpty = false;
+			return;
+		}
 	}
 }

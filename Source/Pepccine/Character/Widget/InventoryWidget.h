@@ -23,13 +23,20 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UUniformGridPanel* InventoryGrid;
 
+	UPROPERTY(meta = (BindWidget))
+	UImage* BackgroundImage;
+	
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	TSubclassOf<UInventoryItemWidget> ItemWidgetClass;
-
-	UPROPERTY(meta=(BindWidget))
-	UImage* BackgroundImage;
+	
 private:
 	int32 CurrentRow = 0;
 	int32 CurrentColumn = 0;
 	
+	const int32 MaxColumns = 7;
+	const int32 MaxRows = 7;
+
+	TArray<UInventoryItemWidget*> GridSlots;
+
+	void SetEmptySpace();
 };

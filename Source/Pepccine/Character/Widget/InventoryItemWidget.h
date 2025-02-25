@@ -16,7 +16,10 @@ class PEPCCINE_API UInventoryItemWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
+	bool bIsEmpty = true;
+
 	void SetItem(UTexture2D* ItemImage, const FString& ItemName);
+	void SetEmpty();
 
 protected:
 	UPROPERTY(meta = (BindWidget))

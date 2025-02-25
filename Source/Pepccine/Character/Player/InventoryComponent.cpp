@@ -27,7 +27,6 @@ void UInventoryComponent::AddItem(UTexture2D* ItemImage, const FString& ItemName
 	if (InventoryWidget)
 	{
 		InventoryWidget->AddItemToInventory(ItemImage, ItemName);
-		UE_LOG(LogTemp, Log, TEXT("Item Added: %s"), *ItemName);
 	}
 }
 
@@ -41,8 +40,6 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UInventoryComponent::ToggleInventory()
 {
 	if (!InventoryWidget) return;
-
-	UE_LOG(LogTemp, Display, TEXT("ToggleInventory [%d]"), bIsInventoryVisible);
 
 	if (bIsInventoryVisible)
 	{
