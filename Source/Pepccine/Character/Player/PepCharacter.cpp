@@ -54,7 +54,7 @@ void APepCharacter::BeginPlay()
 
 // Initialize Character Status
 #pragma region
-void APepCharacter::InitializeCharacterMovement()
+void APepCharacter::InitializeCharacterMovement() const
 {
   if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
   {
@@ -72,16 +72,6 @@ void APepCharacter::Tick(float DeltaTime)
 
   CheckSprinting();
   CheckRolling(DeltaTime);
-}
-
-// Delegate
-float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-  OnHealthChanged.Broadcast(0.1f);
-
-  // OnHealthChanged.AddDynamic(this, &AMyCharacter::OnHealthChangedFunction);
-
-  return 0.0f;
 }
 
 // Tick Method
@@ -123,12 +113,20 @@ void APepCharacter::AddObservers()
   if (PlayerStatComponent)
   {
     PlayerStatComponent->AddStaminaObserver(this);
+    PlayerStatComponent->OnHealthChanged.AddDynamic(this, &APepCharacter::OnHealthChanged);
   }
   
   if (EnhancedRadarComponent)
   {
     EnhancedRadarComponent->OnActorDetectedEnhanced.AddDynamic(this, &APepCharacter::OnActorDetectedEnhanced);
   }
+}
+
+void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth)
+{
+  if (!PrograssBarComponent) return;
+
+  PrograssBarComponent->SetHealth(NewHealth, MaxHealth);
 }
 
 void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
@@ -380,11 +378,11 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 
   if (ScrollValue > 0.0f)
   {
-    UE_LOG(LogTemp, Log, TEXT("Swapping Forward [%f]"), ScrollValue);
+    //UE_LOG(LogTemp, Log, TEXT("Swapping Forward [%f]"), ScrollValue);
   }
   else if (ScrollValue < 0.0f)
   {
-    UE_LOG(LogTemp, Log, TEXT("Swapping Backward [%f]"), ScrollValue);
+    //UE_LOG(LogTemp, Log, TEXT("Swapping Backward [%f]"), ScrollValue);
   }
 }
 

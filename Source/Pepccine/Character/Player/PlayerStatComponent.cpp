@@ -8,7 +8,8 @@ UPlayerStatComponent::UPlayerStatComponent()
 
 	MaxHealth = 100;
 	CurrentHealth = MaxHealth;
-	HealthDecelerationSpeed = 0;
+	HealthDecelerationSpeed = 1;
+	HealthDecelerationAmount = 1;
 
 	MovementSpeed = 400;
 	AttackDamage = 100;
@@ -47,6 +48,26 @@ void UPlayerStatComponent::StartRepeatingTimer()
 		[this]() { this->IncreaseStamina(StaminaRecoveryRate); },
 		StaminaRecoveryTime,
 		true);
+	
+	GetWorld()->GetTimerManager().SetTimer(DecreaseHealthTimerHandle,
+		this,
+		&UPlayerStatComponent::DecreaseHealth_Timer,
+		HealthDecelerationSpeed,
+		true);
+}
+
+void UPlayerStatComponent::DecreaseHealth_Timer()
+{
+	DecreaseHealth(HealthDecelerationAmount);
+}
+
+void UPlayerStatComponent::DecreaseHealth(float Amount)
+{
+	if (Amount <= 0.0f || CurrentHealth <= 0) return;
+
+	CurrentHealth = FMath::Clamp(CurrentHealth - Amount, 0.0f, MaxHealth);
+
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 }
 
 void UPlayerStatComponent::IncreaseStamina(float Amount)
@@ -76,19 +97,6 @@ bool UPlayerStatComponent::DecreaseStamina(float Amount)
 
 	return true;
 }
-
-//bool UPlayerStatComponent::DecreaseStaminaByTime(float Amount, float time)
-//{
-//	if (Amount <= 0.0f || Stamina < Amount) return false;
-//
-//	GetWorld()->GetTimerManager().SetTimer(
-//		DecreaseStaminaTimerHandle,
-//		DecreaseStamina(Amount),
-//		time,
-//		true);
-//
-//	GetWorld()->GetTimerManager().PauseTimer(DecreaseStaminaTimerHandle);
-//}
 
 bool UPlayerStatComponent::DecreaseStaminaByPercentage(float Percentage)
 {

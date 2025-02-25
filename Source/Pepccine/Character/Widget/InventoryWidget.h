@@ -40,8 +40,8 @@ private:
 	const int BoxWidthSize = 180;
 	const int BoxHeightSize = 180;
 
-	const int32 MaxColumns = 5;
-	const int32 MaxRows = 5;
+	const int32 MaxColumns = 7;
+	const int32 MaxRows = 7;
 
 	void SetEmptyGrid();
 	void CreateNewGridBlock();

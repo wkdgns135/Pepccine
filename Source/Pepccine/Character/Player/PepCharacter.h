@@ -21,8 +21,6 @@ class UInventoryComponent;
 //class URadorComponent;
 class UCollisionRadarComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, CurrentHealth);
-
 UCLASS()
 class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver
 {
@@ -34,16 +32,11 @@ public:
 	bool bIsFirstPersonView = false;
 	bool bIsInventoryOpened = false;
 
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnHealthChanged OnHealthChanged;
-
+	// UE delegate
+	UFUNCTION()
+	void OnHealthChanged(const float NewHealth, const float MaxHealth);
+	// Observer Pattern
 	virtual void OnStaminaChanged(float NewStamina, float MaxStamina) override;
-	virtual float TakeDamage(
-		float DamageAmount,
-		struct FDamageEvent const& DamageEvent,
-		class AController* EventInstigator,
-		AActor* DamageCauser
-	) override;
 
 	// inline
 	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }
@@ -145,7 +138,7 @@ private:
 	UFUNCTION()
 	void OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors);
 
-	void InitializeCharacterMovement();
+	void InitializeCharacterMovement() const;
 	void ToggleCameraView();
 	void AddObservers();
 

@@ -96,19 +96,17 @@ void UInventoryWidget::AddItemToInventory(UTexture2D* ItemImage, const FString& 
 		GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
 	}
 
-	InventoryScrollBox->SetScrollOffset(InventoryScrollBox->GetScrollOffset() + 500.f);
-
 	CurrentColumn++;
 	
-	if (CurrentColumn >= 5)
+	if (CurrentColumn >= MaxColumns)
 	{
 		CurrentColumn = 0;
 		CurrentRow++;
 
-		if (CurrentRow >= 5) 
+		if (CurrentRow >= MaxRows) 
 		{
-			CurrentRow = 0;
 			CreateNewGridBlock();
+			CurrentRow = 0;
 		}
 	}
 }
@@ -140,5 +138,5 @@ void UInventoryWidget::CreateNewGridBlock()
 		}
 	}
 
-	InventoryScrollBox->ScrollToEnd();
+	//InventoryScrollBox->ScrollToStart();
 }
