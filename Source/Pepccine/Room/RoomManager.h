@@ -31,6 +31,8 @@ public:
 	bool bIsCleared = false;
 	UPROPERTY()
 	ERoomType RoomType = ERoomType::ENone;
+	UPROPERTY()
+	FIntPoint RoomPoint;
 };
 
 UCLASS(DefaultToInstanced, EditInlineNew)
@@ -42,23 +44,24 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Room")
 	TArray<UFloorRoomData*> FloorRoomData;
 	
-	TArray<TArray<FRoomData>> Map;
-	FIntPoint CurrentRoom;
+	TArray<TArray<FRoomData*>> Map;
+	FRoomData *CurrentRoom;
 	int CurrentFloorIndex;
 
 public:
 	void GenerateMap(const TArray<TArray<int>>& Grid);
 	void StartFloor();
+	void ChangeRoom(FRoomData* RoomData);
+	bool GetCheckRoom(const FIntPoint Point) const;
 	
 private:
-	FRoomData NewRoom(const ERoomType RoomType);
-
+	FRoomData* NewRoom(const ERoomType RoomType);
+	void PrintFloor() const;
+	
 public:
-	FORCEINLINE TArray<TArray<FRoomData>>& GetMap(){return Map;}
-	FORCEINLINE void SetCurrentRoom(const FIntPoint& InputPoint){CurrentRoom = InputPoint;}
-	FORCEINLINE FIntPoint& GetCurrentRoomPoint(){return CurrentRoom;}
-	FORCEINLINE TSoftObjectPtr<UWorld>& GetCurrentRoomLevel(){return Map[CurrentRoom.Y][CurrentRoom.X].RoomLevel;}
-	FORCEINLINE bool GetCurrentRoomIsClear(){return Map[CurrentRoom.Y][CurrentRoom.X].bIsCleared;}
-	FORCEINLINE void SetCurrentRoomIsClear(const bool bInputIsClear){Map[CurrentRoom.Y][CurrentRoom.X].bIsCleared = bInputIsClear;}
+	FORCEINLINE TArray<TArray<FRoomData*>>& GetMap(){return Map;}
+	FORCEINLINE FIntPoint GetCurrentRoomPoint() const {return CurrentRoom->RoomPoint;}
 	FORCEINLINE int GetCurrentFloor() const {return CurrentFloorIndex + 1;}
+	FORCEINLINE FRoomData* GetCurrentRoomData() const {return CurrentRoom;}
+	FORCEINLINE FRoomData* GetPointRoomData(const FIntPoint& Point){return GetCheckRoom(Point) ? Map[Point.Y][Point.X] : NewRoom(ERoomType::ENone);}
 };

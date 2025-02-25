@@ -6,6 +6,18 @@
 #include "GameFramework/Actor.h"
 #include "BaseDoor.generated.h"
 
+struct FRoomData;
+class UBoxComponent;
+
+UENUM()
+enum class EDoorDirection : uint8
+{
+	ELeft,
+	ERight,
+	EUp,
+	EDown
+};
+
 UCLASS()
 class PEPCCINE_API ABaseDoor : public AActor
 {
@@ -13,8 +25,12 @@ class PEPCCINE_API ABaseDoor : public AActor
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Components")
-	int Direction;
-	
+	EDoorDirection Direction;
+	// 트리거 볼륨 컴포넌트
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UBoxComponent* TriggerVolume;
+
+	bool bIsLocked;
 public:	
 	ABaseDoor();
 
@@ -23,7 +39,13 @@ protected:
 
 private:
 	UFUNCTION()
-	void LockDoor();
+	void OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
-	void UnlockDoor();
+	void OnStarted();
+	UFUNCTION()
+	void OnCleared();
+	
+	FRoomData* GetDirectionRoom();
+	void LockDoor();
+	void OpenDoor();
 };
