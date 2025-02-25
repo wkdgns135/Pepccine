@@ -1,6 +1,5 @@
 ﻿#include "InventoryItemWidget.h"
 #include "Components/Button.h"
-#include "Components/Image.h"
 #include "Components/TextBlock.h"
 
 void UInventoryItemWidget::NativeConstruct()
@@ -16,11 +15,6 @@ void UInventoryItemWidget::NativeConstruct()
 
 void UInventoryItemWidget::SetItem(UTexture2D* ItemImage, const FString& ItemName)
 {
-	if (ItemImageWidget)
-	{
-		ItemImageWidget->SetBrushFromTexture(ItemImage);
-	}
-    
 	if (TooltipInfo)
 	{
 		TooltipInfo->SetText(FText::FromString(ItemName));

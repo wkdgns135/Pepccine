@@ -143,9 +143,6 @@ private:
 	FTimerHandle RollTimerHandle;
 
 	UFUNCTION()
-	void OnActorDetected(const AActor* DetectedActor);
-
-	UFUNCTION()
 	void OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors);
 
 	void InitializeCharacterMovement();

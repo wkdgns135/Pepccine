@@ -13,7 +13,6 @@ void UPrograssBarHUDComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	if (StaminaWidget) StaminaWidget->AddToViewport();
-
 	if (HealthWidget) HealthWidget->AddToViewport();
 }
 

@@ -27,7 +27,7 @@ UPlayerStatComponent::UPlayerStatComponent()
 	RollingDistance = 200.0f;
 	RollElapsedTime = 0.0f;
 
-	JumpZVelocity = 400.0f;
+	JumpZVelocity = 500.0f;
 }
 
 void UPlayerStatComponent::BeginPlay()

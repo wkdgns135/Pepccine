@@ -7,7 +7,6 @@
 #include "InventoryItemWidget.generated.h"
 
 class UButton;
-class UImage;
 class UTextBlock;
 
 UCLASS()
@@ -23,9 +22,6 @@ public:
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UButton* ItemButton;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* ItemImageWidget;
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* TooltipInfo;

@@ -124,14 +124,7 @@ void APepCharacter::AddObservers()
   {
     PlayerStatComponent->AddStaminaObserver(this);
   }
-
-  /*
-  if (RadarComponent)
-  {
-    RadarComponent->OnActorDetected.AddDynamic(this, &APepCharacter::OnActorDetected);
-  }
-  */
-
+  
   if (EnhancedRadarComponent)
   {
     EnhancedRadarComponent->OnActorDetectedEnhanced.AddDynamic(this, &APepCharacter::OnActorDetectedEnhanced);
@@ -145,26 +138,17 @@ void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
   PrograssBarComponent->SetStamina(NewStamina, MaxStamina);
 }
 
-void APepCharacter::OnActorDetected(const AActor* DetectedActor)
-{
-  if (DetectedActor)
-  {
-    UE_LOG(LogTemp, Warning, TEXT("OnActorDetected: %s"), *DetectedActor->GetName());
-  }
-}
-
 void APepCharacter::OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors)
 {
   if (DetectedActors.DetectedActors.Num() == 0) return;
 
-  UE_LOG(LogTemp, Warning, TEXT("Number of dectedActor: %d"), DetectedActors.DetectedActors.Num());
-
+  //UE_LOG(LogTemp, Warning, TEXT("Number of dectedActor: %d"), DetectedActors.DetectedActors.Num());
 
   for (AActor* DetectedActor : DetectedActors.DetectedActors)
   {
     if (DetectedActor)
     {
-      UE_LOG(LogTemp, Warning, TEXT("Detected Actors: %s"), *DetectedActor->GetName());
+      //UE_LOG(LogTemp, Warning, TEXT("Detected Actors: %s"), *DetectedActor->GetName());
     }
   }
 }
@@ -285,8 +269,8 @@ void APepCharacter::Roll()
     bIsRolling = false;
     return;
   }
-
-  PepccineMontageComponent->Roll(0);
+  
+  PepccineMontageComponent->Roll(GetRollDirection());
   GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 1.0f, false);
 }
 
@@ -294,7 +278,6 @@ void APepCharacter::EndRoll()
 {
   bIsRolling = false;
 
-  // [�ӽ�] �� Ȱ���ÿ� �ش�κ� ������ ���ؼ� ������
   if (GetCharacterMovement())
   {
     GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
@@ -375,16 +358,6 @@ void APepCharacter::OpenInventory()
   if (bIsRolling) return;
 
   InventoryComponent->ToggleInventory();
-  
-  // HUD
-  if (bIsInventoryOpened)
-  {
-
-  }
-  else
-  {
-
-  }
 }
 
 void APepCharacter::SwapItem(const FInputActionValue& value)
@@ -572,7 +545,7 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
   {
     EnhancedInput->BindAction(
       PlayerController->InventoryAction,
-      ETriggerEvent::Triggered,
+      ETriggerEvent::Started,
       this,
       &APepCharacter::OpenInventory
     );

@@ -42,7 +42,7 @@ void UPepccineMontageComponent::Attack()
 	}
 }
 
-void UPepccineMontageComponent::Roll(int32 dir)
+void UPepccineMontageComponent::Roll(FVector dir)
 {
 	if (AnimInstance && RollMontage)
 	{

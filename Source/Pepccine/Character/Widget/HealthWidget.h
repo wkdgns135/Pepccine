@@ -7,9 +7,6 @@
 #include "Components/ProgressBar.h"
 #include "HealthWidget.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class PEPCCINE_API UHealthWidget : public UUserWidget
 {

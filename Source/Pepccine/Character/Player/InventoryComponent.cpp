@@ -41,7 +41,7 @@ void UInventoryComponent::ToggleInventory()
 {
 	if (!InventoryWidget) return;
 
-	UE_LOG(LogTemp, Display, TEXT("ToggleInventory [%d"), bIsInventoryVisible);
+	UE_LOG(LogTemp, Display, TEXT("ToggleInventory [%d]"), bIsInventoryVisible);
 
 	if (bIsInventoryVisible)
 	{
