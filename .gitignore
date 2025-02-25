@@ -73,6 +73,11 @@ Plugins/**/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 
+# Jetbrain Rider specific files
+Plugins/**/RiderLink/*
+*.sln.DotSettings.user
+.idea/
+
 # Content 폴더의 모든 파일과 폴더 무시
 Content/*
 
@@ -82,3 +87,5 @@ Content/*
 !Content/LevelPrototyping/
 !Content/StarterContent/
 !Content/ThirdPerson/
+
+Source/Pepccine/Character/Player/PrograssBarHUDComponent.h

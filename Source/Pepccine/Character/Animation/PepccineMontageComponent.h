@@ -23,7 +23,7 @@ public:
 	UFUNCTION()
 	void Attack();
 	UFUNCTION()
-	void Roll();
+	void Roll(int32 dir);
 
 protected:
 	// Called when the game starts
