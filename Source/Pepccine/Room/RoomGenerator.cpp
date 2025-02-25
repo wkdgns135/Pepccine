@@ -336,22 +336,11 @@ void ARoomGenerator::AssignEndRooms()
 	Grid[EndRooms[1].Y][EndRooms[1].X] = 5;
 }
 
-void ARoomGenerator::StartNextFloor()
+void ARoomGenerator::StartNextFloor() const
 {
-	TArray<TArray<TPair<int, bool>>> Map;
-	Map.SetNum(MapSize);
-	for (int i = 0; i < MapSize; i++)
-	{
-		Map[i].SetNum(MapSize);
-		for (int j = 0; j < MapSize; j++)
-		{
-			Map[i][j] = {Grid[i][j], false};	
-		}
-	}
-	
 	if (UPepccineGameInstance *PepccineGameInstance = Cast<UPepccineGameInstance>(GetGameInstance()))
 	{
-		PepccineGameInstance->GetRoomManager()->SetMap(Map);
-		UGameplayStatics::OpenLevel(GetWorld(),"StartRoom");
+		PepccineGameInstance->GetRoomManager()->GenerateMap(Grid);
+		PepccineGameInstance->GetRoomManager()->StartFloor();
 	}
 }
