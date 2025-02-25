@@ -19,7 +19,7 @@ public:
 	virtual void BeginPlay() override;
 
 	// 무기 발사
-	bool Fire() const;
+	bool Fire(const float& WeaponDamage) const;
 	// 무기 재장전
 	bool Reload() const;
 
@@ -27,7 +27,8 @@ public:
 	void EquipWeapon(UPepccineWeaponItemData* WeaponItemData);
 
 	// getter
-	FORCEINLINE TObjectPtr<UPepccineWeaponItemData> GetEquippedWeaponData() const { return EquippedWeaponData; };
+	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
+	FORCEINLINE UPepccineWeaponItemData* GetEquippedWeaponData() const { return EquippedWeaponData; };
 
 	// setter
 	FORCEINLINE void SetCharacter(ACharacter* Character) { OwnerCharacter = Character; };

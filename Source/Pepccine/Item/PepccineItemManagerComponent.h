@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "PepccineItemSpawner.h"
+#include "PepccineStatName.h"
 #include "Components/ActorComponent.h"
 #include "Item/Weapon/PepccineWeaponItemData.h"
 #include "Item/Weapon/PepccineWeaponItemComponent.h"
@@ -22,11 +23,10 @@ public:
 
 	virtual void BeginPlay() override;
 
-	// int 값처럼 사용하기 위한 소수점 아래 버림
-	static FORCEINLINE void TruncateFloatStat(float& FloatStat) { FloatStat = FMath::TruncToFloat(FloatStat); };
-
 	// 이름으로 무기 스탯 찾기
-	static float& GetWeaponItemStatByName(FPepccineWeaponStat* WeaponItemStats, const EPepccineWeaponStatName StatName);
+	UFUNCTION(BlueprintPure, category = "Item")
+	static float GetWeaponItemStatByName(const FPepccineWeaponStat& WeaponItemStats,
+	                                     const EPepccineWeaponStatName StatName);
 
 	// 무기 획득
 	TObjectPtr<UPepccineWeaponItemData> PickUpWeaponItem(const UPepccineWeaponItemData* WeaponItemData);
@@ -41,15 +41,14 @@ public:
 	// 아이템 스포너 가져오기
 	UFUNCTION(BlueprintCallable, Category = "Item|Spawner")
 	UPepccineItemSpawner* GetItemSpawner() const { return ItemSpawner; };
-	// 수정본 무기 데이터 가져오기
-	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
 
 	// inline getter
 
 	// 무기 컴포넌트 가져오기
+	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE UPepccineWeaponItemComponent* GetWeaponItemComp() const { return WeaponItemComp; };
 	// 무기 데이터 가져오기
-	FORCEINLINE TObjectPtr<UPepccineWeaponItemData> GetWeaponItemData(
+	FORCEINLINE UPepccineWeaponItemData* GetWeaponItemData(
 		const EPepccineWeaponItemType WeaponItemType)
 	{
 		return WeaponItemType == EPepccineWeaponItemType::EPWIT_Main
@@ -58,42 +57,57 @@ public:
 	}
 
 	// 장착 중인 무기 데이터 가져오기
-	UFUNCTION(BlueprintCallable, category = "Item|Weapon")
+	UFUNCTION(BlueprintPure, category = "Item|Weapon")
 	FORCEINLINE UPepccineWeaponItemData* GetEquippedWeaponItemData() const
 	{
-		if (WeaponItemComp)
-		{
-			return WeaponItemComp->GetEquippedWeaponData();
-		}
-		return nullptr;
+		return WeaponItemComp->GetEquippedWeaponData();
 	}
 
 	// 주 무기 데이터 가져오기
-	UFUNCTION(BlueprintCallable, category = "Item|Weapon")
+	UFUNCTION(BlueprintPure, category = "Item|Weapon")
 	FORCEINLINE UPepccineWeaponItemData* GetMainWeaponItemData() const { return MainWeaponItemData; };
 	// 보조 무기 데이터 가져오기
-	UFUNCTION(BlueprintCallable, category = "Item|Weapon")
+	UFUNCTION(BlueprintPure, category = "Item|Weapon")
 	FORCEINLINE UPepccineWeaponItemData* GetSubWeaponItemData() const { return SubWeaponItemData; };
 	// 전체 패시브 데이터 가져오기
-	UFUNCTION(BlueprintCallable, category = "Item|Passive")
+	UFUNCTION(BlueprintPure, category = "Item|Passive")
 	FORCEINLINE TMap<int32, UPepccinePassiveItemData*> GetPassiveItemDatas() { return PassiveItemDatas; };
 	// 번호로 패시브 데이터 가져오기
-	UFUNCTION(BlueprintCallable, category = "Item|Weapon")
+	UFUNCTION(BlueprintPure, category = "Item|Weapon")
 	FORCEINLINE UPepccinePassiveItemData* GetPassiveItemById(const int32 Id) { return PassiveItemDatas[Id]; };
 	// 아이템 데이터 가져오기
-	UFUNCTION(BlueprintCallable, Category = "Item")
+	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE UPepccineItemDataAssetBase* GetItemData() const { return ItemSpawner->GetItemDataAsset(); };
 
-	// 스탯 이름으로 합연산 총합 가져오기
-	FORCEINLINE float GetTotalSumByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName) const
+	// 스탯 이름으로 무기 스탯 합연산 총합 가져오기
+	UFUNCTION(BlueprintPure, category = "Item")
+	FORCEINLINE float GetTotalSumByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
 	{
-		return TotalSum[WeaponItemStatName];
+		return TotalWeaponStatSum.FindOrAdd({GetEquippedWeaponItemData()->GetWeaponItemType(), WeaponItemStatName});
 	};
-	// 스탯 이름으로 곱연산 총합 가져오기
-	FORCEINLINE float GetTotalProductByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName) const
+	// 스탯 이름으로 무기 스탯 곱연산 총합 가져오기
+	UFUNCTION(BlueprintPure, category = "Item")
+	FORCEINLINE float GetTotalProductByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
 	{
-		return TotalProduct[WeaponItemStatName];
+		return TotalWeaponStatProduct.FindOrAdd({GetEquippedWeaponItemData()->GetWeaponItemType(), WeaponItemStatName},
+		                                        1.0f);
 	};
+
+	// 스탯 이름으로 캐릭터 스탯 합연산 총합 가져오기
+	UFUNCTION(BlueprintPure, category = "Item")
+	FORCEINLINE float GetTotalSumByCharacterStatName(const EPepccineCharacterStatName CharacterStatName)
+	{
+		return TotalCharacterStatSum.FindOrAdd(CharacterStatName);
+	};
+	// 스탯 이름으로 캐릭터 스탯 곱연산 총합 가져오기
+	UFUNCTION(BlueprintPure, category = "Item")
+	FORCEINLINE float GetTotalProductByCharacterStatName(const EPepccineCharacterStatName CharacterStatName)
+	{
+		return TotalCharacterStatProduct.FindOrAdd(CharacterStatName, 1.0f);
+	};
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintType)
+	void BluprintTest();
 
 protected:
 	// 기본 무기 초기화
@@ -114,7 +128,7 @@ protected:
 
 	// 현재 장착 중인 무기 발사
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
-	void FireWeapon() const;
+	void FireWeapon(float WeaponDamage) const;
 
 	// 현재 장착 중인 무기 재장전
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
@@ -140,10 +154,15 @@ private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Item|Weapon", meta = (DisplayName = "원본 보조 무기 데이터"))
 	TObjectPtr<UPepccineWeaponItemData> SubWeaponItemData;
 
-	// 합연산 총합
-	TMap<EPepccineWeaponStatName, float> TotalSum;
-	// 곱연산 총합
-	TMap<EPepccineWeaponStatName, float> TotalProduct;
+	// 무기 스탯 합연산 총합
+	TMap<TPair<EPepccineWeaponItemType, EPepccineWeaponStatName>, float> TotalWeaponStatSum;
+	// 무기 스탯 곱연산 총합
+	TMap<TPair<EPepccineWeaponItemType, EPepccineWeaponStatName>, float> TotalWeaponStatProduct;
+
+	// 캐릭터 스탯 합연산 총합
+	TMap<EPepccineCharacterStatName, float> TotalCharacterStatSum;
+	// 캐릭터 스탯 곱연산 총합
+	TMap<EPepccineCharacterStatName, float> TotalCharacterStatProduct;
 
 	// 패시브 아이템 아이디
 	int32 PassiveItemId = 0;

@@ -18,7 +18,7 @@ public:
 	void SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData);
 	
 	// getter
-	UFUNCTION(BlueprintCallable, category = "Item|Spawner")
+	UFUNCTION(BlueprintPure, category = "Item|Spawner")
 	FORCEINLINE UPepccineItemDataAssetBase* GetItemDataAsset() const { return ItemDataAsset; };
 	
 protected:

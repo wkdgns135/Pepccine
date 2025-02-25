@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "PepccineStatModifyType.h"
 
 #include "PepccineWeaponStat.generated.h"
 
@@ -11,25 +10,6 @@ enum class EPepccineWeaponItemType : uint8
 {
 	EPWIT_Main UMETA(DisplayName = "주 무기"),
 	EPWIT_Sub UMETA(DisplayName = "보조 무기")
-};
-
-// 무기 스탯 이름
-UENUM(BlueprintType)
-enum class EPepccineWeaponStatName : uint8
-{
-	EPWSN_AttackMultiplier UMETA(DisplayName = "공격력 배율"),
-	EPWSN_RangeMultiplier UMETA(DisplayName = "사거리 배율"),
-	EPWSN_FireRateMultiplier UMETA(DisplayName = "연사 배율"),
-	EPWSN_ZoomMultiplier UMETA(DisplayName = "확대 배율"),
-	EPWSN_MagazineSize UMETA(DisplayName = "탄창 용량"),
-	EPWSN_MagazineAmmo UMETA(DisplayName = "현재 탄약 수"),
-	EPWSN_SpareAmmo UMETA(DisplayName = "예비 탄약 수"),
-	EPWSN_BulletSpeed UMETA(DisplayName = "탄속"),
-	EPWSN_ReloadSpeed UMETA(DisplayName = "재장전 속도"),
-	EPWSN_ProjectileCount UMETA(DisplayName = "투사체 개수"),
-	EPWSN_BulletSpread UMETA(DisplayName = "탄 퍼짐"),
-	EPWSN_Recoil UMETA(DisplayName = "반동"),
-	EPWSN_Weight UMETA(DisplayName = "무게")
 };
 
 // 무기 스탯 구조체
@@ -100,41 +80,6 @@ struct FPepccineWeaponStat
 	                       ProjectileCount(1.0f),
 	                       BulletSpread(0.0f), Recoil(0.0f),
 	                       Weight(0.0f)
-	{
-	}
-};
-
-// 무기 수정자 구조체
-USTRUCT(BlueprintType)
-struct FPepccineWeaponStatModifier
-{
-	GENERATED_BODY()
-
-	// 수정자 아이디
-	int32 Id;
-
-	// 연산 타입
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier",
-		meta = (DisplayName = "연산 타입"))
-	EPepccineStatModifyType StatModifyType;
-	// 무기 타입
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier",
-		meta = (DisplayName = "무기 타입"))
-	EPepccineWeaponItemType WeaponItemType;
-	// 무기 스탯 이름
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier",
-		meta = (DisplayName = "무기 스탯 이름"))
-	EPepccineWeaponStatName WeaponItemStatName;
-	// 수정 값
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier",
-		meta = (DisplayName = "수정 값"))
-	float StatModifyValue;
-
-	// 기본 생성자
-	FPepccineWeaponStatModifier(): Id(0), StatModifyType(EPepccineStatModifyType::EPSMT_Add),
-	                               WeaponItemType(EPepccineWeaponItemType::EPWIT_Main),
-	                               WeaponItemStatName(EPepccineWeaponStatName::EPWSN_AttackMultiplier),
-	                               StatModifyValue(0.0f)
 	{
 	}
 };

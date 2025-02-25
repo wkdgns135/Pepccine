@@ -1,11 +1,11 @@
 ﻿#include "Item/PepccineItemManagerComponent.h"
 
 #include "PepccineItemSpawner.h"
-#include "VREditorMode.h"
 #include "Item/PepccineItemDataAssetBase.h"
 #include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 #include "Passive/PepccinePassiveItemData.h"
-#include "Weapon/WeaponStatModifier.h"
+#include "Passive/PepccineStatModifier.h"
 
 UPepccineItemManagerComponent::UPepccineItemManagerComponent()
 	: ItemSpawner(nullptr), WeaponItemComp(nullptr)
@@ -31,29 +31,29 @@ void UPepccineItemManagerComponent::BeginPlay()
 	}
 }
 
-float& UPepccineItemManagerComponent::GetWeaponItemStatByName(FPepccineWeaponStat* WeaponItemStats,
-                                                              const EPepccineWeaponStatName StatName)
+float UPepccineItemManagerComponent::GetWeaponItemStatByName(const FPepccineWeaponStat& WeaponItemStats,
+                                                             const EPepccineWeaponStatName StatName)
 {
 	switch (StatName)
 	{
-	case EPepccineWeaponStatName::EPWSN_AttackMultiplier: return WeaponItemStats->AttackMultiplier;
-	case EPepccineWeaponStatName::EPWSN_RangeMultiplier: return WeaponItemStats->RangeMultiplier;
-	case EPepccineWeaponStatName::EPWSN_FireRateMultiplier: return WeaponItemStats->FireRateMultiplier;
-	case EPepccineWeaponStatName::EPWSN_ZoomMultiplier: return WeaponItemStats->ZoomMultiplier;
-	case EPepccineWeaponStatName::EPWSN_MagazineSize: return WeaponItemStats->MagazineSize;
-	case EPepccineWeaponStatName::EPWSN_MagazineAmmo: return WeaponItemStats->MagazineAmmo;
-	case EPepccineWeaponStatName::EPWSN_SpareAmmo: return WeaponItemStats->SpareAmmo;
-	case EPepccineWeaponStatName::EPWSN_BulletSpeed: return WeaponItemStats->BulletSpeed;
-	case EPepccineWeaponStatName::EPWSN_ReloadSpeed: return WeaponItemStats->ReloadSpeed;
-	case EPepccineWeaponStatName::EPWSN_ProjectileCount: return WeaponItemStats->ProjectileCount;
-	case EPepccineWeaponStatName::EPWSN_BulletSpread: return WeaponItemStats->BulletSpread;
-	case EPepccineWeaponStatName::EPWSN_Recoil: return WeaponItemStats->Recoil;
-	case EPepccineWeaponStatName::EPWSN_Weight: return WeaponItemStats->Weight;
+	case EPepccineWeaponStatName::EPWSN_AttackMultiplier: return WeaponItemStats.AttackMultiplier;
+	case EPepccineWeaponStatName::EPWSN_RangeMultiplier: return WeaponItemStats.RangeMultiplier;
+	case EPepccineWeaponStatName::EPWSN_FireRateMultiplier: return WeaponItemStats.FireRateMultiplier;
+	case EPepccineWeaponStatName::EPWSN_ZoomMultiplier: return WeaponItemStats.ZoomMultiplier;
+	case EPepccineWeaponStatName::EPWSN_MagazineSize: return WeaponItemStats.MagazineSize;
+	case EPepccineWeaponStatName::EPWSN_MagazineAmmo: return WeaponItemStats.MagazineAmmo;
+	case EPepccineWeaponStatName::EPWSN_SpareAmmo: return WeaponItemStats.SpareAmmo;
+	case EPepccineWeaponStatName::EPWSN_BulletSpeed: return WeaponItemStats.BulletSpeed;
+	case EPepccineWeaponStatName::EPWSN_ReloadSpeed: return WeaponItemStats.ReloadSpeed;
+	case EPepccineWeaponStatName::EPWSN_ProjectileCount: return WeaponItemStats.ProjectileCount;
+	case EPepccineWeaponStatName::EPWSN_BulletSpread: return WeaponItemStats.BulletSpread;
+	case EPepccineWeaponStatName::EPWSN_Recoil: return WeaponItemStats.Recoil;
+	case EPepccineWeaponStatName::EPWSN_Weight: return WeaponItemStats.Weight;
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("무기 스탯 이름이 존재하지 않습니다."));
 
-	return WeaponItemStats->AttackMultiplier;
+	return WeaponItemStats.AttackMultiplier;
 }
 
 TObjectPtr<UPepccineWeaponItemData> UPepccineItemManagerComponent::PickUpWeaponItem(
@@ -82,6 +82,11 @@ TObjectPtr<UPepccineWeaponItemData> UPepccineItemManagerComponent::PickUpWeaponI
 		SubWeaponItemData = NewWeaponItemData;
 	}
 
+	if (USoundBase* PickUpSound = NewWeaponItemData->GetPickUpSound())
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, PickUpSound, GetOwner()->GetActorLocation());
+	}
+
 	// 획득한 무기 장착
 	EquipWeapon(NewWeaponItemData);
 
@@ -97,17 +102,36 @@ void UPepccineItemManagerComponent::AddPassiveItemData(const UPepccinePassiveIte
 
 	NewPassiveItemData->SetPassiveItemId(PassiveItemId);
 
-	for (const FPepccineWeaponStatModifier& Modifier : NewPassiveItemData->GetModifyWeaponStats())
+	// 무기 스탯
+	for (const FPepccineWeaponStatModifier& Modifier : NewPassiveItemData->GetWeaponStatModifiers())
 	{
 		// 합연산
-		if (Modifier.StatModifyType == EPepccineStatModifyType::EPSMT_Add)
+		if (Modifier.StatModifierDefault.StatModifyType == EPepccineStatModifyType::EPSMT_Add)
 		{
-			TotalSum.FindOrAdd(Modifier.WeaponItemStatName) += Modifier.StatModifyValue;
+			TotalWeaponStatSum.FindOrAdd({Modifier.WeaponItemType, Modifier.WeaponItemStatName}) += Modifier.
+				StatModifierDefault.StatModifyValue;
 		}
 		// 곱연산
 		else
 		{
-			TotalProduct.FindOrAdd(Modifier.WeaponItemStatName) *= Modifier.StatModifyValue;
+			TotalWeaponStatProduct.FindOrAdd({Modifier.WeaponItemType, Modifier.WeaponItemStatName}, 1.0f) *= Modifier.
+				StatModifierDefault.StatModifyValue;
+		}
+	}
+
+	// 캐릭터 스탯
+	for (const FPepccineCharacterStatModifier& Modifier : NewPassiveItemData->GetCharacterStatModifiers())
+	{
+		// 합연산
+		if (Modifier.StatModifierDefault.StatModifyType == EPepccineStatModifyType::EPSMT_Add)
+		{
+			TotalCharacterStatSum.FindOrAdd(Modifier.CharacterStatName) += Modifier.StatModifierDefault.StatModifyValue;
+		}
+		// 곱연산
+		else
+		{
+			TotalCharacterStatProduct.FindOrAdd(Modifier.CharacterStatName, 1.0f) *= Modifier.StatModifierDefault.
+				StatModifyValue;
 		}
 	}
 
@@ -118,17 +142,19 @@ void UPepccineItemManagerComponent::RemovePassiveItemDataById(const int32 Id)
 {
 	const UPepccinePassiveItemData* PassiveItemData = PassiveItemDatas[Id];
 
-	for (const FPepccineWeaponStatModifier& Modifier : PassiveItemData->GetModifyWeaponStats())
+	for (const FPepccineWeaponStatModifier& Modifier : PassiveItemData->GetWeaponStatModifiers())
 	{
 		// 합연산
-		if (Modifier.StatModifyType == EPepccineStatModifyType::EPSMT_Add)
+		if (Modifier.StatModifierDefault.StatModifyType == EPepccineStatModifyType::EPSMT_Add)
 		{
-			TotalSum[Modifier.WeaponItemStatName] -= Modifier.StatModifyValue;
+			TotalWeaponStatSum[{Modifier.WeaponItemType, Modifier.WeaponItemStatName}] -= Modifier.StatModifierDefault.
+				StatModifyValue;
 		}
 		// 곱연산
 		else
 		{
-			TotalProduct[Modifier.WeaponItemStatName] /= Modifier.StatModifyValue;
+			TotalWeaponStatProduct[{Modifier.WeaponItemType, Modifier.WeaponItemStatName}] /= Modifier.
+				StatModifierDefault.StatModifyValue;
 		}
 	}
 
@@ -147,8 +173,6 @@ void UPepccineItemManagerComponent::EquipDefaultWeapon()
 				if (const UPepccineWeaponItemData* WeaponItemData = ItemDataAsset->GetWeaponsItems()[0])
 				{
 					PickUpWeaponItem(WeaponItemData);
-
-					EquipWeapon(SubWeaponItemData);
 
 					// 디버그용 임시 패시브 적용
 					if (const UPepccinePassiveItemData* PassiveItemData = ItemDataAsset->GetPassiveItems()[0])
@@ -200,12 +224,12 @@ void UPepccineItemManagerComponent::ChangeWeaponEquippedMesh() const
 	}
 }
 
-void UPepccineItemManagerComponent::FireWeapon() const
+void UPepccineItemManagerComponent::FireWeapon(float WeaponDamage) const
 {
 	// 무기 컴포넌트가 있고 장착된 무기가 있을 경우만 발사
 	if (WeaponItemComp && GetEquippedWeaponItemData())
 	{
-		if (WeaponItemComp->Fire())
+		if (WeaponItemComp->Fire(WeaponDamage))
 		{
 			UPepccineWeaponItemData* EquippedWeaponData = GetEquippedWeaponItemData();
 			EquippedWeaponData->GetWeaponItemStatsPointer()->MagazineAmmo--;
@@ -230,7 +254,7 @@ void UPepccineItemManagerComponent::ReloadWeapon() const
 		if (WeaponItemComp->Reload())
 		{
 			UPepccineWeaponItemData* EquippedWeaponItemData = GetEquippedWeaponItemData();
-
+			
 			UE_LOG(LogTemp, Warning, TEXT("%s 재장전! %.0f / %.0f"),
 			       *EquippedWeaponItemData->GetDisplayName(),
 			       EquippedWeaponItemData->GetWeaponItemStats().MagazineAmmo,

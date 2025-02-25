@@ -1,16 +1,17 @@
 ﻿#include "Item/Weapon/PepccineWeaponItemComponent.h"
+
+#include "Components/SphereComponent.h"
 #include "Item/Weapon/PepccineProjectile.h"
 #include "GameFramework/Character.h"
 #include "Item/Weapon/PepccineWeaponItemData.h"
 #include "Kismet/GameplayStatics.h"
-#include "Item/Weapon/WeaponStatModifier.h"
 
 void UPepccineWeaponItemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-bool UPepccineWeaponItemComponent::Fire() const
+bool UPepccineWeaponItemComponent::Fire(const float& WeaponDamage) const
 {
 	// 현재 탄창에 탄약이 없을 경우 발사 실패
 	if (EquippedWeaponData->GetWeaponItemStats().MagazineAmmo == 0.0f)
@@ -27,25 +28,38 @@ bool UPepccineWeaponItemComponent::Fire() const
 			if (DoesSocketExist(SoketName))
 			{
 				// 카메라 방향으로 바라보기
-				RotateToCamera();
+				// RotateToCamera();
 
 				const FRotator MuzzleRotation = GetSocketRotation(SoketName);
 				const FVector MuzzleLocation = GetSocketLocation(SoketName);
 
-				FActorSpawnParameters ActorSpawnParams;
-				ActorSpawnParams.SpawnCollisionHandlingOverride =
-					ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-
+				FActorSpawnParameters SpawnParams;
+				SpawnParams.SpawnCollisionHandlingOverride =
+					ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+				// 프로젝타일을 생성한 주체 설정
+				SpawnParams.Instigator = OwnerCharacter;
+				SpawnParams.Owner = GetOwner();
+				
 				// 투사체 생성
 				APepccineProjectile* SpawnedProjectile = World->SpawnActor<APepccineProjectile>(
-					Projectile, MuzzleLocation, MuzzleRotation, ActorSpawnParams);
-				SpawnedProjectile->SetProjectileVelocity(GetFireDirection(MuzzleLocation));
+					Projectile, MuzzleLocation, MuzzleRotation, SpawnParams);
+				if (SpawnedProjectile)
+				{
+					SpawnedProjectile->SetOwnerCharacter(OwnerCharacter);
+					SpawnedProjectile->SetWeaponDamage(WeaponDamage);
+					SpawnedProjectile->SetProjectileVelocity(GetFireDirection(MuzzleLocation));
 
-				//// Try and play the sound if specified
-				//if (FireSound != nullptr)
-				//{
-				//	UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation());
-				//}
+					if (SpawnedProjectile->GetCollisionComp())
+					{
+						SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(OwnerCharacter, true);
+						SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(GetOwner(), true);
+					}
+				}
+
+				if (USoundBase* FireSound = EquippedWeaponData->GetFireSound())
+				{
+					UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwnerCharacter->GetActorLocation());
+				}
 
 				//// Try and play a firing animation if specified
 				//if (FireAnimation != nullptr)
@@ -67,6 +81,7 @@ bool UPepccineWeaponItemComponent::Fire() const
 }
 
 static float MaxSpareAmmo = 999.0f;
+
 bool UPepccineWeaponItemComponent::Reload() const
 {
 	if (!EquippedWeaponData)
@@ -76,7 +91,7 @@ bool UPepccineWeaponItemComponent::Reload() const
 	}
 
 	FPepccineWeaponStat* EquippedWeaponItemStats = EquippedWeaponData->GetWeaponItemStatsPointer();
-	
+
 	// 탄창 용량
 	float& MagazineSize = EquippedWeaponItemStats->MagazineSize;
 
@@ -96,7 +111,8 @@ bool UPepccineWeaponItemComponent::Reload() const
 			EquippedWeaponItemStats->MagazineAmmo += EquippedWeaponItemStats->SpareAmmo >= ModifyValue
 				                                         ? ModifyValue
 				                                         : EquippedWeaponItemStats->SpareAmmo;
-			EquippedWeaponItemStats->SpareAmmo = FMath::Clamp(EquippedWeaponItemStats->SpareAmmo - ModifyValue, 0.0f, MaxSpareAmmo);
+			EquippedWeaponItemStats->SpareAmmo = FMath::Clamp(EquippedWeaponItemStats->SpareAmmo - ModifyValue, 0.0f,
+			                                                  MaxSpareAmmo);
 		}
 		else
 		{
@@ -110,12 +126,22 @@ bool UPepccineWeaponItemComponent::Reload() const
 		EquippedWeaponItemStats->MagazineAmmo = MagazineSize;
 	}
 
+	if (USoundBase* ReloadSound = EquippedWeaponData->GetReloadSound())
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ReloadSound, OwnerCharacter->GetActorLocation());
+	}
+
 	return true;
 }
 
 void UPepccineWeaponItemComponent::EquipWeapon(UPepccineWeaponItemData* WeaponItemData)
 {
 	EquippedWeaponData = WeaponItemData;
+
+	if (USoundBase* ReloadSound = EquippedWeaponData->GetReloadSound())
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ReloadSound, OwnerCharacter->GetActorLocation());
+	}
 }
 
 FVector UPepccineWeaponItemComponent::GetFireDirection(const FVector& MuzzleLocation) const
@@ -138,7 +164,7 @@ FVector UPepccineWeaponItemComponent::GetFireDirection(const FVector& MuzzleLoca
 	DrawDebugLine(GetWorld(), Start, End, FColor::Green, true, 2.0f);
 
 	FVector HitLocation;
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility))
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldDynamic))
 	{
 		HitLocation = HitResult.Location; // 충돌한 위치
 	}
