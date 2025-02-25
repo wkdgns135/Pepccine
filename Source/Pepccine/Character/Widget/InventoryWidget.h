@@ -7,6 +7,7 @@
 class UInventoryItemWidget;
 class UUniformGridPanel;
 class UImage;
+class UScrollBox;
 
 UCLASS()
 class PEPCCINE_API UInventoryWidget : public UUserWidget
@@ -25,6 +26,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UImage* BackgroundImage;
+
+	UPROPERTY(meta = (BindWidget))
+	UScrollBox* InventoryScrollBox;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	TSubclassOf<UInventoryItemWidget> ItemWidgetClass;
@@ -32,11 +36,13 @@ protected:
 private:
 	int32 CurrentRow = 0;
 	int32 CurrentColumn = 0;
-	
-	const int32 MaxColumns = 7;
-	const int32 MaxRows = 7;
 
-	TArray<UInventoryItemWidget*> GridSlots;
+	const int BoxWidthSize = 180;
+	const int BoxHeightSize = 180;
 
-	void SetEmptySpace();
+	const int32 MaxColumns = 5;
+	const int32 MaxRows = 5;
+
+	void SetEmptyGrid();
+	void CreateNewGridBlock();
 };

@@ -3,6 +3,8 @@
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/Image.h"
+#include "Components/ScrollBox.h"
+#include "Components/SizeBox.h"
 
 void UInventoryWidget::NativeConstruct()
 {
@@ -10,37 +12,54 @@ void UInventoryWidget::NativeConstruct()
 
 	if (!InventoryGrid)
 	{
-		UE_LOG(LogTemp, Error, TEXT("❌ InventoryGrid is nullptr! Make sure it's bound in the widget blueprint."));
+		UE_LOG(LogTemp, Error, TEXT("InventoryGrid is nullptr! Make sure it's bound in the widget blueprint."));
+	}
+
+	if (!InventoryScrollBox)
+	{
+		UE_LOG(LogTemp, Error, TEXT("InventoryScrollBox is nullptr! Make sure it's bound in the widget blueprint."));
 	}
 
 	if (!ItemWidgetClass)
 	{
-		UE_LOG(LogTemp, Error, TEXT("❌ ItemWidgetClass is nullptr! Ensure it is assigned in the blueprint or loaded properly."));
+		UE_LOG(LogTemp, Error, TEXT("ItemWidgetClass is nullptr! Ensure it is assigned in the blueprint or loaded properly."));
 	}
 
 	if (!BackgroundImage)
 	{
-		UE_LOG(LogTemp, Error, TEXT("❌ BackgroundImage is nullptr! Ensure it is assigned in the blueprint or loaded properly."));
+		UE_LOG(LogTemp, Error, TEXT("BackgroundImage is nullptr! Ensure it is assigned in the blueprint or loaded properly."));
 	}
 
-	SetEmptySpace();
+	CurrentRow = 0;
+	CurrentColumn = 0;
+
+	SetEmptyGrid();
 }
 
-void UInventoryWidget::SetEmptySpace()
+void UInventoryWidget::SetEmptyGrid()
 {
-	for (int32 row = 0; row < MaxRows; row++)
+	for (int32 Row = 0; Row < MaxRows; Row++)
 	{
-		for (int32 col = 0; col < MaxColumns; col++)
+		for (int32 Col = 0; Col < MaxColumns; Col++)
 		{
 			UInventoryItemWidget* EmptySlot = CreateWidget<UInventoryItemWidget>(this, ItemWidgetClass);
+			if (!EmptySlot) continue;
+            
 			EmptySlot->SetEmpty();
-			//InventoryGrid->AddChildToUniformGrid(EmptySlot, row, col);
-			if (UUniformGridSlot* GridSlot = InventoryGrid->AddChildToUniformGrid(EmptySlot, row, col))
+
+			USizeBox* ItemSizeBox = NewObject<USizeBox>(this);
+			if (ItemSizeBox)
 			{
-				GridSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
-				GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Fill);
+				ItemSizeBox->SetWidthOverride(BoxWidthSize);
+				ItemSizeBox->SetHeightOverride(BoxHeightSize);
+				ItemSizeBox->AddChild(EmptySlot);
 			}
-			GridSlots.Add(EmptySlot);
+
+			if (UUniformGridSlot* GridSlot = InventoryGrid->AddChildToUniformGrid(ItemSizeBox, Row, Col))
+			{
+				GridSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
+				GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
+			}
 		}
 	}
 }
@@ -49,17 +68,77 @@ void UInventoryWidget::AddItemToInventory(UTexture2D* ItemImage, const FString& 
 {
 	if (!InventoryGrid || !ItemWidgetClass)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("❌ InventoryGrid or ItemWidgetClass is nullptr!"));
+		UE_LOG(LogTemp, Warning, TEXT("InventoryGrid or ItemWidgetClass is nullptr!"));
 		return;
 	}
 
-	for (int32 i = 0; i < GridSlots.Num(); i++)
+	UInventoryItemWidget* NewItem = CreateWidget<UInventoryItemWidget>(this, ItemWidgetClass);
+	if (!NewItem)
 	{
-		if (GridSlots[i]->bIsEmpty)
+		UE_LOG(LogTemp, Warning, TEXT("Failed to create InventoryItemWidget!"));
+		return;
+	}
+
+	NewItem->SetItem(ItemImage, ItemName);
+	NewItem->bIsEmpty = false;
+
+	USizeBox* ItemSizeBox = NewObject<USizeBox>(this);
+	if (ItemSizeBox)
+	{
+		ItemSizeBox->SetWidthOverride(BoxWidthSize);
+		ItemSizeBox->SetHeightOverride(BoxHeightSize);
+		ItemSizeBox->AddChild(NewItem);
+	}
+
+	if (UUniformGridSlot* GridSlot = InventoryGrid->AddChildToUniformGrid(ItemSizeBox, CurrentRow, CurrentColumn))
+	{
+		GridSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
+		GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
+	}
+
+	InventoryScrollBox->SetScrollOffset(InventoryScrollBox->GetScrollOffset() + 500.f);
+
+	CurrentColumn++;
+	
+	if (CurrentColumn >= 5)
+	{
+		CurrentColumn = 0;
+		CurrentRow++;
+
+		if (CurrentRow >= 5) 
 		{
-			GridSlots[i]->SetItem(ItemImage, ItemName);
-			GridSlots[i]->bIsEmpty = false;
-			return;
+			CurrentRow = 0;
+			CreateNewGridBlock();
 		}
 	}
+}
+
+void UInventoryWidget::CreateNewGridBlock()
+{
+	for (int32 Row = 0; Row < MaxRows; Row++)
+	{
+		for (int32 Col = 0; Col < MaxColumns; Col++)
+		{
+			UInventoryItemWidget* EmptySlot = CreateWidget<UInventoryItemWidget>(this, ItemWidgetClass);
+			if (!EmptySlot) continue;
+
+			EmptySlot->SetEmpty();
+
+			USizeBox* ItemSizeBox = NewObject<USizeBox>(this);
+			if (ItemSizeBox)
+			{
+				ItemSizeBox->SetWidthOverride(BoxWidthSize);
+				ItemSizeBox->SetHeightOverride(BoxHeightSize);
+				ItemSizeBox->AddChild(EmptySlot);
+			}
+
+			if (UUniformGridSlot* GridSlot = InventoryGrid->AddChildToUniformGrid(ItemSizeBox, CurrentRow + Row, Col))
+			{
+				GridSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
+				GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
+			}
+		}
+	}
+
+	InventoryScrollBox->ScrollToEnd();
 }

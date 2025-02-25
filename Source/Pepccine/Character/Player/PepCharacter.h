@@ -32,6 +32,7 @@ public:
 	APepCharacter();
 
 	bool bIsFirstPersonView = false;
+	bool bIsInventoryOpened = false;
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHealthChanged OnHealthChanged;
@@ -46,6 +47,7 @@ public:
 
 	// inline
 	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }
+	FORCEINLINE_DEBUGGABLE bool IsInventoryOpen() const { return bIsInventoryOpened; }
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -129,7 +131,6 @@ private:
 	bool bIsSprintable = true;
 	bool bIsReloading = false;
 	bool bIsInteracting = false;
-	bool bIsInventoryOpened = false;
 	bool bIsRolling = false;
 	bool bIsRollable = true;
 	bool bIsMoving = false;

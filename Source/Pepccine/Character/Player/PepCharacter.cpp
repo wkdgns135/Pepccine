@@ -349,8 +349,23 @@ void APepCharacter::Interactive()
 void APepCharacter::OpenInventory()
 {
   if (bIsRolling || !InventoryComponent) return;
-  
+
+  bIsInventoryOpened = !bIsInventoryOpened;
   InventoryComponent->ToggleInventory();
+
+  if (PlayerController)
+  {
+    if (bIsInventoryOpened)
+    {
+      PlayerController->bShowMouseCursor = true; 
+      PlayerController->SetInputMode(FInputModeGameAndUI());
+    }
+    else 
+    {
+      PlayerController->bShowMouseCursor = false; 
+      PlayerController->SetInputMode(FInputModeGameOnly());
+    }
+  }
   
   UTexture2D* SampleItemTexture = LoadObject<UTexture2D>(nullptr, TEXT("/Game/PA_UrbanCity/Textures/T_Graffiti03"));
   if (SampleItemTexture)
