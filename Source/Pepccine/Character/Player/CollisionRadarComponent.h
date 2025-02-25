@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -29,7 +27,6 @@ public:
   UPROPERTY(BlueprintAssignable, Category = "Radar|Events")
   FOnActorDetectedEnhanced OnActorDetectedEnhanced;
 
-  // Debug 용
   UPROPERTY(EditAnywhere, Category = "Debug")
   bool bShowDetectionRadius = false;
 
@@ -42,18 +39,18 @@ protected:
 
 private:
   UPROPERTY(VisibleAnywhere, Category = "Radar")
-  USphereComponent* DetectionZone; // 감지 반경을 위한 Sphere 콜리전
+  USphereComponent* DetectionZone;
 
   UPROPERTY(EditAnywhere, Category = "Radar|Settings")
-  float DetectionRadius = 1200.0f; // 감지 거리
+  float DetectionRadius = 1200.0f;
 
   UPROPERTY(EditAnywhere, Category = "Radar|Settings")
-  float FieldOfView = 120.0f; // 시야각 (FOV)
+  float FieldOfView = 120.0f;
 
   UPROPERTY(EditAnywhere, Category = "Debug")
-  bool bShowDebug = true; // 디버그 모드
+  bool bShowDebug = true;
 
-  TArray<AActor*> NearbyActors; // 감지 범위 내 액터 리스트
+  TArray<AActor*> NearbyActors;
 
   bool IsInFieldOfView(AActor* TargetActor) const;
   void DetectActors();

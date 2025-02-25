@@ -9,7 +9,6 @@ UPepccineMontageComponent::UPepccineMontageComponent()
 {
 }
 
-
 // Called when the game starts
 void UPepccineMontageComponent::BeginPlay()
 {

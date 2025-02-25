@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/ScrollBox.h"
+#include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 #include "StaminaWidget.generated.h"
 

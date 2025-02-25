@@ -17,8 +17,8 @@ class USpringArmComponent;
 class UCameraComponent;
 class UPepccineMontageComponent;
 class UPrograssBarHUDComponent;
-
-class URadorComponent;
+class UInventoryComponent;
+//class URadorComponent;
 class UCollisionRadarComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, CurrentHealth);
@@ -65,9 +65,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPrograssBarHUDComponent* PrograssBarComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	URadorComponent* RadarComponent;
+    UCollisionRadarComponent* EnhancedRadarComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	UCollisionRadarComponent* EnhancedRadarComponent;
+	UInventoryComponent* InventoryComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineMontageComponent* PepccineMontageComponent;
 
