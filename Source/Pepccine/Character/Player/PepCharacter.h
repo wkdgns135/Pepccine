@@ -40,7 +40,9 @@ public:
 	void OnHealthChanged(const float NewHealth, const float MaxHealth);
 	// Observer Pattern
 	virtual void OnStaminaChanged(float NewStamina, float MaxStamina) override;
-
+	
+	void TriggerCameraShake();
+	
 	// inline
 	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }
 	FORCEINLINE_DEBUGGABLE bool IsInventoryOpen() const { return bIsInventoryOpened; }

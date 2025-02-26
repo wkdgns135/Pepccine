@@ -9,9 +9,10 @@
 #include "Camera/CameraComponent.h"
 #include "CrosshairHUDComponent.h"
 #include "PrograssBarHUDComponent.h"
-
 #include "CollisionRadarComponent.h"
 #include "InventoryComponent.h"
+
+#include "Character/Controller/PepccineCameraModifier.h"
 
 #include "GameFramework/SpringArmComponent.h"
 #include "Character/Animation/PepccineMontageComponent.h"
@@ -19,6 +20,7 @@
 #include "Components/WidgetComponent.h"
 #include "Item/PepccineDropItem.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
+#include "Kismet/GameplayStatics.h"
 
 APepCharacter::APepCharacter()
 {
@@ -421,6 +423,7 @@ void APepCharacter::Fire()
 {
   if (bIsRolling) return;
 
+  TriggerCameraShake();
   PepccineMontageComponent->Fire();
   ItemManagerComponent->FireWeapon(100);
 }
@@ -459,6 +462,25 @@ void APepCharacter::ToggleCameraView()
 
   FirstPersonCamera->SetActive(bIsFirstPersonView);
   ThirdPersonCamera->SetActive(!bIsFirstPersonView);
+}
+
+void APepCharacter::TriggerCameraShake()
+{
+  APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+  if (PC && PC->PlayerCameraManager)
+  {
+    UPepccineCameraModifier* Modifier
+    = Cast<UPepccineCameraModifier>(PC->PlayerCameraManager->FindCameraModifierByClass(UPepccineCameraModifier::StaticClass()));
+    if (!Modifier)
+    {
+      Modifier = Cast<UPepccineCameraModifier>(PC->PlayerCameraManager->AddNewCameraModifier(UPepccineCameraModifier::StaticClass()));
+    }
+
+    if (Modifier)
+    {
+      Modifier->StartShake(5.0f, 20.0f, 0.5f);
+    }
+  }
 }
 #pragma endregion
 
