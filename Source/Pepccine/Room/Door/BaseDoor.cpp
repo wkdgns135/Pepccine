@@ -40,7 +40,7 @@ void ABaseDoor::BeginPlay()
 void ABaseDoor::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor->Tags[0] == "Player")
+	if (!OtherActor->Tags.IsEmpty() && OtherActor->Tags[0] == "Player")
 	{
 		if (bIsLocked == false)
 		{
