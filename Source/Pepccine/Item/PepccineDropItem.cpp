@@ -4,10 +4,8 @@
 #include "PepccineItemManagerComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
-#include "GameFramework/Character.h"
 #include "Passive/PepccinePassiveItemData.h"
 #include "Weapon/PepccineWeaponItemData.h"
-#include "Weapon/WeaponStatModifier.h"
 
 APepccineDropItem::APepccineDropItem()
 {

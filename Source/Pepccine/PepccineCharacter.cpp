@@ -54,6 +54,17 @@ APepccineCharacter::APepccineCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
+float APepccineCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	UE_LOG(LogTemp, Warning, TEXT("받은 피해량 : %.2f"), DamageAmount);
+	
+	return ActualDamage;
+	
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 

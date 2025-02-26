@@ -14,8 +14,10 @@ class PEPCCINE_API UPepccineItemDataAssetBase : public UPrimaryDataAsset
 
 public:
 	// getter
-	FORCEINLINE TArray<TObjectPtr<UPepccineWeaponItemData>> GetWeaponsItems() { return WeaponItems; };
-	FORCEINLINE TArray<TObjectPtr<UPepccinePassiveItemData>> GetPassiveItems() { return PassiveItems; };
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE TArray<UPepccineWeaponItemData*> GetWeaponsItems() { return WeaponItems; };
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE TArray<UPepccinePassiveItemData*> GetPassiveItems() { return PassiveItems; };
 
 protected:
 	// 전체 무기 데이터 목록
