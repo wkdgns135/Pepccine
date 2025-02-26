@@ -33,6 +33,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Debug")
   bool bShowFieldOfView = false; // FOV
 
+  UPROPERTY(EditAnywhere, Category = "Radar")
+  bool bIsUseRadar = false;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

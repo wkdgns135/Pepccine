@@ -13,20 +13,19 @@ void UPrograssBarHUDComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	if (StaminaWidget) StaminaWidget->AddToViewport();
-
 	if (HealthWidget) HealthWidget->AddToViewport();
 }
 
-void UPrograssBarHUDComponent::SetStamina(float NewStamina, float MaxStamina)
+void UPrograssBarHUDComponent::SetStamina(const float NewStamina, float MaxStamina) const
 {
 	if (!StaminaWidget) return;
 	StaminaWidget->UpdateStaminaVolumne(NewStamina, MaxStamina);
 }
 
-void UPrograssBarHUDComponent::SetHealth(float NewHealth, float MaxHealth)
+void UPrograssBarHUDComponent::SetHealth(const float NewHealth, const float MaxHealth) const
 {
 	if (!HealthWidget) return;
-	HealthWidget->UpdateHealthVolumne(NewHealth, MaxHealth);
+	HealthWidget->UpdateHealthVolume(NewHealth, MaxHealth);
 }
 
 void UPrograssBarHUDComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

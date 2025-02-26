@@ -8,6 +8,7 @@
 #include "Character/Interfaces/IStaminaObserver.h"
 #include "PlayerStatComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, CurrentHealth, float, MaxHealth);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PEPCCINE_API UPlayerStatComponent : public UBaseStatComponent
@@ -17,8 +18,14 @@ class PEPCCINE_API UPlayerStatComponent : public UBaseStatComponent
 public:	
 	UPlayerStatComponent();
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnHealthChanged OnHealthChanged;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float HealthDecelerationSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
+	float HealthDecelerationAmount;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float Stamina;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
@@ -27,6 +34,7 @@ public:
 	float StaminaRecoveryRate;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float StaminaRecoveryTime;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float InvincibilityTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
@@ -44,6 +52,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Player")
 	float RollElapsedTime;
 
+	void DecreaseHealth(float Amount);
+	
+	void DecreaseHealth_Timer();
+	
 	bool DecreaseStamina(float Amount);
 	bool DecreaseStaminaByPercentage(float Percentage);
 
@@ -54,10 +66,10 @@ public:
 	void RemoveStaminaObserver(IIStaminaObserver* Observer);
 
 	// inline
-	float getCurrentStamina() { return Stamina; }
-	float getMaxStamina() { return MaxStamina; }
-	float getCurrentHealth() { return CurrentHealth; }
-	float getMaxHealth() { return MaxHealth; }
+	FORCEINLINE_DEBUGGABLE float getCurrentStamina() const { return Stamina; }
+	FORCEINLINE_DEBUGGABLE float getMaxStamina() const { return MaxStamina; }
+	FORCEINLINE_DEBUGGABLE float getCurrentHealth() const { return CurrentHealth; }
+	FORCEINLINE_DEBUGGABLE float getMaxHealth() const { return MaxHealth; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -69,4 +81,5 @@ private:
 
 	TArray<IIStaminaObserver*> StaminaObservers;
 	FTimerHandle IncreaseStaminaTimerHandle;
+	FTimerHandle DecreaseHealthTimerHandle;
 };

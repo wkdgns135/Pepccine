@@ -21,6 +21,7 @@ void UCollisionRadarComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+  if (!bIsUseRadar) return;
   if (!DetectionZone) return;
   AddDetectZone();
 

@@ -21,7 +21,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void AddItem(UTexture2D* ItemImage, const FString& ItemName);
+	void AddItem(UTexture2D* ItemImage, const FString& ItemName, const FString& ItemDetail);
 
 	UFUNCTION(BlueprintCallable)
 	void ToggleInventory();

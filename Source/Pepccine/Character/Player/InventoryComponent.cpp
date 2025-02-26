@@ -22,11 +22,11 @@ void UInventoryComponent::BeginPlay()
 	}
 }
 
-void UInventoryComponent::AddItem(UTexture2D* ItemImage, const FString& ItemName)
+void UInventoryComponent::AddItem(UTexture2D* ItemImage, const FString& ItemName, const FString& ItemDetail)
 {
 	if (InventoryWidget)
 	{
-		InventoryWidget->AddItemToInventory(ItemImage, ItemName);
+		InventoryWidget->AddItemToInventory(ItemImage, ItemName, ItemDetail);
 	}
 }
 
@@ -40,8 +40,6 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UInventoryComponent::ToggleInventory()
 {
 	if (!InventoryWidget) return;
-
-	UE_LOG(LogTemp, Display, TEXT("ToggleInventory [%d"), bIsInventoryVisible);
 
 	if (bIsInventoryVisible)
 	{
