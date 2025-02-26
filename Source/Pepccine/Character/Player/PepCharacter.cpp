@@ -9,6 +9,7 @@
 
 #include "RadorComponent.h"
 #include "CollisionRadarComponent.h"
+#include "InventoryComponent.h"
 
 #include "GameFramework/SpringArmComponent.h"
 #include "Character/Animation/PepccineMontageComponent.h"
@@ -39,7 +40,7 @@ APepCharacter::APepCharacter()
   //RadarComponent->DetectionClass = AActor::StaticClass();
 
   EnhancedRadarComponent = CreateDefaultSubobject<UCollisionRadarComponent>(TEXT("EnhancedRadarComponent"));
-
+  InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
   PepccineMontageComponent = CreateDefaultSubobject<UPepccineMontageComponent>(TEXT("MontageComponent"));
 }
 
@@ -169,7 +170,6 @@ void APepCharacter::OnActorDetectedEnhanced(const FDetectedActorList& DetectedAc
 }
 #pragma endregion
 
-// TODO: ºÐ·ù ¼¼ºÐÈ­ ÇÊ¿ä
 // Action
 #pragma region
 void APepCharacter::Move(const FInputActionValue& Value)
@@ -261,7 +261,7 @@ void APepCharacter::StopSprint(const FInputActionValue& value)
     Roll();
   }
 
-  SprintHoldStartTime = 0.0f; // ÃÊ±âÈ­
+  SprintHoldStartTime = 0.0f; // ï¿½Ê±ï¿½È­
 }
 
 void APepCharacter::SetCharacterSpeed(float Speed)
@@ -294,7 +294,7 @@ void APepCharacter::EndRoll()
 {
   bIsRolling = false;
 
-  // [ÀÓ½Ã] ·Ñ È°¼º½Ã¿¡ ÇØ´çºÎºÐ Á¢±ÙÀ» ¸øÇØ¼­ °¡Á®¿È
+  // [ï¿½Ó½ï¿½] ï¿½ï¿½ È°ï¿½ï¿½ï¿½Ã¿ï¿½ ï¿½Ø´ï¿½Îºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
   if (GetCharacterMovement())
   {
     GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
@@ -374,6 +374,8 @@ void APepCharacter::OpenInventory()
 
   if (bIsRolling) return;
 
+  InventoryComponent->ToggleInventory();
+  
   // HUD
   if (bIsInventoryOpened)
   {
