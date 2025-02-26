@@ -38,6 +38,8 @@ protected:
 	// 아이템 획득 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "아이템 획득 사운드"))
 	TObjectPtr<USoundBase> PickUpSound;
+
+public:
 	// 화면에 보여질 아이콘
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "아이템 아이콘"))
 	TObjectPtr<UTexture2D> IconTexture;

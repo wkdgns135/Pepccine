@@ -348,7 +348,8 @@ void APepCharacter::Interactive()
   // 아이템 인벤토리에 추가
   if (CurrentDropItem)
   {
-    //InventoryComponent->AddItem(CurrentDropItem, TEXT("Graffiti03"), "BlaBlaBlaBla");
+    const UPepccineItemDataBase* DropItem = CurrentDropItem->GetDropItemData();
+    InventoryComponent->AddItem(DropItem->IconTexture, DropItem->GetDisplayName(), DropItem->GetDescription());
   }
 
   // 스텟연산
