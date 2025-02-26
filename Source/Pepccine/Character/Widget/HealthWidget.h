@@ -7,9 +7,6 @@
 #include "Components/ProgressBar.h"
 #include "HealthWidget.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class PEPCCINE_API UHealthWidget : public UUserWidget
 {
@@ -20,6 +17,6 @@ public:
 	UProgressBar* HealthPrograssBar;
 
 	UFUNCTION(BlueprintCallable, Category = "UI|Health")
-	void UpdateHealthVolumne(const float Health, const float MaxHealth);
+	void UpdateHealthVolume(const float Health, const float MaxHealth);
 };
 

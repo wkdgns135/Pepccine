@@ -11,11 +11,15 @@ class PEPCCINE_API UPepccineItemDataBase : public UObject
 
 public:
 	// getter
-	FORCEINLINE FString GetDisplayName() { return DisplayName; };
-	FORCEINLINE FString GetDescription() { return Description; };
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE FString GetDisplayName() const { return DisplayName; };
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE FString GetDescription() const { return Description; };
+	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE int32 GetItemTier() const { return ItemTier; };
-	FORCEINLINE int32 GetSellingPrice() const { return SellingPrice; };
+
 	FORCEINLINE TObjectPtr<UStaticMesh> GetMeshToSpawn() { return MeshToSpawn; };
+	FORCEINLINE TObjectPtr<USoundBase> GetPickUpSound() { return PickUpSound; };
 
 protected:
 	// 화면에 보여질 이름
@@ -28,13 +32,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info",
 		meta = (DisplayName = "레어도", ClampMin = "0", ClampMax = "4"))
 	int32 ItemTier;
-	// 판매할 때 가격
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "판매 가격"))
-	int32 SellingPrice;
 	// 스폰할 때 보여질 메시
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "스폰 메시"))
 	TObjectPtr<UStaticMesh> MeshToSpawn;
-	// UI에 보여질 이미지
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "아이콘 텍스쳐"))
+	// 아이템 획득 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "아이템 획득 사운드"))
+	TObjectPtr<USoundBase> PickUpSound;
+	// 화면에 보여질 아이콘
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "아이템 아이콘"))
 	TObjectPtr<UTexture2D> IconTexture;
 };

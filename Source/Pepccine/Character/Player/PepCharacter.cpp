@@ -7,7 +7,6 @@
 #include "CrosshairHUDComponent.h"
 #include "PrograssBarHUDComponent.h"
 
-#include "RadorComponent.h"
 #include "CollisionRadarComponent.h"
 #include "InventoryComponent.h"
 
@@ -54,7 +53,7 @@ void APepCharacter::BeginPlay()
 
 // Initialize Character Status
 #pragma region
-void APepCharacter::InitializeCharacterMovement()
+void APepCharacter::InitializeCharacterMovement() const
 {
   if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
   {
@@ -72,16 +71,6 @@ void APepCharacter::Tick(float DeltaTime)
 
   CheckSprinting();
   CheckRolling(DeltaTime);
-}
-
-// Delegate
-float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-  OnHealthChanged.Broadcast(0.1f);
-
-  // OnHealthChanged.AddDynamic(this, &AMyCharacter::OnHealthChangedFunction);
-
-  return 0.0f;
 }
 
 // Tick Method
@@ -123,19 +112,20 @@ void APepCharacter::AddObservers()
   if (PlayerStatComponent)
   {
     PlayerStatComponent->AddStaminaObserver(this);
+    PlayerStatComponent->OnHealthChanged.AddDynamic(this, &APepCharacter::OnHealthChanged);
   }
-
-  /*
-  if (RadarComponent)
-  {
-    RadarComponent->OnActorDetected.AddDynamic(this, &APepCharacter::OnActorDetected);
-  }
-  */
-
+  
   if (EnhancedRadarComponent)
   {
     EnhancedRadarComponent->OnActorDetectedEnhanced.AddDynamic(this, &APepCharacter::OnActorDetectedEnhanced);
   }
+}
+
+void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth)
+{
+  if (!PrograssBarComponent) return;
+
+  PrograssBarComponent->SetHealth(NewHealth, MaxHealth);
 }
 
 void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
@@ -145,26 +135,17 @@ void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
   PrograssBarComponent->SetStamina(NewStamina, MaxStamina);
 }
 
-void APepCharacter::OnActorDetected(const AActor* DetectedActor)
-{
-  if (DetectedActor)
-  {
-    UE_LOG(LogTemp, Warning, TEXT("OnActorDetected: %s"), *DetectedActor->GetName());
-  }
-}
-
 void APepCharacter::OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors)
 {
   if (DetectedActors.DetectedActors.Num() == 0) return;
 
-  UE_LOG(LogTemp, Warning, TEXT("Number of dectedActor: %d"), DetectedActors.DetectedActors.Num());
-
+  //UE_LOG(LogTemp, Warning, TEXT("Number of dectedActor: %d"), DetectedActors.DetectedActors.Num());
 
   for (AActor* DetectedActor : DetectedActors.DetectedActors)
   {
     if (DetectedActor)
     {
-      UE_LOG(LogTemp, Warning, TEXT("Detected Actors: %s"), *DetectedActor->GetName());
+      //UE_LOG(LogTemp, Warning, TEXT("Detected Actors: %s"), *DetectedActor->GetName());
     }
   }
 }
@@ -210,17 +191,14 @@ void APepCharacter::JumpStart()
 
   Super::Jump();
 
-  UE_LOG(LogTemp, Log, TEXT("JumpStart!"));
-  bIsJumping = true;
   Jump();
 }
 
 void APepCharacter::JumpStop()
 {
   Super::StopJumping();
-  bIsJumping = false;
+  
   StopJumping();
-  UE_LOG(LogTemp, Log, TEXT("JumpStop!"));
 }
 
 void APepCharacter::UseItem()
@@ -231,8 +209,6 @@ void APepCharacter::UseItem()
 void APepCharacter::Look(const FInputActionValue& value)
 {
   FVector2D LookInput = value.Get<FVector2D>();
-
-  //UE_LOG(LogTemp, Log, TEXT("LookInput[%s]"), *LookInput.ToString());
 
   AddControllerYawInput(LookInput.X);
   AddControllerPitchInput(LookInput.Y);
@@ -261,7 +237,7 @@ void APepCharacter::StopSprint(const FInputActionValue& value)
     Roll();
   }
 
-  SprintHoldStartTime = 0.0f; // �ʱ�ȭ
+  SprintHoldStartTime = 0.0f;
 }
 
 void APepCharacter::SetCharacterSpeed(float Speed)
@@ -274,27 +250,26 @@ void APepCharacter::SetCharacterSpeed(float Speed)
 
 void APepCharacter::Roll()
 {
-  if (!GetCharacterMovement() || bIsRolling || bIsJumping || !PlayerStatComponent) return;
-
+  if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling()) return;
+  
   bIsRolling = true;
   PlayerStatComponent->RollElapsedTime = 0.0f;
-  RollDirection = GetActorForwardVector();
+  RollDirection = GetRollDirection();
 
   if (!PlayerStatComponent->DecreaseStaminaByPercentage(30))
   {
     bIsRolling = false;
     return;
   }
-
-  PepccineMontageComponent->Roll(0);
-  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 1.0f, false);
+  
+  PepccineMontageComponent->Roll(GetRollDirection(), GetActorRotation());
+  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 0.5f, false);
 }
 
 void APepCharacter::EndRoll()
 {
   bIsRolling = false;
 
-  // [�ӽ�] �� Ȱ���ÿ� �ش�κ� ������ ���ؼ� ������
   if (GetCharacterMovement())
   {
     GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
@@ -370,20 +345,29 @@ void APepCharacter::Interactive()
 
 void APepCharacter::OpenInventory()
 {
-  UE_LOG(LogTemp, Log, TEXT("OpenInventory!"));
+  if (bIsRolling || !InventoryComponent) return;
 
-  if (bIsRolling) return;
-
+  bIsInventoryOpened = !bIsInventoryOpened;
   InventoryComponent->ToggleInventory();
-  
-  // HUD
-  if (bIsInventoryOpened)
-  {
 
+  if (PlayerController)
+  {
+    if (bIsInventoryOpened)
+    {
+      PlayerController->bShowMouseCursor = true; 
+      PlayerController->SetInputMode(FInputModeGameAndUI());
+    }
+    else 
+    {
+      PlayerController->bShowMouseCursor = false; 
+      PlayerController->SetInputMode(FInputModeGameOnly());
+    }
   }
-  else
+  
+  UTexture2D* SampleItemTexture = LoadObject<UTexture2D>(nullptr, TEXT("/Game/PA_UrbanCity/Textures/T_Graffiti03"));
+  if (SampleItemTexture)
   {
-
+    InventoryComponent->AddItem(SampleItemTexture, TEXT("Graffiti03"), "BlaBlaBlaBla");
   }
 }
 
@@ -393,11 +377,11 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 
   if (ScrollValue > 0.0f)
   {
-    UE_LOG(LogTemp, Log, TEXT("Swapping Forward [%f]"), ScrollValue);
+    //UE_LOG(LogTemp, Log, TEXT("Swapping Forward [%f]"), ScrollValue);
   }
   else if (ScrollValue < 0.0f)
   {
-    UE_LOG(LogTemp, Log, TEXT("Swapping Backward [%f]"), ScrollValue);
+    //UE_LOG(LogTemp, Log, TEXT("Swapping Backward [%f]"), ScrollValue);
   }
 }
 
@@ -572,7 +556,7 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
   {
     EnhancedInput->BindAction(
       PlayerController->InventoryAction,
-      ETriggerEvent::Triggered,
+      ETriggerEvent::Started,
       this,
       &APepCharacter::OpenInventory
     );

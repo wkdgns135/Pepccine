@@ -23,7 +23,7 @@ public:
 	UFUNCTION()
 	void Attack();
 	UFUNCTION()
-	void Roll(int32 dir);
+	void Roll(FVector Dir, FRotator ActorRotation);
 
 protected:
 	// Called when the game starts
