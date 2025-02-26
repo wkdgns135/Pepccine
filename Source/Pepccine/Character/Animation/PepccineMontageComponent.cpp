@@ -42,6 +42,17 @@ void UPepccineMontageComponent::Attack()
 	}
 }
 
+void UPepccineMontageComponent::Death()
+{
+	if (AnimInstance && DeathMontage)
+	{
+		int32 JumpSection = FMath::RandRange(0, DeathMontage->CompositeSections.Num());
+		FName SectionName = FName(*FString::Printf(TEXT("%d"), JumpSection));
+		AnimInstance->Montage_Play(DeathMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, DeathMontage);
+	}
+}
+
 void UPepccineMontageComponent::Roll(FVector Dir, FRotator ActorRotation)
 {
 	float ForwardDeltaDegree = 0;
