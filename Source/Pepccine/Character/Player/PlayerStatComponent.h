@@ -59,6 +59,8 @@ public:
 	bool DecreaseStamina(float Amount);
 	bool DecreaseStaminaByPercentage(float Percentage);
 
+	void IncreaseStamina_Timer();
+
 	void IncreaseStamina(float Amount);
 	void IncreaseStaminaByPercentage(float Percentage);
 
@@ -74,12 +76,14 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
 private:
 	void NotifyStaminaObservers();
 	void StartRepeatingTimer();
 
 	TArray<IIStaminaObserver*> StaminaObservers;
+	
 	FTimerHandle IncreaseStaminaTimerHandle;
 	FTimerHandle DecreaseHealthTimerHandle;
 };

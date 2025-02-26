@@ -37,6 +37,14 @@ void UPlayerStatComponent::BeginPlay()
 	StartRepeatingTimer();
 }
 
+void UPlayerStatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super:;EndPlay(EndPlayReason);
+
+	GetWorld()->GetTimerManager().ClearTimer(IncreaseStaminaTimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(DecreaseHealthTimerHandle);
+}
+
 void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -45,7 +53,8 @@ void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 void UPlayerStatComponent::StartRepeatingTimer()
 {
 	GetWorld()->GetTimerManager().SetTimer(IncreaseStaminaTimerHandle,
-		[this]() { this->IncreaseStamina(StaminaRecoveryRate); },
+		this,
+		&UPlayerStatComponent::IncreaseStamina_Timer,
 		StaminaRecoveryTime,
 		true);
 	
@@ -54,6 +63,11 @@ void UPlayerStatComponent::StartRepeatingTimer()
 		&UPlayerStatComponent::DecreaseHealth_Timer,
 		HealthDecelerationSpeed,
 		true);
+}
+
+void UPlayerStatComponent::IncreaseStamina_Timer()
+{
+	IncreaseStamina(StaminaRecoveryRate);
 }
 
 void UPlayerStatComponent::DecreaseHealth_Timer()
