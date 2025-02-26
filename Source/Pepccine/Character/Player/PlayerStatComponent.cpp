@@ -39,7 +39,7 @@ void UPlayerStatComponent::BeginPlay()
 
 void UPlayerStatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super:;EndPlay(EndPlayReason);
+	Super::EndPlay(EndPlayReason);
 
 	GetWorld()->GetTimerManager().ClearTimer(IncreaseStaminaTimerHandle);
 	GetWorld()->GetTimerManager().ClearTimer(DecreaseHealthTimerHandle);
