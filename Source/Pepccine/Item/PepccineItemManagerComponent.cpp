@@ -27,12 +27,6 @@ void UPepccineItemManagerComponent::BeginPlay()
 
 			// 기본 무기 장착
 			EquipDefaultWeapon();
-
-			// 임시
-			if (UPepccineItemDataAssetBase* ItemDataAsset = ItemSpawner->GetItemDataAsset())
-			{
-				ItemSpawner->SpawnItem(GetOwner()->GetActorLocation(), ItemDataAsset->GetWeaponsItems()[0]);
-			}
 		}
 	}
 }

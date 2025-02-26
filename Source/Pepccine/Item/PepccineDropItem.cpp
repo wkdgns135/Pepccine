@@ -58,7 +58,7 @@ void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 	if (ItemManagerComponent)
 	{
 		bool IsDestroy = true;
-
+		
 		// 무기 아이템
 		if (const UPepccineWeaponItemData* WeaponItemData = Cast<UPepccineWeaponItemData>(DropItemData))
 		{
