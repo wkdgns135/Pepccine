@@ -1,8 +1,11 @@
 
 #include "PepCharacter.h"
-#include "EnhancedInputComponent.h"
+
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
+
+#include "EnhancedInputComponent.h"
+#include "Item/PepccineItemManagerComponent.h"
 #include "Camera/CameraComponent.h"
 #include "CrosshairHUDComponent.h"
 #include "PrograssBarHUDComponent.h"
@@ -12,6 +15,9 @@
 
 #include "GameFramework/SpringArmComponent.h"
 #include "Character/Animation/PepccineMontageComponent.h"
+#include "Character/Data/ActorInfo.h"
+#include "Components/WidgetComponent.h"
+#include "Item/PepccineDropItem.h"
 
 APepCharacter::APepCharacter()
 {
@@ -41,6 +47,7 @@ APepCharacter::APepCharacter()
   EnhancedRadarComponent = CreateDefaultSubobject<UCollisionRadarComponent>(TEXT("EnhancedRadarComponent"));
   InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
   PepccineMontageComponent = CreateDefaultSubobject<UPepccineMontageComponent>(TEXT("MontageComponent"));
+  ItemManagerComponent = CreateDefaultSubobject<UPepccineItemManagerComponent>(TEXT("ItemManagerComponent"));
 }
 
 void APepCharacter::BeginPlay()
@@ -135,19 +142,22 @@ void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
   PrograssBarComponent->SetStamina(NewStamina, MaxStamina);
 }
 
-void APepCharacter::OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors)
+void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
 {
   if (DetectedActors.DetectedActors.Num() == 0) return;
 
-  //UE_LOG(LogTemp, Warning, TEXT("Number of dectedActor: %d"), DetectedActors.DetectedActors.Num());
-
-  for (AActor* DetectedActor : DetectedActors.DetectedActors)
+  const FDetectedActorInfo* MinDistActor = Algo::MinElement(DetectedActors.DetectedActors, [](const FDetectedActorInfo& InfoA, const FDetectedActorInfo& InfoB)
   {
-    if (DetectedActor)
-    {
-      //UE_LOG(LogTemp, Warning, TEXT("Detected Actors: %s"), *DetectedActor->GetName());
-    }
-  }
+    return InfoA.Distance < InfoB.Distance;
+  });
+
+  APepccineDropItem* DropItem = Cast<APepccineDropItem>(MinDistActor->Actor);
+  //DropItem->ShowEKey;
+  CurrentDropItem = DropItem;
+
+  //UE_LOG(LogTemp, Warning, TEXT("Number of DectedActor: %d"), DetectedActors.DetectedActors.Num());
+  //UE_LOG(LogTemp, Warning, TEXT("Detected Actors: [%s]"), *MinDistActor->Actor->GetName());
+  //UE_LOG(LogTemp, Warning, TEXT("Detected Actors Loc: [%f]"), MinDistActor->Distance);
 }
 #pragma endregion
 
@@ -316,30 +326,42 @@ void APepCharacter::Crouching()
 void APepCharacter::Reload()
 {
   UE_LOG(LogTemp, Log, TEXT("Reload!"));
-
-  PepccineMontageComponent->Reloading();
-
+  
   if (bIsReloading)
   {
-    
+    bIsReloading = false;
   }
   else
   {
-
+    ItemManagerComponent->ReloadWeapon();
+    PepccineMontageComponent->Reloading();
+    bIsReloading = true;
   }
 }
 
 void APepCharacter::Interactive()
 {
   UE_LOG(LogTemp, Log, TEXT("Interactive!"));
+  CurrentDropItem->PickUpItem(ItemManagerComponent);
+  // 아이템 줍는 모션
+  
+  // 아이템 인벤토리에 추가
+  if (CurrentDropItem)
+  {
+    //InventoryComponent->AddItem(CurrentDropItem, TEXT("Graffiti03"), "BlaBlaBlaBla");
+  }
 
+  // 스텟연산
+  
+
+  // Delay 있는 상호작용 전용
   if (bIsInteracting)
   {
 
   }
   else
   {
-
+    
   }
 }
 
@@ -363,12 +385,6 @@ void APepCharacter::OpenInventory()
       PlayerController->SetInputMode(FInputModeGameOnly());
     }
   }
-  
-  UTexture2D* SampleItemTexture = LoadObject<UTexture2D>(nullptr, TEXT("/Game/PA_UrbanCity/Textures/T_Graffiti03"));
-  if (SampleItemTexture)
-  {
-    InventoryComponent->AddItem(SampleItemTexture, TEXT("Graffiti03"), "BlaBlaBlaBla");
-  }
 }
 
 void APepCharacter::SwapItem(const FInputActionValue& value)
@@ -387,11 +403,10 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 
 void APepCharacter::Fire()
 {
-  UE_LOG(LogTemp, Log, TEXT("Fire!"));
-
   if (bIsRolling) return;
 
   PepccineMontageComponent->Fire();
+  ItemManagerComponent->FireWeapon(100);
 }
 
 void APepCharacter::ZoomIn()
@@ -545,7 +560,7 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
   {
     EnhancedInput->BindAction(
       PlayerController->InteractiveAction,
-      ETriggerEvent::Triggered,
+      ETriggerEvent::Started,
       this,
       &APepCharacter::Interactive
     );

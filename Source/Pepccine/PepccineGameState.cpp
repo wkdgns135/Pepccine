@@ -2,7 +2,7 @@
 
 
 #include "PepccineGameState.h"
-#include "Room/BaseRoom.h"
+#include "Room/Controller/BaseRoomController.h"
 
 void APepccineGameState::BeginPlay()
 {

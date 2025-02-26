@@ -8,7 +8,9 @@
 #include "Pepccine/Character/Controller/PepccinePlayerController.h"
 #include "PlayerStatComponent.h"
 #include "CrosshairHUDComponent.h"
+#include "Character/Data/ActorInfo.h"
 #include "Character/Interfaces/IStaminaObserver.h"
+#include "Item/PepccineDropItem.h"
 #include "PepCharacter.generated.h"
 
 class UInputMappingContext;
@@ -18,6 +20,7 @@ class UCameraComponent;
 class UPepccineMontageComponent;
 class UPrograssBarHUDComponent;
 class UInventoryComponent;
+class UPepccineItemManagerComponent;
 //class URadorComponent;
 class UCollisionRadarComponent;
 
@@ -63,6 +66,8 @@ protected:
     UCollisionRadarComponent* EnhancedRadarComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UInventoryComponent* InventoryComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UPepccineItemManagerComponent* ItemManagerComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineMontageComponent* PepccineMontageComponent;
 
@@ -132,11 +137,14 @@ private:
 	float SprintHoldThreshold = 0.2f;
 
 	FVector RollDirection;
+	
+	UPROPERTY()
+	APepccineDropItem* CurrentDropItem;
 
 	FTimerHandle RollTimerHandle;
 
 	UFUNCTION()
-	void OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors);
+	void OnActorDetectedEnhanced(FDetectedActorList& DetectedActors);
 
 	void InitializeCharacterMovement() const;
 	void ToggleCameraView();

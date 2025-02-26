@@ -3,6 +3,7 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h" // Debug
+#include "Character/Data/ActorInfo.h"
 
 /*
 Collision Enabled 된 대상만 가능
@@ -68,7 +69,11 @@ void UCollisionRadarComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedCom
 void UCollisionRadarComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-  NearbyActors.Remove(OtherActor);
+  //UE_LOG(LogTemp, Warning, TEXT("End -> [%s]"), *OtherActor->GetName());
+  if (OtherActor && OtherActor != GetOwner())
+  {
+    NearbyActors.Remove(OtherActor);
+  }
 }
 
 bool UCollisionRadarComponent::IsInFieldOfView(AActor* TargetActor) const
@@ -95,9 +100,16 @@ void UCollisionRadarComponent::DetectActors()
   {
     if (!Actor) continue;
 
+    const float Distance = FVector::Dist(GetOwner()->GetActorLocation(), Actor->GetActorLocation());
+
     if (IsInFieldOfView(Actor))
     {
-      DetectedActorList.DetectedActors.Add(Actor);
+      //UE_LOG(LogTemp, Warning, TEXT("Detected -> [%s]"), *Actor->GetName());
+      FDetectedActorInfo ActorInfo;
+      ActorInfo.Actor = Actor;
+      ActorInfo.Distance = Distance;
+      
+      DetectedActorList.DetectedActors.Add(ActorInfo);
     }
   }
 

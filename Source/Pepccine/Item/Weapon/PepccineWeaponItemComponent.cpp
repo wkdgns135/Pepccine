@@ -180,11 +180,15 @@ FVector UPepccineWeaponItemComponent::GetFireDirection(const FVector& MuzzleLoca
 	FHitResult HitResult;
 
 	DrawDebugLine(GetWorld(), Start, End, FColor::Green, true, 2.0f);
-
+	
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(OwnerCharacter);
+	
 	FVector HitLocation;
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldDynamic))
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams))
 	{
 		HitLocation = HitResult.Location; // 충돌한 위치
+		UE_LOG(LogTemp, Warning, TEXT("HitResult [%s]"), *HitResult.GetActor()->GetName());
 	}
 	else
 	{

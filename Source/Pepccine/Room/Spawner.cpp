@@ -3,7 +3,7 @@
 
 #include "Room/Spawner.h"
 #include "PepccineGameState.h"
-#include "Room/BaseRoom.h"
+#include "Controller/BaseRoomController.h"
 #include "Monster/Class/BaseMonster.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -18,7 +18,11 @@ void ASpawner::BeginPlay()
 	GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	if (GameState)
 	{
-		GameState->GetCurrentRoom()->OnRoomStarted.AddUObject(this, &ASpawner::SpawnMonster);
+		ABaseRoomController* RoomController = GameState->GetRoomController();
+		if (RoomController)
+		{
+			RoomController->OnRoomCleared.AddUObject(this, &ASpawner::SpawnMonster);
+		}
 	}
 }
 

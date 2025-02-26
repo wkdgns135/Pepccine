@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "BaseRoom.generated.h"
+#include "BaseRoomController.generated.h"
 
 class ASpawner;
 
@@ -12,7 +12,7 @@ DECLARE_MULTICAST_DELEGATE(FOnRoomStarted)
 DECLARE_MULTICAST_DELEGATE(FOnRoomCleared)
 
 UCLASS()
-class PEPCCINE_API ABaseRoom : public AActor
+class PEPCCINE_API ABaseRoomController : public AActor
 {
 	GENERATED_BODY()
 

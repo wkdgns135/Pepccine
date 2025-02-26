@@ -23,6 +23,8 @@ public:
 	UFUNCTION()
 	void Attack();
 	UFUNCTION()
+	void Death();
+	UFUNCTION()
 	void Roll(FVector Dir, FRotator ActorRotation);
 
 protected:
@@ -40,6 +42,8 @@ protected:
 	UAnimMontage* ReloadMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* AttackMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* DeathMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* RollMontage;
 };

@@ -43,11 +43,14 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, category = "DropItem|Component",
 		meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* StaticMeshComp;
+
+public:
 	// 상호 작용 위젯 컴포넌트
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, category = "DropItem|Component",
 		meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* InteractWidgetComp;
 
+private:
 	// 드랍 아이템 데이터
 	UPROPERTY(VisibleAnywhere, category = "DropItem|Data")
 	UPepccineItemDataBase* DropItemData;

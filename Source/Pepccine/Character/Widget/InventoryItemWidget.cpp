@@ -3,9 +3,6 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 
-#include "Styling/SlateBrush.h"
-#include "Styling/SlateTypes.h"
-
 void UInventoryItemWidget::NativeConstruct()
 {
 	Super::NativeConstruct();

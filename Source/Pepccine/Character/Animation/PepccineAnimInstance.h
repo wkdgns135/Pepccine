@@ -22,7 +22,7 @@ protected:
 	virtual void NativeUpdateAnimation(float dt) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
-	TObjectPtr<class ACharacter> Owner;
+	TObjectPtr<class APepCharacter> Owner;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<class UCharacterMovementComponent> Movement;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
@@ -39,6 +39,8 @@ protected:
 	bool bIsCrouch;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	bool bIsSprint;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
+	bool bIsMainWeapon;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	float MovingThreshould;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")

@@ -27,6 +27,12 @@ void UPepccineItemManagerComponent::BeginPlay()
 
 			// 기본 무기 장착
 			EquipDefaultWeapon();
+
+			// 임시
+			if (UPepccineItemDataAssetBase* ItemDataAsset = ItemSpawner->GetItemDataAsset())
+			{
+				ItemSpawner->SpawnItem(GetOwner()->GetActorLocation(), ItemDataAsset->GetWeaponsItems()[0]);
+			}
 		}
 	}
 }
@@ -170,7 +176,7 @@ void UPepccineItemManagerComponent::EquipDefaultWeapon()
 			if (ItemDataAsset->GetWeaponsItems().Num() > 0)
 			{
 				// 기본 무기는 0번 인덱스
-				if (const UPepccineWeaponItemData* WeaponItemData = ItemDataAsset->GetWeaponsItems()[0])
+				if (const UPepccineWeaponItemData* WeaponItemData = ItemDataAsset->GetWeaponsItems()[1])
 				{
 					PickUpWeaponItem(WeaponItemData);
 
