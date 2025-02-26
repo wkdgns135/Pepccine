@@ -5,6 +5,12 @@
 
 #include "RoomManager.h"
 
+UFloorRoomData::UFloorRoomData()
+{
+	MapSize = 6;
+	EndPointCount = 4;
+}
+
 TSoftObjectPtr<UWorld> UFloorRoomData::GetRandomRoomLevel(const ERoomType RoomType)
 {
 	switch (RoomType)

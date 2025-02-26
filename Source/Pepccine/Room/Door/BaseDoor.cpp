@@ -27,11 +27,9 @@ ABaseDoor::ABaseDoor()
 void ABaseDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	APepccineGameState* GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld()));
-	if (GameState)
+	if (APepccineGameState* GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld())))
 	{
-		ABaseRoomController* RoomController = GameState->GetRoomController();
-		if (RoomController)
+		if (ABaseRoomController* RoomController = GameState->GetRoomController())
 		{
 			RoomController->OnRoomStarted.AddUObject(this, &ABaseDoor::OnStarted);
 			RoomController->OnRoomCleared.AddUObject(this, &ABaseDoor::OnCleared);
@@ -46,16 +44,17 @@ void ABaseDoor::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	{
 		if (bIsLocked == false)
 		{
-			URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager();
-			RoomManager->ChangeRoom(GetDirectionRoom());
+			if (URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
+			{
+				RoomManager->ChangeRoom(GetDirectionRoom());
+			}
 		}
 	}
 }
 
 void ABaseDoor::OnStarted()
 {
-	URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager();
-	if (RoomManager)
+	if (URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
 	{
 		const FRoomData* RoomData = GetDirectionRoom();
 		if (RoomData->RoomType == ERoomType::ENone)
@@ -75,6 +74,7 @@ void ABaseDoor::OnCleared()
 FRoomData* ABaseDoor::GetDirectionRoom()
 {
 	URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager();
+	if (RoomManager == nullptr) return nullptr;
 	FIntPoint RoomPoint = RoomManager->GetCurrentRoomPoint();
 	switch (Direction)
 	{

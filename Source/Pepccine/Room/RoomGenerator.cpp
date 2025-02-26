@@ -62,6 +62,7 @@ ARoomGenerator::ARoomGenerator()
 void ARoomGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+	GetParameters();
 	if (!GenerateEndPoints())
 	{
 		return;
@@ -81,7 +82,10 @@ void ARoomGenerator::BeginPlay()
 
 void ARoomGenerator::GetParameters()
 {
-	// Implementation here
+	if (URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
+	{
+		
+	}
 }
 
 
@@ -312,7 +316,6 @@ void ARoomGenerator::AssignEndRooms()
 	{
 		for (int j = i + 1; j < EndRooms.Num(); j++)
 		{
-			//TODO: 수정
 			const int Distance = FindShortestPath(EndRooms[i], EndRooms[j]).Num();
 			if (Distance > MaxDistance)
 			{

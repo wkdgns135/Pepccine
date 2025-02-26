@@ -60,7 +60,7 @@ private:
 	
 public:
 	FORCEINLINE TArray<TArray<FRoomData*>>& GetMap(){return Map;}
-	FORCEINLINE FIntPoint GetCurrentRoomPoint() const {return CurrentRoom->RoomPoint;}
+	FORCEINLINE FIntPoint GetCurrentRoomPoint() const {return CurrentRoom ? CurrentRoom->RoomPoint : FIntPoint();}
 	FORCEINLINE int GetCurrentFloor() const {return CurrentFloorIndex + 1;}
 	FORCEINLINE FRoomData* GetCurrentRoomData() const {return CurrentRoom;}
 	FORCEINLINE FRoomData* GetPointRoomData(const FIntPoint& Point){return GetCheckRoom(Point) ? Map[Point.Y][Point.X] : NewRoom(ERoomType::ENone);}
