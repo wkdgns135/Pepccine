@@ -2,7 +2,7 @@
 
 
 #include "Character/Animation/PepccineAnimInstance.h"
-#include "GameFramework/Character.h"
+#include "Character/Player/PepCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 UPepccineAnimInstance::UPepccineAnimInstance()
@@ -16,6 +16,7 @@ UPepccineAnimInstance::UPepccineAnimInstance()
 	bIsCrouch = false;
 	bIsSprint = false;
 	bIsFalling = false;
+	bIsMainWeapon = true;
 	ControllerPitch = 0.0f;
 }
 
@@ -23,7 +24,7 @@ void UPepccineAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	Owner = Cast<ACharacter>(GetOwningActor());
+	Owner = Cast<APepCharacter>(GetOwningActor());
 	if (Owner)
 	{
 		Movement = Owner->GetCharacterMovement();
@@ -49,5 +50,6 @@ void UPepccineAnimInstance::NativeUpdateAnimation(float dt)
 		bIsSprint = WalkSpeed < Movement->MaxWalkSpeed;
 		float Pitch = Owner->GetControlRotation().Pitch;
 		(Pitch > 90) ? ControllerPitch = Pitch - 360 : ControllerPitch = Pitch;
+		//bIsMainWeapon = Owner->IsMainWeapon();
 	}
 }
