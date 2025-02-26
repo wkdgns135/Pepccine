@@ -154,13 +154,20 @@ void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
     return InfoA.Distance < InfoB.Distance;
   });
 
-  APepccineDropItem* DropItem = Cast<APepccineDropItem>(MinDistActor->Actor);
-  //DropItem->ShowEKey;
-  CurrentDropItem = DropItem;
+  if (APepccineDropItem* DropItem = Cast<APepccineDropItem>(MinDistActor->Actor))
+  {
+    DropItem->ShowInteractWidget(true);
 
-  UE_LOG(LogTemp, Warning, TEXT("Number of DectedActor: %d"), DetectedActors.DetectedActors.Num());
-  UE_LOG(LogTemp, Warning, TEXT("Detected Actors: [%s]"), *MinDistActor->Actor->GetName());
-  UE_LOG(LogTemp, Warning, TEXT("Detected Actors Loc: [%f]"), MinDistActor->Distance);
+    if (CurrentDropItem && CurrentDropItem != DropItem)
+    {
+      CurrentDropItem->ShowInteractWidget(false);
+    }
+  
+    CurrentDropItem = DropItem;
+  }
+  //UE_LOG(LogTemp, Warning, TEXT("Number of DectedActor: %d"), DetectedActors.DetectedActors.Num());
+  //UE_LOG(LogTemp, Warning, TEXT("Detected Actors: [%s]"), *MinDistActor->Actor->GetName());
+  //UE_LOG(LogTemp, Warning, TEXT("Detected Actors Loc: [%f]"), MinDistActor->Distance);
 }
 #pragma endregion
 
@@ -344,24 +351,65 @@ void APepCharacter::Reload()
 
 void APepCharacter::Interactive()
 {
-  UE_LOG(LogTemp, Log, TEXT("Interactive!"));
-  CurrentDropItem->PickUpItem(ItemManagerComponent);
-  // 아이템 줍는 모션
-  
   // 아이템 인벤토리에 추가
   if (CurrentDropItem)
   {
+    CurrentDropItem->PickUpItem(ItemManagerComponent);
+    
     if (CurrentDropItem->IsA(UPepccinePassiveItemData::StaticClass()))
     {
-      const UPepccineItemDataBase* DropItem = CurrentDropItem->GetDropItemData();
+      // 패시브 아이템
+      const UPepccinePassiveItemData* DropItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData());
       InventoryComponent->AddItem(DropItem->IconTexture, DropItem->GetDisplayName(), DropItem->GetDescription());
+      
+      TArray<FPepccineCharacterStatModifier> CharacterStatModifiers = DropItem->GetCharacterStatModifiers();
+      for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)
+      {
+        EPepccineCharacterStatName CharacterStatName = Modifier.CharacterStatName;
+        EPepccineStatModifyType ModifyType = Modifier.StatModifierDefault.StatModifyType;
+        float Amount = Modifier.StatModifierDefault.StatModifyValue;
+
+        FString StatName = UEnum::GetValueAsString(CharacterStatName);
+        UE_LOG(LogTemp, Warning, TEXT("CharacterStatName: %s"), StatName);
+
+        FString MT = UEnum::GetValueAsString(ModifyType);
+        UE_LOG(LogTemp, Warning, TEXT("ModifyType: %s"), MT);
+        UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
+      }
+
+      TArray<FPepccineWeaponStatModifier> WeaponStatModifiers = DropItem->GetWeaponStatModifiers();
+      for (const FPepccineWeaponStatModifier& Modifier : WeaponStatModifiers)
+      {
+        EPepccineWeaponItemType WeaponItemType = Modifier.WeaponItemType;
+        EPepccineWeaponStatName WeaponItemStatName = Modifier.WeaponItemStatName;
+        float Amount = Modifier.StatModifierDefault.StatModifyValue;
+
+        FString WeaponType = UEnum::GetValueAsString(WeaponItemType);
+        UE_LOG(LogTemp, Warning, TEXT("WeaponItemType: %s"), WeaponType);
+
+        FString WeaponStatName = UEnum::GetValueAsString(WeaponItemStatName);
+        UE_LOG(LogTemp, Warning, TEXT("WeaponItemStatName: %s"), WeaponStatName);
+        UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
+      }
+
+      TArray<FPepccineCharacterFeature> CharacterFeatures = DropItem->CharacterFeatures;
+      for (const FPepccineCharacterFeature& Feature : CharacterFeatures)
+      {
+        switch (Feature.CharacterFeatureName)
+        {
+        case EPepccineCharacterFeatureName::EPCFN_Roll:
+          break;
+        case EPepccineCharacterFeatureName::EPCFN_Sprint:
+          break;
+        }
+      }
     }
     else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
     {
-      // 무기에 관련된 변화
+      // 무기 먹었을때
     }
   }
-
+  
   // 스텟연산 (저장 구조체)
   // 갖고있는 모든 패시브 아이템 적용 (캐릭터 스텟)
   PlayerStatComponent->AttackDamage = (PlayerStatComponent->AttackDamage + ItemManagerComponent->GetTotalSumByCharacterStatName(EPepccineCharacterStatName::EPCSN_AttackDamage)) * ItemManagerComponent->GetTotalProductByCharacterStatName(EPepccineCharacterStatName::EPCSN_AttackDamage);
@@ -411,11 +459,11 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 
   if (ScrollValue > 0.0f)
   {
-    //UE_LOG(LogTemp, Log, TEXT("Swapping Forward [%f]"), ScrollValue);
+    ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Main);
   }
   else if (ScrollValue < 0.0f)
   {
-    //UE_LOG(LogTemp, Log, TEXT("Swapping Backward [%f]"), ScrollValue);
+    ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Sub);
   }
 }
 
@@ -424,14 +472,14 @@ void APepCharacter::Fire()
   if (bIsRolling) return;
 
   TriggerCameraShake();
+  
   PepccineMontageComponent->Fire();
+  // 탄퍼짐 관련 계산해서 넘겨주기
   ItemManagerComponent->FireWeapon(100);
 }
 
 void APepCharacter::ZoomIn()
 {
-  UE_LOG(LogTemp, Log, TEXT("ZoomIn!"));
-
   if (bIsRolling) return;
 
   bIsZooming = true;
@@ -478,7 +526,7 @@ void APepCharacter::TriggerCameraShake()
 
     if (Modifier)
     {
-      Modifier->StartShake(5.0f, 20.0f, 0.5f);
+      Modifier->StartShake(10.0f, 20.0f, 0.5f);
     }
   }
 }

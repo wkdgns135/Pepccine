@@ -45,6 +45,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Passive", meta = (DisplayName = "캐릭터 스탯 수정 목록"))
 	TArray<FPepccineCharacterStatModifier> CharacterStatModifiers;
 
+public:
+	
 	// 캐릭터 추가 기능 목록
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Passive",
 		meta = (DisplayName = "캐릭터 추가 기능 목록"))

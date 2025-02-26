@@ -108,6 +108,8 @@ public:
 	};
 
 protected:
+	
+public:	
 	// 기본 무기 초기화
 	UFUNCTION()
 	void EquipDefaultWeapon();
@@ -124,7 +126,6 @@ protected:
 	UFUNCTION()
 	void ChangeWeaponEquippedMesh() const;
 
-public:
 	// 현재 장착 중인 무기 발사
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
 	void FireWeapon(float WeaponDamage) const;

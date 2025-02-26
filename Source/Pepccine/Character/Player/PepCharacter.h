@@ -34,6 +34,17 @@ public:
 
 	bool bIsFirstPersonView = false;
 	bool bIsInventoryOpened = false;
+	
+	bool bIsMoving = false;
+	bool bIsZooming = false;
+	bool bIsSprinting = false;
+	
+	bool bIsCrouching = false;
+	bool bIsSprintable = true;
+	bool bIsReloading = false;
+	bool bIsInteracting = false;
+	bool bIsRolling = false;
+	bool bIsRollable = true;
 
 	// UE delegate
 	UFUNCTION()
@@ -125,16 +136,6 @@ protected:
 private:
 	float CameraArmLength = 300.0f;
 	
-	bool bIsZooming = false;
-	bool bIsCrouching = false;
-	bool bIsSprinting = false;
-	bool bIsSprintable = true;
-	bool bIsReloading = false;
-	bool bIsInteracting = false;
-	bool bIsRolling = false;
-	bool bIsRollable = true;
-	bool bIsMoving = false;
-
 	float SprintHoldStartTime = 0.0f;
 	float SprintHoldThreshold = 0.2f;
 
