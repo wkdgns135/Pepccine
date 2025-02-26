@@ -5,6 +5,7 @@
 #include "Components/Image.h"
 #include "Components/ScrollBox.h"
 #include "Components/SizeBox.h"
+#include "Components/TextBlock.h"
 
 void UInventoryWidget::NativeConstruct()
 {
@@ -30,8 +31,19 @@ void UInventoryWidget::NativeConstruct()
 		UE_LOG(LogTemp, Error, TEXT("BackgroundImage is nullptr! Ensure it is assigned in the blueprint or loaded properly."));
 	}
 
+	if (!ItemDetailText)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ItemDetailText is nullptr! Ensure it is assigned in the blueprint."));
+	}
+	else
+	{
+		ItemDetailText->SetText(FText::FromString(""));
+		ItemDetailText->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 	CurrentRow = 0;
 	CurrentColumn = 0;
+	NextItemIndex = 0;
 
 	SetEmptyGrid();
 }
@@ -60,11 +72,13 @@ void UInventoryWidget::SetEmptyGrid()
 				GridSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
 				GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
 			}
+
+			EmptySlot->OnItemHovered.AddDynamic(this, &UInventoryWidget::HandleItemHovered);
 		}
 	}
 }
 
-void UInventoryWidget::AddItemToInventory(UTexture2D* ItemImage, const FString& ItemName)
+void UInventoryWidget::AddItemToInventory(UTexture2D* ItemImage, const FString& ItemName, const FString& ItemDetail)
 {
 	if (!InventoryGrid || !ItemWidgetClass)
 	{
@@ -79,7 +93,10 @@ void UInventoryWidget::AddItemToInventory(UTexture2D* ItemImage, const FString& 
 		return;
 	}
 
-	NewItem->SetItem(ItemImage, ItemName);
+	int32 AssignedIndex = NextItemIndex++;
+	ItemDetailsMap.Add(AssignedIndex, ItemDetail);
+	
+	NewItem->SetItem(ItemImage, ItemName, AssignedIndex);
 	NewItem->bIsEmpty = false;
 
 	USizeBox* ItemSizeBox = NewObject<USizeBox>(this);
@@ -96,8 +113,9 @@ void UInventoryWidget::AddItemToInventory(UTexture2D* ItemImage, const FString& 
 		GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
 	}
 
+	NewItem->OnItemHovered.AddDynamic(this, &UInventoryWidget::HandleItemHovered);
+
 	CurrentColumn++;
-	
 	if (CurrentColumn >= MaxColumns)
 	{
 		CurrentColumn = 0;
@@ -135,8 +153,35 @@ void UInventoryWidget::CreateNewGridBlock()
 				GridSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
 				GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
 			}
+
+			EmptySlot->OnItemHovered.AddDynamic(this, &UInventoryWidget::HandleItemHovered);
 		}
 	}
+}
 
-	//InventoryScrollBox->ScrollToStart();
+void UInventoryWidget::HandleItemHovered(int32 ItemIndex, bool bIsHovered)
+{
+	if (bIsHovered)
+	{
+		if (FString* FoundDetail = ItemDetailsMap.Find(ItemIndex))
+		{
+			UE_LOG(LogTemp, Display, TEXT("Item %d is hovered: %s"), ItemIndex, **FoundDetail);
+
+			if (ItemDetailText)
+			{
+				ItemDetailText->SetText(FText::FromString(*FoundDetail));
+				ItemDetailText->SetVisibility(ESlateVisibility::Visible);
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("Item %d is unhovered"), ItemIndex);
+
+		if (ItemDetailText)
+		{
+			ItemDetailText->SetText(FText::FromString(""));
+			ItemDetailText->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
 }

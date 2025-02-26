@@ -37,10 +37,14 @@ void UInventoryItemWidget::SetEmpty()
 	}
 
 	bIsEmpty = true;
+
+	ItemIndex = -1;
 }
 
-void UInventoryItemWidget::SetItem(UTexture2D* ItemImage, const FString& ItemName)
+void UInventoryItemWidget::SetItem(UTexture2D* ItemImage, const FString& ItemName, int32 Index)
 {
+	ItemIndex = Index;
+	
 	if (TooltipInfo)
 	{
 		TooltipInfo->SetText(FText::FromString(ItemName));
@@ -62,6 +66,8 @@ void UInventoryItemWidget::OnHovered()
 		UE_LOG(LogTemp, Display, TEXT("OnHovered"));
 		TooltipInfo->SetVisibility(ESlateVisibility::Visible);
 	}
+
+	OnItemHovered.Broadcast(ItemIndex, true);
 }
 
 void UInventoryItemWidget::OnUnhovered()
@@ -71,4 +77,6 @@ void UInventoryItemWidget::OnUnhovered()
 		UE_LOG(LogTemp, Display, TEXT("OnUnhovered"));
 		TooltipInfo->SetVisibility(ESlateVisibility::Hidden);
 	}
+
+	OnItemHovered.Broadcast(ItemIndex, false);
 }

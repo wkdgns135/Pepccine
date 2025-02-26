@@ -7,7 +7,6 @@
 #include "CrosshairHUDComponent.h"
 #include "PrograssBarHUDComponent.h"
 
-#include "RadorComponent.h"
 #include "CollisionRadarComponent.h"
 #include "InventoryComponent.h"
 
@@ -368,7 +367,7 @@ void APepCharacter::OpenInventory()
   UTexture2D* SampleItemTexture = LoadObject<UTexture2D>(nullptr, TEXT("/Game/PA_UrbanCity/Textures/T_Graffiti03"));
   if (SampleItemTexture)
   {
-    InventoryComponent->AddItem(SampleItemTexture, TEXT("Graffiti03"));
+    InventoryComponent->AddItem(SampleItemTexture, TEXT("Graffiti03"), "BlaBlaBlaBla");
   }
 }
 

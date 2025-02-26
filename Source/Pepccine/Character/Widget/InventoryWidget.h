@@ -8,6 +8,7 @@ class UInventoryItemWidget;
 class UUniformGridPanel;
 class UImage;
 class UScrollBox;
+class UTextBlock;
 
 UCLASS()
 class PEPCCINE_API UInventoryWidget : public UUserWidget
@@ -18,7 +19,7 @@ public:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintCallable)
-	void AddItemToInventory(UTexture2D* ItemImage, const FString& ItemName);
+	void AddItemToInventory(UTexture2D* ItemImage, const FString& ItemName, const FString& ItemDetail);
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -29,6 +30,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UScrollBox* InventoryScrollBox;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ItemDetailText;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	TSubclassOf<UInventoryItemWidget> ItemWidgetClass;
@@ -36,6 +40,9 @@ protected:
 private:
 	int32 CurrentRow = 0;
 	int32 CurrentColumn = 0;
+	int32 NextItemIndex = 0;
+
+	TMap<int32, FString> ItemDetailsMap;
 
 	const int BoxWidthSize = 180;
 	const int BoxHeightSize = 180;
@@ -45,4 +52,7 @@ private:
 
 	void SetEmptyGrid();
 	void CreateNewGridBlock();
+	
+	UFUNCTION()
+	void HandleItemHovered(int32 ItemIndex, bool bIsHovered);
 };

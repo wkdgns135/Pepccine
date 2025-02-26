@@ -22,7 +22,7 @@ UPlayerStatComponent::UPlayerStatComponent()
 	StaminaRecoveryTime = 1.0f;
 
 	InvincibilityTime = 0;
-	Defence = 0;  
+	Defence = 0;
 	FireRate = 0;
 
 	RollingDistance = 200.0f;
