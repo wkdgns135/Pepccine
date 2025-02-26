@@ -31,9 +31,11 @@ private:
 	UBoxComponent* TriggerVolume;
 
 	bool bIsLocked;
+	
 public:	
 	ABaseDoor();
-
+	FRoomData* GetDirectionRoom();
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -45,7 +47,6 @@ private:
 	UFUNCTION()
 	void OnCleared();
 	
-	FRoomData* GetDirectionRoom();
 	void LockDoor();
 	void OpenDoor();
 };

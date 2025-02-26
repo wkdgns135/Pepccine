@@ -3,8 +3,10 @@
 
 #include "BaseDoor.h"
 
+#include "PepccineCharacter.h"
 #include "PepccineGameInstance.h"
 #include "PepccineGameState.h"
+#include "Character/Player/PepCharacter.h"
 #include "Room/Controller/BaseRoomController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
@@ -27,6 +29,8 @@ ABaseDoor::ABaseDoor()
 void ABaseDoor::BeginPlay()
 {
 	Super::BeginPlay();
+	LockDoor();
+	
 	if (APepccineGameState* GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld())))
 	{
 		if (ABaseRoomController* RoomController = GameState->GetRoomController())
@@ -40,7 +44,7 @@ void ABaseDoor::BeginPlay()
 void ABaseDoor::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!OtherActor->Tags.IsEmpty() && OtherActor->Tags[0] == "Player")
+	if (OtherActor->IsA(APepCharacter::StaticClass()))
 	{
 		if (bIsLocked == false)
 		{
@@ -62,8 +66,9 @@ void ABaseDoor::OnStarted()
 			Destroy();
 			return;
 		}
-		LockDoor();
 	}
+	FTimerHandle DoorOpenTimerHandle;
+	GetWorldTimerManager().SetTimer(DoorOpenTimerHandle, this, &ABaseDoor::OpenDoor, 5.0f, false);
 }
 
 void ABaseDoor::OnCleared()
@@ -97,7 +102,7 @@ FRoomData* ABaseDoor::GetDirectionRoom()
 void ABaseDoor::LockDoor()
 {
 	// HERE[장훈]: 문이 잠기는 애니메이션 재생 등 추가
-	bIsLocked = false;
+	bIsLocked = true;
 }
 
 void ABaseDoor::OpenDoor()

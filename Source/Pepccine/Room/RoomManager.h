@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "RoomManager.generated.h"
 
+enum class EDoorDirection : uint8;
 class UFloorRoomData;
 
 UENUM()
@@ -46,6 +47,7 @@ private:
 	
 	TArray<TArray<FRoomData*>> Map;
 	FRoomData *CurrentRoom;
+	FRoomData *PreviousRoom;
 	int CurrentFloorIndex;
 
 public:
@@ -64,4 +66,5 @@ public:
 	FORCEINLINE int GetCurrentFloor() const {return CurrentFloorIndex + 1;}
 	FORCEINLINE FRoomData* GetCurrentRoomData() const {return CurrentRoom;}
 	FORCEINLINE FRoomData* GetPointRoomData(const FIntPoint& Point){return GetCheckRoom(Point) ? Map[Point.Y][Point.X] : NewRoom(ERoomType::ENone);}
+	FORCEINLINE FRoomData* GetPreviousRoomData() const {return PreviousRoom;}
 };

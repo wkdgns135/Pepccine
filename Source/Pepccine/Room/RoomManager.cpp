@@ -58,6 +58,7 @@ void URoomManager::ChangeRoom(FRoomData* RoomData)
 
 	// 정확한 패키지 경로를 사용해 레벨 로드
 	UGameplayStatics::OpenLevel(GetWorld(), FName(*LevelPath));
+	PreviousRoom = CurrentRoom;
 	CurrentRoom = RoomData;
 	PrintFloor();
 }

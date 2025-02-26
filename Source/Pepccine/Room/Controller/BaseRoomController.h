@@ -27,8 +27,12 @@ private:
 protected:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
+	
 public:
 	void ClearRoom();
+
+private:
+	void PlacePlayer();
 	
 public:
 	FORCEINLINE bool GetIsRoomClear() const { return bIsRoomClear; }
