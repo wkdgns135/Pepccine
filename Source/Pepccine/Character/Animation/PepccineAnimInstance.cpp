@@ -16,7 +16,7 @@ UPepccineAnimInstance::UPepccineAnimInstance()
 	bIsCrouch = false;
 	bIsSprint = false;
 	bIsFalling = false;
-	bIsMainWeapon = true;
+	bIsMainWeapon = false;
 	ControllerPitch = 0.0f;
 }
 
