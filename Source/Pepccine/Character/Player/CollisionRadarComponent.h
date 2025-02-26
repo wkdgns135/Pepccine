@@ -5,16 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "CollisionRadarComponent.generated.h"
 
-USTRUCT(Atomic, BlueprintType)
-struct FDetectedActorList
-{
-  GENERATED_BODY()
-
-  UPROPERTY()
-  TArray<AActor*> DetectedActors;
-};
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActorDetectedEnhanced, const FDetectedActorList&, DetectedActors);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActorDetectedEnhanced, FDetectedActorList&, DetectedActors);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PEPCCINE_API UCollisionRadarComponent : public UActorComponent

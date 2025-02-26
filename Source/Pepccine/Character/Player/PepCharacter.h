@@ -8,7 +8,9 @@
 #include "Pepccine/Character/Controller/PepccinePlayerController.h"
 #include "PlayerStatComponent.h"
 #include "CrosshairHUDComponent.h"
+#include "Character/Data/ActorInfo.h"
 #include "Character/Interfaces/IStaminaObserver.h"
+#include "Item/PepccineDropItem.h"
 #include "PepCharacter.generated.h"
 
 class UInputMappingContext;
@@ -135,11 +137,14 @@ private:
 	float SprintHoldThreshold = 0.2f;
 
 	FVector RollDirection;
+	
+	UPROPERTY()
+	APepccineDropItem* CurrentDropItem;
 
 	FTimerHandle RollTimerHandle;
 
 	UFUNCTION()
-	void OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors);
+	void OnActorDetectedEnhanced(FDetectedActorList& DetectedActors);
 
 	void InitializeCharacterMovement() const;
 	void ToggleCameraView();
