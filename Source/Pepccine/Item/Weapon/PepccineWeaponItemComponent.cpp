@@ -11,13 +11,20 @@ void UPepccineWeaponItemComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-bool UPepccineWeaponItemComponent::Fire(const float& WeaponDamage) const
+void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage)
 {
+	// 현재 발사 가능 상태가 아니라면 발사 실패(연사 관련)
+	if (!bCanFire)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("발사 준비 중"));
+		return;
+	}
+
 	// 현재 탄창에 탄약이 없을 경우 발사 실패
 	if (EquippedWeaponData->GetWeaponItemStats().MagazineAmmo == 0.0f)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("탄창에 남은 탄약이 없습니다."));
-		return false;
+		return;
 	}
 
 	if (TSubclassOf<APepccineProjectile> Projectile = EquippedWeaponData->GetProjectileClass())
@@ -39,7 +46,7 @@ bool UPepccineWeaponItemComponent::Fire(const float& WeaponDamage) const
 				// 프로젝타일을 생성한 주체 설정
 				SpawnParams.Instigator = OwnerCharacter;
 				SpawnParams.Owner = GetOwner();
-				
+
 				// 투사체 생성
 				APepccineProjectile* SpawnedProjectile = World->SpawnActor<APepccineProjectile>(
 					Projectile, MuzzleLocation, MuzzleRotation, SpawnParams);
@@ -72,12 +79,23 @@ bool UPepccineWeaponItemComponent::Fire(const float& WeaponDamage) const
 				//	}
 				//}
 
-				return true;
+				// 임시 무기 재사용 대기시간
+				const float FireRate = 0.2f * EquippedWeaponData->GetWeaponItemStats().FireRateMultiplier;
+
+				bCanFire = false;
+				// 무기 재사용 대기시간 적용
+				World->GetTimerManager().SetTimer(EquippedWeaponData->GetFireRateTimerHandle(), this,
+				                                  &UPepccineWeaponItemComponent::CanFire, FireRate, false);
+
+				EquippedWeaponData->GetWeaponItemStatsPointer()->MagazineAmmo--;
+
+				UE_LOG(LogTemp, Warning, TEXT("%s 발사! %.0f / %.0f"),
+				       *EquippedWeaponData->GetDisplayName(),
+				       EquippedWeaponData->GetWeaponItemStats().MagazineAmmo,
+				       EquippedWeaponData->GetWeaponItemStats().SpareAmmo);
 			}
 		}
 	}
-
-	return false;
 }
 
 static float MaxSpareAmmo = 999.0f;

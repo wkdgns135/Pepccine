@@ -229,20 +229,7 @@ void UPepccineItemManagerComponent::FireWeapon(float WeaponDamage) const
 	// 무기 컴포넌트가 있고 장착된 무기가 있을 경우만 발사
 	if (WeaponItemComp && GetEquippedWeaponItemData())
 	{
-		if (WeaponItemComp->Fire(WeaponDamage))
-		{
-			UPepccineWeaponItemData* EquippedWeaponData = GetEquippedWeaponItemData();
-			EquippedWeaponData->GetWeaponItemStatsPointer()->MagazineAmmo--;
-
-			UE_LOG(LogTemp, Warning, TEXT("%s 발사! %.0f / %.0f"),
-			       *EquippedWeaponData->GetDisplayName(),
-			       EquippedWeaponData->GetWeaponItemStats().MagazineAmmo,
-			       EquippedWeaponData->GetWeaponItemStats().SpareAmmo);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("무기 발사 실패!!"));
-		}
+		WeaponItemComp->Fire(WeaponDamage);
 	}
 }
 

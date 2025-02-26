@@ -17,8 +17,6 @@ public:
 	FORCEINLINE FString GetDescription() const { return Description; };
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE int32 GetItemTier() const { return ItemTier; };
-	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE int32 GetSellingPrice() const { return SellingPrice; };
 
 	FORCEINLINE TObjectPtr<UStaticMesh> GetMeshToSpawn() { return MeshToSpawn; };
 	FORCEINLINE TObjectPtr<USoundBase> GetPickUpSound() { return PickUpSound; };
@@ -34,9 +32,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info",
 		meta = (DisplayName = "레어도", ClampMin = "0", ClampMax = "4"))
 	int32 ItemTier;
-	// 판매할 때 가격
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "판매 가격"))
-	int32 SellingPrice;
 	// 스폰할 때 보여질 메시
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "스폰 메시"))
 	TObjectPtr<UStaticMesh> MeshToSpawn;

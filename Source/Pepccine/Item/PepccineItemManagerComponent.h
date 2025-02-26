@@ -106,9 +106,6 @@ public:
 		return TotalCharacterStatProduct.FindOrAdd(CharacterStatName, 1.0f);
 	};
 
-	UFUNCTION(BlueprintImplementableEvent, BlueprintType)
-	void BluprintTest();
-
 protected:
 	// 기본 무기 초기화
 	UFUNCTION()
