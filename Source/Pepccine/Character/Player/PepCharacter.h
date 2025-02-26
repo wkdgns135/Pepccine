@@ -17,11 +17,9 @@ class USpringArmComponent;
 class UCameraComponent;
 class UPepccineMontageComponent;
 class UPrograssBarHUDComponent;
-
-class URadorComponent;
+class UInventoryComponent;
+//class URadorComponent;
 class UCollisionRadarComponent;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, CurrentHealth);
 
 UCLASS()
 class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver
@@ -32,20 +30,17 @@ public:
 	APepCharacter();
 
 	bool bIsFirstPersonView = false;
+	bool bIsInventoryOpened = false;
 
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnHealthChanged OnHealthChanged;
-
+	// UE delegate
+	UFUNCTION()
+	void OnHealthChanged(const float NewHealth, const float MaxHealth);
+	// Observer Pattern
 	virtual void OnStaminaChanged(float NewStamina, float MaxStamina) override;
-	virtual float TakeDamage(
-		float DamageAmount,
-		struct FDamageEvent const& DamageEvent,
-		class AController* EventInstigator,
-		AActor* DamageCauser
-	) override;
 
 	// inline
-	FORCEINLINE_DEBUGGABLE bool IsJumping() const { return bIsJumping; }
+	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }
+	FORCEINLINE_DEBUGGABLE bool IsInventoryOpen() const { return bIsInventoryOpened; }
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -65,9 +60,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPrograssBarHUDComponent* PrograssBarComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	URadorComponent* RadarComponent;
+    UCollisionRadarComponent* EnhancedRadarComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	UCollisionRadarComponent* EnhancedRadarComponent;
+	UInventoryComponent* InventoryComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineMontageComponent* PepccineMontageComponent;
 
@@ -124,13 +119,11 @@ private:
 	float CameraArmLength = 300.0f;
 	
 	bool bIsZooming = false;
-	bool bIsJumping = false;
 	bool bIsCrouching = false;
 	bool bIsSprinting = false;
 	bool bIsSprintable = true;
 	bool bIsReloading = false;
 	bool bIsInteracting = false;
-	bool bIsInventoryOpened = false;
 	bool bIsRolling = false;
 	bool bIsRollable = true;
 	bool bIsMoving = false;
@@ -143,12 +136,9 @@ private:
 	FTimerHandle RollTimerHandle;
 
 	UFUNCTION()
-	void OnActorDetected(const AActor* DetectedActor);
-
-	UFUNCTION()
 	void OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors);
 
-	void InitializeCharacterMovement();
+	void InitializeCharacterMovement() const;
 	void ToggleCameraView();
 	void AddObservers();
 

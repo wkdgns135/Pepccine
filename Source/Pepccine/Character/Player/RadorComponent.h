@@ -14,7 +14,6 @@ class PEPCCINE_API URadorComponent : public UActorComponent
 public:	
 	URadorComponent();
 
-  // Debug 용
   UPROPERTY(EditAnywhere, Category = "Debug")
   bool bShowDetectionRadius = false;
 
@@ -27,16 +26,16 @@ protected:
 
 public:
   UPROPERTY(EditAnywhere, Category = "Radar")
-  float DetectionRadius = 1200.0f; // 감지 반경
+  float DetectionRadius = 1200.0f;
 
   UPROPERTY(EditAnywhere, Category = "Radar")
-  float FieldOfView = 120.0f; // 시야각 (FOV)
+  float FieldOfView = 120.0f; 
 
   UPROPERTY(EditAnywhere, Category = "Radar")
-  TSubclassOf<AActor> DetectionClass; // 감지할 액터 타입 (예: ACharacter)
+  TSubclassOf<AActor> DetectionClass; 
 
   UPROPERTY(BlueprintAssignable, Category = "Radar")
-  FOnActorDetected OnActorDetected; // 블루프린트 이벤트
+  FOnActorDetected OnActorDetected; 
 
 private:
   bool IsInFieldOfView(AActor* TargetActor) const;

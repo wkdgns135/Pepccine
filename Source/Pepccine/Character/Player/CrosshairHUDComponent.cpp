@@ -2,6 +2,7 @@
 #include "PepCharacter.h"
 #include "Components/Image.h"
 #include "Blueprint/UserWidget.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UCrosshairHUDComponent::UCrosshairHUDComponent()
 {
@@ -42,9 +43,10 @@ void UCrosshairHUDComponent::UpdateCrosshair(float DeltaTime)
     APepCharacter* PepCharacter = Cast<APepCharacter>(Owner);
     if (!PepCharacter) return;
 
-    bool IsJumping = PepCharacter->IsJumping();
-
-    if (IsJumping) {
+    UCharacterMovementComponent* CharacterMovementComponent = PepCharacter->GetCharacterMovement();
+    if (!CharacterMovementComponent) return;
+    
+    if (CharacterMovementComponent->IsFalling()) {
       AimSize += 200.f * DeltaTime;
     }
     else {

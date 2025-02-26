@@ -21,8 +21,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "UI")
 	UHealthWidget* HealthWidget;
 
-	void SetStamina(float NewStamina, float MaxStamina);
-	void SetHealth(float NewHealth, float MaxHealth);
+	void SetStamina(const float NewStamina, const float MaxStamina) const;
+	void SetHealth(const float NewHealth, const float MaxHealth) const;
 
 protected:
 	virtual void BeginPlay() override;

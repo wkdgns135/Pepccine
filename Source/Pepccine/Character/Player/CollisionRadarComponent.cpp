@@ -5,7 +5,7 @@
 #include "DrawDebugHelpers.h" // Debug
 
 /*
-Collision Enabled µÈ ¾×ÅÍ¸¸ °¨Áö °¡´É
+Collision Enabled ëœ ëŒ€ìƒë§Œ ê°€ëŠ¥
 */
 
 UCollisionRadarComponent::UCollisionRadarComponent()
@@ -21,6 +21,7 @@ void UCollisionRadarComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+  if (!bIsUseRadar) return;
   if (!DetectionZone) return;
   AddDetectZone();
 
@@ -54,7 +55,6 @@ void UCollisionRadarComponent::AddDetectZone()
   DetectionZone->OnComponentEndOverlap.AddDynamic(this, &UCollisionRadarComponent::OnOverlapEnd);
 }
 
-// °¨Áö ¹üÀ§ ¾È¿¡ µé¾î¿Â ¾×ÅÍ Ãß°¡
 void UCollisionRadarComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
   bool bFromSweep, const FHitResult& SweepResult)
@@ -62,34 +62,15 @@ void UCollisionRadarComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedCom
   if (OtherActor && OtherActor != GetOwner())
   {
     NearbyActors.AddUnique(OtherActor);
-    /* For DEBUG
-    // °¨ÁöµÈ ¾×ÅÍÀÇ ÀÌ¸§ Ãâ·Â
-    UE_LOG(LogTemp, Warning, TEXT("Dected Actor: %s"), *OtherActor->GetName());
-
-    // °¨ÁöµÈ ¾×ÅÍÀÇ Å¬·¡½º Ãâ·Â
-    UE_LOG(LogTemp, Warning, TEXT("Detected Actor Class: %s"), *OtherActor->GetClass()->GetName());
-
-    // ÇöÀç °¨ÁöµÈ ¾×ÅÍ ¸®½ºÆ® °³¼ö Ãâ·Â
-    UE_LOG(LogTemp, Warning, TEXT("Detected Actor Count: %d"), NearbyActors.Num());
-
-    // °¨ÁöµÈ ¾×ÅÍÀÇ ÄÝ¸®Àü ¼³Á¤ È®ÀÎ
-    if (OtherActor->GetRootComponent())
-    {
-      UE_LOG(LogTemp, Warning, TEXT("Collision Enabled: %s"),
-        OtherActor->GetRootComponent()->IsCollisionEnabled() ? TEXT("YES") : TEXT("NO"));
-    }
-    */
   }
 }
 
-// °¨Áö ¹üÀ§¸¦ ¹þ¾î³­ ¾×ÅÍ Á¦°Å
 void UCollisionRadarComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
   NearbyActors.Remove(OtherActor);
 }
 
-// ½Ã¾ß°¢ ³»¿¡ ÀÖ´ÂÁö È®ÀÎ (³»Àû »ç¿ë)
 bool UCollisionRadarComponent::IsInFieldOfView(AActor* TargetActor) const
 {
   if (!TargetActor) return false;
@@ -106,7 +87,6 @@ bool UCollisionRadarComponent::IsInFieldOfView(AActor* TargetActor) const
   return DotProduct >= CosHalfFOV;
 }
 
-// °¨Áö ½Ã½ºÅÛ (NearbyActors ³»¿¡¼­¸¸ Ã¼Å©)
 void UCollisionRadarComponent::DetectActors()
 {
   FDetectedActorList DetectedActorList;
@@ -134,13 +114,11 @@ void UCollisionRadarComponent::DrawDebugVisualization()
   FVector Location = GetOwner()->GetActorLocation();
   FVector Forward = GetOwner()->GetActorForwardVector();
 
-  // °¨Áö¹Ý°æ
   if (bShowDetectionRadius)
   {
     DrawDebugSphere(GetWorld(), Location, DetectionRadius, 32, FColor::Green, false, 0.1f, 0, 2.0f);
   }
 
-  // ½Ã¾ß°¢
   if (bShowFieldOfView)
   {
     float HalfFOV = FMath::DegreesToRadians(FieldOfView * 0.5f);
