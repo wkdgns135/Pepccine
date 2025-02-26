@@ -60,7 +60,7 @@ void UInventoryItemWidget::OnHovered()
 {
 	if (TooltipInfo)
 	{
-		UE_LOG(LogTemp, Display, TEXT("OnHovered"));
+		//UE_LOG(LogTemp, Display, TEXT("OnHovered"));
 		TooltipInfo->SetVisibility(ESlateVisibility::Visible);
 	}
 
@@ -71,7 +71,7 @@ void UInventoryItemWidget::OnUnhovered()
 {
 	if (TooltipInfo)
 	{
-		UE_LOG(LogTemp, Display, TEXT("OnUnhovered"));
+		//UE_LOG(LogTemp, Display, TEXT("OnUnhovered"));
 		TooltipInfo->SetVisibility(ESlateVisibility::Hidden);
 	}
 

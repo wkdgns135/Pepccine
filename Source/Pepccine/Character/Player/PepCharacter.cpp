@@ -18,6 +18,7 @@
 #include "Character/Data/ActorInfo.h"
 #include "Components/WidgetComponent.h"
 #include "Item/PepccineDropItem.h"
+#include "Item/Passive/PepccinePassiveItemData.h"
 
 APepCharacter::APepCharacter()
 {
@@ -155,9 +156,9 @@ void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
   //DropItem->ShowEKey;
   CurrentDropItem = DropItem;
 
-  //UE_LOG(LogTemp, Warning, TEXT("Number of DectedActor: %d"), DetectedActors.DetectedActors.Num());
-  //UE_LOG(LogTemp, Warning, TEXT("Detected Actors: [%s]"), *MinDistActor->Actor->GetName());
-  //UE_LOG(LogTemp, Warning, TEXT("Detected Actors Loc: [%f]"), MinDistActor->Distance);
+  UE_LOG(LogTemp, Warning, TEXT("Number of DectedActor: %d"), DetectedActors.DetectedActors.Num());
+  UE_LOG(LogTemp, Warning, TEXT("Detected Actors: [%s]"), *MinDistActor->Actor->GetName());
+  UE_LOG(LogTemp, Warning, TEXT("Detected Actors Loc: [%f]"), MinDistActor->Distance);
 }
 #pragma endregion
 
@@ -348,12 +349,26 @@ void APepCharacter::Interactive()
   // 아이템 인벤토리에 추가
   if (CurrentDropItem)
   {
-    const UPepccineItemDataBase* DropItem = CurrentDropItem->GetDropItemData();
-    InventoryComponent->AddItem(DropItem->IconTexture, DropItem->GetDisplayName(), DropItem->GetDescription());
+    if (CurrentDropItem->IsA(UPepccinePassiveItemData::StaticClass()))
+    {
+      const UPepccineItemDataBase* DropItem = CurrentDropItem->GetDropItemData();
+      InventoryComponent->AddItem(DropItem->IconTexture, DropItem->GetDisplayName(), DropItem->GetDescription());
+    }
+    else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
+    {
+      // 무기에 관련된 변화
+    }
   }
 
-  // 스텟연산
+  // 스텟연산 (저장 구조체)
+  // 갖고있는 모든 패시브 아이템 적용 (캐릭터 스텟)
+  PlayerStatComponent->AttackDamage = (PlayerStatComponent->AttackDamage + ItemManagerComponent->GetTotalSumByCharacterStatName(EPepccineCharacterStatName::EPCSN_AttackDamage)) * ItemManagerComponent->GetTotalProductByCharacterStatName(EPepccineCharacterStatName::EPCSN_AttackDamage);
+  // 1. 케릭터 스탯 연산 선행
+  // 2. 무기 스탯 반영
+  // 3. PlayerStatComponent->AttackDamage 
   
+  // 갖고있는 무기 스텟 (총 스텟)
+  PlayerStatComponent->AttackDamage *= (ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().AttackMultiplier + ItemManagerComponent->GetTotalSumByWeaponItemStatName(EPepccineWeaponStatName::EPWSN_AttackMultiplier)) * ItemManagerComponent->GetTotalProductByWeaponItemStatName(EPepccineWeaponStatName::EPWSN_AttackMultiplier);
 
   // Delay 있는 상호작용 전용
   if (bIsInteracting)
