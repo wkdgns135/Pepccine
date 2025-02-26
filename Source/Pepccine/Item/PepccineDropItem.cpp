@@ -45,8 +45,12 @@ void APepccineDropItem::InitializeDropItem(const UPepccineItemDataBase* InDropIt
 	{
 		// 스폰 메시 설정
 		StaticMeshComp->SetStaticMesh(DropItemData->GetMeshToSpawn());
-		
 	}
+}
+
+void APepccineDropItem::ShowInteractWidget(const bool bShow) const
+{
+	InteractWidgetComp->SetHiddenInGame(!bShow);
 }
 
 void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerComponent)

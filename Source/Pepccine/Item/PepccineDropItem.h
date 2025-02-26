@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
 #include "PepccineDropItem.generated.h"
 
 class UPepccineItemManagerComponent;
@@ -22,6 +23,12 @@ public:
 
 	// 아이템 초기화
 	void InitializeDropItem(const UPepccineItemDataBase* InDropItemData);
+
+	// 아이템 위젯 on / off (show = true, hidden = false)
+	void ShowInteractWidget(const bool bShow) const;
+
+	// 아이템 데이터 가져오기
+	UPepccineItemDataBase* GetDropItemData() const { return DropItemData; };
 
 	// 아이템 획득
 	UFUNCTION(BlueprintCallable)
