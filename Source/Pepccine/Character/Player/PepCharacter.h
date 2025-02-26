@@ -18,6 +18,7 @@ class UCameraComponent;
 class UPepccineMontageComponent;
 class UPrograssBarHUDComponent;
 class UInventoryComponent;
+class UPepccineItemManagerComponent;
 //class URadorComponent;
 class UCollisionRadarComponent;
 
@@ -63,6 +64,8 @@ protected:
     UCollisionRadarComponent* EnhancedRadarComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UInventoryComponent* InventoryComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UPepccineItemManagerComponent* ItemManagerComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineMontageComponent* PepccineMontageComponent;
 

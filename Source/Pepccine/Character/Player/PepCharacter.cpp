@@ -1,8 +1,11 @@
 
 #include "PepCharacter.h"
-#include "EnhancedInputComponent.h"
+
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
+
+#include "EnhancedInputComponent.h"
+#include "Item/PepccineItemManagerComponent.h"
 #include "Camera/CameraComponent.h"
 #include "CrosshairHUDComponent.h"
 #include "PrograssBarHUDComponent.h"
@@ -41,6 +44,7 @@ APepCharacter::APepCharacter()
   EnhancedRadarComponent = CreateDefaultSubobject<UCollisionRadarComponent>(TEXT("EnhancedRadarComponent"));
   InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
   PepccineMontageComponent = CreateDefaultSubobject<UPepccineMontageComponent>(TEXT("MontageComponent"));
+  ItemManagerComponent = CreateDefaultSubobject<UPepccineItemManagerComponent>(TEXT("ItemManagerComponent"));
 }
 
 void APepCharacter::BeginPlay()
@@ -387,11 +391,10 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 
 void APepCharacter::Fire()
 {
-  UE_LOG(LogTemp, Log, TEXT("Fire!"));
-
   if (bIsRolling) return;
 
   PepccineMontageComponent->Fire();
+  ItemManagerComponent->FireWeapon(100);
 }
 
 void APepCharacter::ZoomIn()
