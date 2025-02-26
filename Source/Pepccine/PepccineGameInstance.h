@@ -13,11 +13,9 @@ class PEPCCINE_API UPepccineGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 private:
-	TObjectPtr<URoomManager> RoomManager;
+	UPROPERTY(EditAnywhere, Category = "RoomManager")
+	URoomManager *RoomManager;
 	
 public:
-	virtual void Init() override;
-	
-public:
-	FORCEINLINE TObjectPtr<URoomManager> GetRoomManager() const { return RoomManager; }
+	FORCEINLINE URoomManager* GetRoomManager() const { return RoomManager; }
 };

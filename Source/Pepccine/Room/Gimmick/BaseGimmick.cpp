@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Room/BaseGimmick.h"
+#include "BaseGimmick.h"
 #include "PepccineGameState.h"
-#include "Room/BaseRoom.h"
+#include "Room/Controller/BaseRoomController.h"
 #include "Kismet/GameplayStatics.h"
 
 ABaseGimmick::ABaseGimmick()
@@ -17,8 +17,12 @@ void ABaseGimmick::BeginPlay()
 	APepccineGameState* GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	if (GameState)
 	{
-		GameState->GetCurrentRoom()->OnRoomStarted.AddUObject(this, &ABaseGimmick::Activate);
-		GameState->GetCurrentRoom()->OnRoomCleared.AddUObject(this, &ABaseGimmick::Deactivate);
+		ABaseRoomController* RoomController = GameState->GetRoomController();
+		if (RoomController)
+		{
+			RoomController->OnRoomStarted.AddUObject(this, &ABaseGimmick::Activate);
+			RoomController->OnRoomCleared.AddUObject(this, &ABaseGimmick::Deactivate);
+		}
 	}
 }
 

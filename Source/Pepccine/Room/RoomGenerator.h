@@ -39,7 +39,7 @@ private:
 	void AddAdditionalEndRooms();
 	void PrintGrid();
 	void AssignEndRooms();
-	void StartNextFloor();
+	void StartNextFloor() const;
 	TArray<FIntPoint> FindShortestPath(const FIntPoint Start, const FIntPoint End) const;
 	
 	static void ShuffleArray(TArray<FIntPoint>& Array);
