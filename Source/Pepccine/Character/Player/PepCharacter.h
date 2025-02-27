@@ -138,12 +138,8 @@ private:
 	void ZoomIn();
 	UFUNCTION()
 	void ZoomOut();
-	
-	void TestApplyStatModifier();
-	void TestRemoveStatModifier();
 
 	float CameraArmLength = 300.0f;
-	
 	float SprintHoldStartTime = 0.0f;
 	float SprintHoldThreshold = 0.2f;
 
@@ -166,4 +162,8 @@ private:
 	void CheckRolling(float DeltaTime);
 
 	FVector GetRollDirection();
+
+	// TEST CODE
+	void TestApplyStatModifier();
+	void TestRemoveStatModifier();
 };

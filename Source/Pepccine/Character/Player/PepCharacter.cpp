@@ -60,8 +60,8 @@ void APepCharacter::BeginPlay()
 	InitializeCharacterMovement();
 	AddObservers();
 
-	TestApplyStatModifier();
-	TestRemoveStatModifier();
+	//TestApplyStatModifier();
+	//TestRemoveStatModifier();
 }
 
 void APepCharacter::TestApplyStatModifier()
@@ -83,10 +83,10 @@ void APepCharacter::TestApplyStatModifier()
 	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 	UE_LOG(LogTemp, Log, TEXT("적용 예정: 50.0f, 1.1f"));
 
-	FStatModifier SpeedModifier(EPepccineCharacterStatName::EPCSN_MovementSpeed, 50.0f, 1.1f);
-	PlayerStatComponent->ApplyStatModifier(SpeedModifier);
+	FStatModifier AttackModifierA(EPepccineCharacterStatName::EPCSN_AttackDamage, 50.0f, 1.1f);
+	PlayerStatComponent->ApplyStatModifier(AttackModifierA);
 
-	UE_LOG(LogTemp, Log, TEXT("== 2. 스탯 적용 =="));
+	UE_LOG(LogTemp, Log, TEXT("== 3. 스탯 적용 =="));
 	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 }
 
@@ -102,15 +102,15 @@ void APepCharacter::TestRemoveStatModifier()
 	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 	UE_LOG(LogTemp, Log, TEXT("적용 예정: 10.0f, 1.2f"));
 
-	FStatModifier AttackModifier(EPepccineCharacterStatName::EPCSN_AttackDamage, 10.0f, 1.2f);
+	FStatModifier AttackModifier(EPepccineCharacterStatName::EPCSN_AttackDamage, 50.0f, 1.1f);
 	PlayerStatComponent->RemoveStatModifier(AttackModifier);
 
 	UE_LOG(LogTemp, Log, TEXT("== 2. 스탯 제거 =="));
 	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 	UE_LOG(LogTemp, Log, TEXT("적용 예정: 50.0f, 1.1f"));
 
-	FStatModifier SpeedModifier(EPepccineCharacterStatName::EPCSN_MovementSpeed, 50.0f, 1.1f);
-	PlayerStatComponent->RemoveStatModifier(SpeedModifier);
+	FStatModifier AttackModifierA(EPepccineCharacterStatName::EPCSN_AttackDamage, 10.0f, 1.2f);
+	PlayerStatComponent->RemoveStatModifier(AttackModifierA);
 
 	UE_LOG(LogTemp, Log, TEXT("== 3. 스탯 제거 =="));
 	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
@@ -362,8 +362,6 @@ void APepCharacter::Roll()
 	}
 
 	bIsRolling = true;
-	FStatModifier SpeedModifier(EPepccineCharacterStatName::EPCSN_RollElapsedTime, 0.0f, 0.0f);
-	PlayerStatComponent->ApplyStatModifier(SpeedModifier);
 	RollDirection = GetRollDirection();
 
 	if (!PlayerStatComponent->DecreaseStaminaByPercentage(30))
@@ -769,7 +767,7 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	{
 		EnhancedInput->BindAction(
 			PlayerController->ReloadingAction,
-			ETriggerEvent::Triggered,
+			ETriggerEvent::Started,
 			this,
 			&APepCharacter::Reload
 		);
