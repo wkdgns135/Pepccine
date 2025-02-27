@@ -10,15 +10,6 @@ struct FStatModifier
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EPepccineCharacterStatName StatType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AdditiveValue = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MultiplicativeValue = 1.0f;
-
 	FStatModifier()
 			: StatType(EPepccineCharacterStatName::EPCSN_AttackDamage),
 				AdditiveValue(0.0f),
@@ -30,7 +21,16 @@ public:
 				AdditiveValue(InAdditive),
 				MultiplicativeValue(InMultiplicative)
 	{}
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EPepccineCharacterStatName StatType;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AdditiveValue = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MultiplicativeValue = 1.0f;
+	
 	bool operator==(const FStatModifier& Other) const
 	{
 		return StatType == Other.StatType &&

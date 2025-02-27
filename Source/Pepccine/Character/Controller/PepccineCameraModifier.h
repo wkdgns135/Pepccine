@@ -11,7 +11,6 @@ class PEPCCINE_API UPepccineCameraModifier : public UCameraModifier
 
 public:
 	void StartShake(float Amplitude, float Frequency, float Duration);
-
 	void StopShake();
 
 protected:

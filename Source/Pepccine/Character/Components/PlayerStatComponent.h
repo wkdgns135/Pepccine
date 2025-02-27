@@ -21,6 +21,11 @@ class PEPCCINE_API UPlayerStatComponent : public UBaseStatComponent
 public:	
 	UPlayerStatComponent();
 
+	TArray<IIStaminaObserver*> StaminaObservers;
+	
+	FTimerHandle IncreaseStaminaTimerHandle;
+	FTimerHandle DecreaseHealthTimerHandle;
+
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHealthChanged OnHealthChanged;
 	
@@ -38,6 +43,9 @@ public:
 
 	void AddStaminaObserver(IIStaminaObserver* Observer);
 	void RemoveStaminaObserver(IIStaminaObserver* Observer);
+	void NotifyStaminaObservers();
+	
+	void StartRepeatingTimer();
 
 	float GetAttackDamage() const { return CurrentStats.CombatStats.AttackDamage; }
 
@@ -53,14 +61,6 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 public:
-	void NotifyStaminaObservers();
-	void StartRepeatingTimer();
-
-	TArray<IIStaminaObserver*> StaminaObservers;
-	
-	FTimerHandle IncreaseStaminaTimerHandle;
-	FTimerHandle DecreaseHealthTimerHandle;
-
 	// 스텟 관련 리팩중
 	/** 새로운 PlayerStatDataAsset을 설정하고 스탯을 초기화 */
 	UFUNCTION(BlueprintCallable, Category="Stats")
@@ -82,14 +82,16 @@ public:
 private:
 	/* 현재 스텟 */
 	FPlayerStats CurrentStats;
+	/** 현재 적용된 모든 Modifier의 합연산 총합 */
+	FPlayerStats CurrentTotalAdd;
+	/** 현재 적용된 모든 Modifier의 곱연산 총합 */
+	FPlayerStats CurrentTotalMul;
 
 	/** 적용된 스탯 수정 목록 (아이템, 버프 등) */
 	TArray<FStatModifier> ActiveModifiers;
 
 	/** 모든 Modifier를 적용하여 스탯을 다시 계산 */
 	void RecalculateStats();
-	/** 특정 Modifier를 한 개만 적용 */
-	void ApplySingleStatModifier(const FStatModifier& Modifier);
 	/** 스탯 값이 제한을 초과하지 않도록 보정 */
 	void ClampStats();
 	/** 스탯 초기화 (기본값으로 리셋) */
@@ -98,4 +100,7 @@ private:
 	/** 게임에서 사용할 기본 스탯을 저장하는 데이터 애셋 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
 	UPlayerStatDataAsset* PlayerStatDataAsset;
+
+
+
 };

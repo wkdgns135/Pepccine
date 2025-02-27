@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-#include "Pepccine/Character/Controller/PepccinePlayerController.h"
-#include "PlayerStatComponent.h"
-#include "CrosshairHUDComponent.h"
+#include "Character/Controller/PepccinePlayerController.h"
+#include "Character/Components/PlayerStatComponent.h"
+#include "Character/Components/CrosshairHUDComponent.h"
 #include "Character/Data/ActorInfo.h"
 #include "Character/Interfaces/IStaminaObserver.h"
 #include "Item/PepccineDropItem.h"
@@ -58,11 +58,15 @@ public:
 	// inline
 	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }
 	FORCEINLINE_DEBUGGABLE bool IsInventoryOpen() const { return bIsInventoryOpened; }
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+public:
+	APepccinePlayerController* PlayerController;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	USpringArmComponent* SpringArmComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
@@ -87,6 +91,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineMontageComponent* PepccineMontageComponent;
 
+private:
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
 	UFUNCTION()
@@ -137,9 +142,6 @@ protected:
 	void TestApplyStatModifier();
 	void TestRemoveStatModifier();
 
-	APepccinePlayerController* PlayerController;
-
-private:
 	float CameraArmLength = 300.0f;
 	
 	float SprintHoldStartTime = 0.0f;

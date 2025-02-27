@@ -47,7 +47,7 @@ struct FCombatStats
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Stats")
-    float AttackDamage = 100.0f;
+    float AttackDamage = 10.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
     float InvincibilityTime = 0.0f;
