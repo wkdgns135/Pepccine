@@ -14,16 +14,7 @@ class PEPCCINE_API UBaseStatComponent : public UActorComponent
 
 public:	
 	UBaseStatComponent();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Common")
-	float CurrentHealth;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Common")
-	float MaxHealth;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Common")
-	float MovementSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status|Common")
-	float AttackDamage;
-
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

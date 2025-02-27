@@ -31,6 +31,8 @@ public:
 	{
 		return CharacterStatModifiers;
 	};
+	UFUNCTION(BlueprintPure, category = "Modifier")
+	FORCEINLINE TArray<FPepccineCharacterFeature> GetCharacterFeatures() const { return CharacterFeatures; };
 
 protected:
 	// 무기 스탯 수정자 목록
@@ -41,7 +43,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Passive", meta = (DisplayName = "캐릭터 스탯 수정 목록"))
 	TArray<FPepccineCharacterStatModifier> CharacterStatModifiers;
 
-public:
 	// 캐릭터 추가 기능 목록
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Passive",
 		meta = (DisplayName = "캐릭터 추가 기능 목록"))

@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-#include "Pepccine/Character/Controller/PepccinePlayerController.h"
-#include "PlayerStatComponent.h"
-#include "CrosshairHUDComponent.h"
+#include "Character/Controller/PepccinePlayerController.h"
+#include "Character/Components/PlayerStatComponent.h"
+#include "Character/Components/CrosshairHUDComponent.h"
 #include "Character/Data/ActorInfo.h"
 #include "Character/Interfaces/IStaminaObserver.h"
 #include "Item/PepccineDropItem.h"
@@ -19,6 +19,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UPepccineMontageComponent;
 class UPrograssBarHUDComponent;
+class UItemIconHUDComponent;
 class UInventoryComponent;
 class UPepccineItemManagerComponent;
 //class URadorComponent;
@@ -34,21 +35,38 @@ public:
 
 	bool bIsFirstPersonView = false;
 	bool bIsInventoryOpened = false;
+	
+	bool bIsMoving = false;
+	bool bIsZooming = false;
+	bool bIsSprinting = false;
+	
+	bool bIsCrouching = false;
+	bool bIsSprintable = true;
+	bool bIsReloading = false;
+	bool bIsInteracting = false;
+	bool bIsRolling = false;
+	bool bIsRollable = true;
 
 	// UE delegate
 	UFUNCTION()
 	void OnHealthChanged(const float NewHealth, const float MaxHealth);
 	// Observer Pattern
 	virtual void OnStaminaChanged(float NewStamina, float MaxStamina) override;
-
+	
+	void TriggerCameraShake();
+	
 	// inline
 	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }
 	FORCEINLINE_DEBUGGABLE bool IsInventoryOpen() const { return bIsInventoryOpened; }
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+public:
+	APepccinePlayerController* PlayerController;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	USpringArmComponent* SpringArmComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
@@ -63,7 +81,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPrograssBarHUDComponent* PrograssBarComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UCollisionRadarComponent* EnhancedRadarComponent;
+	UItemIconHUDComponent* ItemIconComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UCollisionRadarComponent* EnhancedRadarComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UInventoryComponent* InventoryComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -71,6 +91,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineMontageComponent* PepccineMontageComponent;
 
+private:
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
 	UFUNCTION()
@@ -117,22 +138,12 @@ protected:
 	void ZoomIn();
 	UFUNCTION()
 	void ZoomOut();
+	
+	void TestApplyStatModifier();
+	void TestRemoveStatModifier();
 
-	APepccinePlayerController* PlayerController;
-
-private:
 	float CameraArmLength = 300.0f;
 	
-	bool bIsZooming = false;
-	bool bIsCrouching = false;
-	bool bIsSprinting = false;
-	bool bIsSprintable = true;
-	bool bIsReloading = false;
-	bool bIsInteracting = false;
-	bool bIsRolling = false;
-	bool bIsRollable = true;
-	bool bIsMoving = false;
-
 	float SprintHoldStartTime = 0.0f;
 	float SprintHoldThreshold = 0.2f;
 

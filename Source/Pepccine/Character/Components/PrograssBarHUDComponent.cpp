@@ -1,4 +1,4 @@
-#include "Character/Player/PrograssBarHUDComponent.h"
+#include "Character/Components/PrograssBarHUDComponent.h"
 
 UPrograssBarHUDComponent::UPrograssBarHUDComponent()
 {

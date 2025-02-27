@@ -1,9 +1,10 @@
-#include "Character/Player/CollisionRadarComponent.h"
+#include "Character/Components/CollisionRadarComponent.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h" // Debug
 #include "Character/Data/ActorInfo.h"
+#include "Item/PepccineDropItem.h"
 
 /*
 Collision Enabled 된 대상만 가능
@@ -72,6 +73,10 @@ void UCollisionRadarComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
   //UE_LOG(LogTemp, Warning, TEXT("End -> [%s]"), *OtherActor->GetName());
   if (OtherActor && OtherActor != GetOwner())
   {
+    if (const APepccineDropItem* Item = Cast<APepccineDropItem>(OtherActor))
+    {
+      Item->ShowInteractWidget(false);
+    }
     NearbyActors.Remove(OtherActor);
   }
 }

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -21,5 +19,5 @@ public:
 	UProgressBar* ActiveProgressBar;
 
 	UFUNCTION(BlueprintCallable, Category = "UI|Active")
-	void UpdateWeaponUI(UTexture2D* ActiveImage, const FString& ActiveName, FString& ActiveButton, const int32 Cooldown, const int32 MaxCooldown);
+	void UpdateActiveItemUI(UTexture2D* ActiveImage, const FString& ActiveName, FString& ActiveButton, const int32 Cooldown, const int32 MaxCooldown);
 };
