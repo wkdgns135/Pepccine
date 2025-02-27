@@ -587,7 +587,9 @@ void APepCharacter::Fire()
 	TriggerCameraShake();
 
 	PepccineMontageComponent->Fire();
-	ItemManagerComponent->FireWeapon(100);
+	// 무기 데미지
+	
+	ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 }
 
 void APepCharacter::ZoomIn()
