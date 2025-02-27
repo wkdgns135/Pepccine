@@ -23,11 +23,11 @@ void ABaseRoomController::PostInitializeComponents()
 void ABaseRoomController::BeginPlay()
 {
 	Super::BeginPlay();
-	PlacePlayer();
 	GetWorldTimerManager().SetTimerForNextTick([this]()
 		{
 			OnRoomStarted.Broadcast();
 		});
+	PlacePlayer();
 }
 
 void ABaseRoomController::ClearRoom()
@@ -37,8 +37,10 @@ void ABaseRoomController::ClearRoom()
 
 void ABaseRoomController::PlacePlayer()
 {
-	URoomManager* RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager();
+	const URoomManager* RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager();
 	TArray<AActor*> BaseDoors;
+	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
+	
 	UGameplayStatics::GetAllActorsOfClass(this, ABaseDoor::StaticClass(), BaseDoors);
 	for (AActor* Actor : BaseDoors)
 	{
@@ -47,16 +49,25 @@ void ABaseRoomController::PlacePlayer()
 		{
 			if (Door->GetDirectionRoom() == RoomManager->GetPreviousRoomData())
 			{
-				ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
 				if (PlayerCharacter)
 				{
-					const FVector DoorLocation = Door->GetActorLocation();
-					const FRotator DoorRotation = Door->GetActorRotation();
+					const FVector DoorLocation = Door->GetSpawnPosition();
+					const FRotator DoorRotation = Door->GetSpawnRotation();
 					PlayerCharacter->SetActorLocation(DoorLocation);
-					PlayerCharacter->SetActorRotation(DoorRotation);
+					PlayerCharacter->Controller->SetControlRotation(DoorRotation);
+					return;
 				}
-
 			}
+		}
+	}
+
+	// 이전 방 정보가 없을 시 중앙에서 스폰
+	if (RoomManager->GetPreviousRoomData() == nullptr)
+	{
+		if (PlayerCharacter)
+		{
+			PlayerCharacter->SetActorLocation({0,0,0});
+			PlayerCharacter->SetActorRotation({0,0,0});
 		}
 	}
 }

@@ -3,33 +3,44 @@
 
 #include "BaseDoor.h"
 
-#include "PepccineCharacter.h"
 #include "PepccineGameInstance.h"
 #include "PepccineGameState.h"
 #include "Character/Player/PepCharacter.h"
 #include "Room/Controller/BaseRoomController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SceneComponent.h"
 #include "Room/RoomManager.h"
 
 
 ABaseDoor::ABaseDoor()
 {
+	RootScene = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+	SetRootComponent(RootScene);
+	
 	TriggerVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerVolume"));
-	TriggerVolume->SetupAttachment(RootComponent);
+	TriggerVolume->SetupAttachment(RootScene);
 	TriggerVolume->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	TriggerVolume->SetCollisionObjectType(ECC_WorldDynamic);
 	TriggerVolume->SetCollisionResponseToAllChannels(ECR_Ignore);
 	TriggerVolume->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	TriggerVolume->OnComponentBeginOverlap.AddDynamic(this, &ABaseDoor::OnTriggerBeginOverlap);
-
+	
+	DoorStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorStaticMesh"));
+	DoorStaticMesh->SetupAttachment(RootScene);
+	SpawnPosition = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpawnPosition"));
+	SpawnPosition->SetupAttachment(RootScene);
+	
 	PrimaryActorTick.bCanEverTick = false;
 }
 
 void ABaseDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	LockDoor();
+	
+	// LockDoor();
+	bIsLocked = false;
 	
 	if (APepccineGameState* GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld())))
 	{
@@ -39,6 +50,8 @@ void ABaseDoor::BeginPlay()
 			RoomController->OnRoomCleared.AddUObject(this, &ABaseDoor::OnCleared);
 		}
 	}
+	
+	SpawnPosition->SetVisibility(false);
 }
 
 void ABaseDoor::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -67,8 +80,6 @@ void ABaseDoor::OnStarted()
 			return;
 		}
 	}
-	FTimerHandle DoorOpenTimerHandle;
-	GetWorldTimerManager().SetTimer(DoorOpenTimerHandle, this, &ABaseDoor::OpenDoor, 5.0f, false);
 }
 
 void ABaseDoor::OnCleared()

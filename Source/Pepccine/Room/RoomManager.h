@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "RoomManager.generated.h"
 
+class ULevelStreamingDynamic;
 enum class EDoorDirection : uint8;
 class UFloorRoomData;
 
@@ -34,6 +35,8 @@ public:
 	ERoomType RoomType = ERoomType::ENone;
 	UPROPERTY()
 	FIntPoint RoomPoint;
+	UPROPERTY()
+	ULevelStreamingDynamic *StreamingLevel = nullptr;
 };
 
 UCLASS(DefaultToInstanced, EditInlineNew)
