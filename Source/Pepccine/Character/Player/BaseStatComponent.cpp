@@ -6,11 +6,6 @@
 UBaseStatComponent::UBaseStatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
-	MaxHealth = 0;
-	CurrentHealth = MaxHealth;
-	MovementSpeed = 0;
-	AttackDamage = 0;
 }
 
 void UBaseStatComponent::BeginPlay()

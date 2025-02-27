@@ -60,6 +60,65 @@ void APepCharacter::BeginPlay()
 
   InitializeCharacterMovement();
   AddObservers();
+
+  TestApplyStatModifier();
+  TestRemoveStatModifier();
+}
+
+void APepCharacter::TestApplyStatModifier()
+{
+    if (!PlayerStatComponent)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("PlayerStatComponent가 없습니다!"));
+        return;
+    }
+
+    // 현재 스탯 출력
+    UE_LOG(LogTemp, Log, TEXT("== 스탯 적용 전 =="));
+    UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.AttackDamage);
+    UE_LOG(LogTemp, Log, TEXT("현재 속도: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.MovementSpeed);
+
+    // 테스트용 스탯 Modifier (공격력 +10, *1.2배)
+    FStatModifier AttackModifier(EPepccineCharacterStatName::EPCSN_AttackDamage, 10.0f, 1.2f);
+    PlayerStatComponent->ApplyStatModifier(AttackModifier);
+
+    // 테스트용 스탯 Modifier (이동 속도 +50, *1.1배)
+    FStatModifier SpeedModifier(EPepccineCharacterStatName::EPCSN_MovementSpeed, 50.0f, 1.1f);
+    PlayerStatComponent->ApplyStatModifier(SpeedModifier);
+
+    // 현재 스탯 출력
+    UE_LOG(LogTemp, Log, TEXT("== 스탯 적용 후 =="));
+    UE_LOG(LogTemp, Log, TEXT("공격력 증가 아이템 사용!"));
+    UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.AttackDamage);
+    UE_LOG(LogTemp, Log, TEXT("현재 속도: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.MovementSpeed);
+}
+
+void APepCharacter::TestRemoveStatModifier()
+{
+    if (!PlayerStatComponent)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("PlayerStatComponent가 없습니다!"));
+        return;
+    }
+
+    // 현재 스탯 출력
+    UE_LOG(LogTemp, Log, TEXT("== 스탯 제거 전 =="));
+    UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.AttackDamage);
+    UE_LOG(LogTemp, Log, TEXT("현재 속도: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.MovementSpeed);
+
+    // 테스트용 스탯 Modifier 제거 (공격력 +10, *1.2배)
+    FStatModifier AttackModifier(EPepccineCharacterStatName::EPCSN_AttackDamage, 10.0f, 1.2f);
+    PlayerStatComponent->RemoveStatModifier(AttackModifier);
+
+    // 테스트용 스탯 Modifier 제거 (이동 속도 +50, *1.1배)
+    FStatModifier SpeedModifier(EPepccineCharacterStatName::EPCSN_MovementSpeed, 50.0f, 1.1f);
+    PlayerStatComponent->RemoveStatModifier(SpeedModifier);
+
+    // 현재 스탯 출력
+    UE_LOG(LogTemp, Log, TEXT("== 스탯 제거 후 =="));
+    UE_LOG(LogTemp, Log, TEXT("공격력 증가 아이템 제거!"));
+    UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.AttackDamage);
+    UE_LOG(LogTemp, Log, TEXT("현재 속도: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.MovementSpeed);
 }
 
 // Initialize Character Status
@@ -407,8 +466,23 @@ void APepCharacter::Interactive()
     }
     else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
     {
+      // 무기류 아이템
+      const UPepccineWeaponItemData* DropItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData());
+      // UTexture2D* MainWeaponImage, UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo)
+
+      if (DropItem->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main)
+      {
+        // ItemIconComponent->UpdateMainWeaponUI();
+      }
+      else if (DropItem->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Sub)
+      {
+        // ItemIconComponent->UpdateSubWeaponUI();
+      }
+    }
+    else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
+    {
       // 액티브 아이템
-      
+      const UPepccineWeaponItemData* DropItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData());
     }
   }
   

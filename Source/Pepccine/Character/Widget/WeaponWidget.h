@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -25,5 +23,7 @@ public:
 	UImage* BackWeaponImage;
 
 	UFUNCTION(BlueprintCallable, Category = "UI|Weapon")
-	void UpdateWeaponUI(UTexture2D* MainWeaponImage, UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo);
+	void UpdateMainWeaponUI(UTexture2D* MainWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo);
+	void UpdateSubWeaponUI(UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo);
+
 };

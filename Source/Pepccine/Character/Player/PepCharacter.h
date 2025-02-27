@@ -133,6 +133,9 @@ protected:
 	void ZoomIn();
 	UFUNCTION()
 	void ZoomOut();
+	
+	void TestApplyStatModifier();
+	void TestRemoveStatModifier();
 
 	APepccinePlayerController* PlayerController;
 
