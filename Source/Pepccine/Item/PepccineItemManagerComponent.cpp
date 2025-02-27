@@ -58,8 +58,14 @@ float UPepccineItemManagerComponent::GetWeaponStatByName(const EPepccineWeaponIt
 	return 0.0f;
 }
 
-void UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemData)
+void UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemData, const bool bIsPlayPickUpSound)
 {
+	if (!DropItemData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("아이템 데이터가 없습니다."));
+		return;
+	}
+	
 	if (const UPepccineWeaponItemData* WeaponItemData = Cast<UPepccineWeaponItemData>(DropItemData))
 	{
 		PickUpItem(WeaponItemData);
@@ -67,6 +73,14 @@ void UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemDa
 	else if (const UPepccinePassiveItemData* PassiveItemData = Cast<UPepccinePassiveItemData>(DropItemData))
 	{
 		PickUpItem(PassiveItemData);
+	}
+
+	if (bIsPlayPickUpSound)
+	{
+		if (USoundBase* PickUpSound = DropItemData->GetPickUpSound())
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, PickUpSound, GetOwner()->GetActorLocation());
+		}
 	}
 
 	// 임시 연사 속도 재설정
@@ -86,12 +100,6 @@ void UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemDa
 
 void UPepccineItemManagerComponent::PickUpItem(const UPepccineWeaponItemData* WeaponItemData)
 {
-	if (!WeaponItemData)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("무기 아이템 데이터가 없습니다."));
-		return;
-	}
-
 	// 복사해서 사용
 	UPepccineWeaponItemData* NewWeaponItemData = DuplicateObject<UPepccineWeaponItemData>(
 		WeaponItemData, this);
@@ -103,11 +111,6 @@ void UPepccineItemManagerComponent::PickUpItem(const UPepccineWeaponItemData* We
 	else
 	{
 		SubWeaponItemData = NewWeaponItemData;
-	}
-
-	if (USoundBase* PickUpSound = NewWeaponItemData->GetPickUpSound())
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, PickUpSound, GetOwner()->GetActorLocation());
 	}
 
 	// 획득한 무기 장착
@@ -200,7 +203,7 @@ void UPepccineItemManagerComponent::EquipDefaultWeapon()
 	}
 }
 
-void UPepccineItemManagerComponent::EquipWeapon(UPepccineWeaponItemData* Weapon)
+void UPepccineItemManagerComponent::EquipWeapon(UPepccineWeaponItemData* Weapon, const bool bIsPlayEquipSound) const
 {
 	// 무기가 없거나 무기 컴포넌트가 없을 경우 장착 X
 	if (!Weapon || !WeaponItemComp)
@@ -210,7 +213,7 @@ void UPepccineItemManagerComponent::EquipWeapon(UPepccineWeaponItemData* Weapon)
 	}
 
 	// 무기 장착
-	WeaponItemComp->EquipWeapon(Weapon);
+	WeaponItemComp->EquipWeapon(Weapon, bIsPlayEquipSound);
 
 	// 메시 변경
 	ChangeWeaponEquippedMesh();
@@ -288,14 +291,30 @@ FPepccineItemSaveData UPepccineItemManagerComponent::GetSaveItemData() const
 		PassiveItemIds.Add(PassiveItem.Key);
 	}
 
-	const int32 MainWeaponItemId = MainWeaponItemData ? MainWeaponItemData->GetItemId() : -1;
-	const int32 SubWeaponItemId = SubWeaponItemData ? SubWeaponItemData->GetItemId() : -1;
+	int32 MainWeaponItemId = -1;
+	FPepccineSaveWeaponAmmo MainWeaponAmmo;
+	if (MainWeaponItemData)
+	{
+		MainWeaponItemId = MainWeaponItemData->GetItemId();
+		MainWeaponAmmo.MagazinesAmmo = MainWeaponItemData->GetWeaponItemStats().MagazineAmmo;
+		MainWeaponAmmo.SpareAmmo = MainWeaponItemData->GetWeaponItemStats().SpareAmmo;
+	}
+	int32 SubWeaponItemId = -1;
+	FPepccineSaveWeaponAmmo SubWeaponAmmo;
+	if (SubWeaponItemData)
+	{
+		SubWeaponItemId = SubWeaponItemData->GetItemId();
+		SubWeaponAmmo.MagazinesAmmo = SubWeaponItemData->GetWeaponItemStats().MagazineAmmo;
+		SubWeaponAmmo.SpareAmmo = SubWeaponItemData->GetWeaponItemStats().SpareAmmo;
+	}
 	const EPepccineWeaponItemType EquippedWeaponItemType = GetEquippedWeaponItemData()
 		                                                       ? GetEquippedWeaponItemData()->GetWeaponItemType()
 		                                                       : EPepccineWeaponItemType::EPWIT_Sub;
 
 	return FPepccineItemSaveData(MainWeaponItemId,
+	                             MainWeaponAmmo,
 	                             SubWeaponItemId,
+	                             SubWeaponAmmo,
 	                             EquippedWeaponItemType,
 	                             PassiveItemIds);
 }
@@ -305,7 +324,9 @@ void UPepccineItemManagerComponent::LoadItemData(const FPepccineItemSaveData& Sa
 	UPepccineItemDataAssetBase* ItemDataBase = ItemSpawner->GetItemDataAsset();
 	if (SaveData.MainWeaponItemId >= 0 && SaveData.MainWeaponItemId < ItemDataBase->GetWeaponsItems().Num())
 	{
-		PickUpItem(ItemDataBase->GetWeaponsItemById(SaveData.MainWeaponItemId));
+		PickUpItem(ItemDataBase->GetWeaponsItemById(SaveData.MainWeaponItemId), false);
+		MainWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = SaveData.MainWeaponAmmo.MagazinesAmmo;
+		MainWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SaveData.MainWeaponAmmo.SpareAmmo;
 	}
 	else
 	{
@@ -314,12 +335,14 @@ void UPepccineItemManagerComponent::LoadItemData(const FPepccineItemSaveData& Sa
 
 	if (SaveData.SubWeaponItemId >= 0 && SaveData.SubWeaponItemId < ItemDataBase->GetWeaponsItems().Num())
 	{
-		PickUpItem(ItemDataBase->GetWeaponsItemById(SaveData.SubWeaponItemId));
+		PickUpItem(ItemDataBase->GetWeaponsItemById(SaveData.SubWeaponItemId), false);
+		SubWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = SaveData.SubWeaponAmmo.MagazinesAmmo;
+		SubWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SaveData.SubWeaponAmmo.SpareAmmo;
 	}
 
 	EquipWeapon(SaveData.EquippedWeaponItemType == EPepccineWeaponItemType::EPWIT_Main
 		            ? MainWeaponItemData
-		            : SubWeaponItemData);
+		            : SubWeaponItemData, false);
 
 	for (const int32 Id : SaveData.PassiveItemIds)
 	{

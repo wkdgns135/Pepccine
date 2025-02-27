@@ -153,13 +153,16 @@ bool UPepccineWeaponItemComponent::Reload() const
 	return true;
 }
 
-void UPepccineWeaponItemComponent::EquipWeapon(UPepccineWeaponItemData* WeaponItemData)
+void UPepccineWeaponItemComponent::EquipWeapon(UPepccineWeaponItemData* WeaponItemData, const bool bIsPlayEquipSound)
 {
 	EquippedWeaponData = WeaponItemData;
 
-	if (USoundBase* ReloadSound = EquippedWeaponData->GetReloadSound())
+	if (bIsPlayEquipSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ReloadSound, OwnerCharacter->GetActorLocation());
+		if (USoundBase* ReloadSound = EquippedWeaponData->GetReloadSound())
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, ReloadSound, OwnerCharacter->GetActorLocation());
+		}		
 	}
 }
 

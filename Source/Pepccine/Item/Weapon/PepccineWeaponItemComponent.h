@@ -24,7 +24,7 @@ public:
 	bool Reload() const;
 
 	// 무기 장착
-	void EquipWeapon(UPepccineWeaponItemData* WeaponItemData);
+	void EquipWeapon(UPepccineWeaponItemData* WeaponItemData, bool bIsPlayEquipSound = true);
 
 	FORCEINLINE void CanFire()
 	{

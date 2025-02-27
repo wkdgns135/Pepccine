@@ -27,7 +27,7 @@ public:
 	float GetWeaponStatByName(EPepccineWeaponItemType WeaponType, EPepccineWeaponStatName WeaponStatName) const;
 	
 	// 아이템 획득
-	void PickUpItem(UPepccineItemDataBase* DropItemData);
+	void PickUpItem(UPepccineItemDataBase* DropItemData, bool bIsPlayPickUpSound = true);
 	// 무기 획득
 	void PickUpItem(const UPepccineWeaponItemData* WeaponItemData);
 	// 패시브 획득
@@ -55,7 +55,7 @@ public:
 
 	// 무기 장착
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
-	void EquipWeapon(UPepccineWeaponItemData* Weapon);
+	void EquipWeapon(UPepccineWeaponItemData* Weapon, bool bIsPlayEquipSound = true) const;
 
 	// 무기 교체
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
