@@ -19,6 +19,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UPepccineMontageComponent;
 class UPrograssBarHUDComponent;
+class UItemIconHUDComponent;
 class UInventoryComponent;
 class UPepccineItemManagerComponent;
 //class URadorComponent;
@@ -76,7 +77,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPrograssBarHUDComponent* PrograssBarComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UCollisionRadarComponent* EnhancedRadarComponent;
+	UItemIconHUDComponent* ItemIconComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UCollisionRadarComponent* EnhancedRadarComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UInventoryComponent* InventoryComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")

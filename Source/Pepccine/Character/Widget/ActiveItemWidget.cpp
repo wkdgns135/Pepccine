@@ -2,7 +2,7 @@
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 
-void UActiveItemWidget::UpdateWeaponUI(UTexture2D* ActiveImage, const FString& ActiveName, FString& ActiveButton, const int32 Cooldown, const int32 MaxCooldown)
+void UActiveItemWidget::UpdateActiveItemUI(UTexture2D* ActiveImage, const FString& ActiveName, FString& ActiveButton, const int32 Cooldown, const int32 MaxCooldown)
 {
 	
 }

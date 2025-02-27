@@ -9,6 +9,7 @@
 #include "Camera/CameraComponent.h"
 #include "CrosshairHUDComponent.h"
 #include "PrograssBarHUDComponent.h"
+#include "ItemIconHUDComponent.h"
 #include "CollisionRadarComponent.h"
 #include "InventoryComponent.h"
 
@@ -40,9 +41,9 @@ APepCharacter::APepCharacter()
   FirstPersonCamera->bUsePawnControlRotation = true;
 
   PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
-
   CrosshairComponent = CreateDefaultSubobject<UCrosshairHUDComponent>(TEXT("CrosshairHUDComponent"));
   PrograssBarComponent = CreateDefaultSubobject<UPrograssBarHUDComponent>(TEXT("PrograssBarComponent"));
+  ItemIconComponent = CreateDefaultSubobject<UItemIconHUDComponent>(TEXT("ItemIconComponent"));
 
   //RadarComponent = CreateDefaultSubobject<URadorComponent>(TEXT("RadarComponent"));
   //RadarComponent->DetectionClass = AActor::StaticClass();
@@ -370,10 +371,10 @@ void APepCharacter::Interactive()
         float Amount = Modifier.StatModifierDefault.StatModifyValue;
 
         FString StatName = UEnum::GetValueAsString(CharacterStatName);
-        UE_LOG(LogTemp, Warning, TEXT("CharacterStatName: %s"), StatName);
+        UE_LOG(LogTemp, Warning, TEXT("CharacterStatName: %s"), *StatName);
 
         FString MT = UEnum::GetValueAsString(ModifyType);
-        UE_LOG(LogTemp, Warning, TEXT("ModifyType: %s"), MT);
+        UE_LOG(LogTemp, Warning, TEXT("ModifyType: %s"), *MT);
         UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
       }
 
@@ -385,10 +386,10 @@ void APepCharacter::Interactive()
         float Amount = Modifier.StatModifierDefault.StatModifyValue;
 
         FString WeaponType = UEnum::GetValueAsString(WeaponItemType);
-        UE_LOG(LogTemp, Warning, TEXT("WeaponItemType: %s"), WeaponType);
+        UE_LOG(LogTemp, Warning, TEXT("WeaponItemType: %s"), *WeaponType);
 
         FString WeaponStatName = UEnum::GetValueAsString(WeaponItemStatName);
-        UE_LOG(LogTemp, Warning, TEXT("WeaponItemStatName: %s"), WeaponStatName);
+        UE_LOG(LogTemp, Warning, TEXT("WeaponItemStatName: %s"), *WeaponStatName);
         UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
       }
 
@@ -406,7 +407,8 @@ void APepCharacter::Interactive()
     }
     else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
     {
-      // 무기 먹었을때
+      // 액티브 아이템
+      
     }
   }
   
