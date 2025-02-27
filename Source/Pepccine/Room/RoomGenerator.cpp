@@ -1,4 +1,6 @@
 #include "Room/RoomGenerator.h"
+
+#include "FloorRoomData.h"
 #include "PepccineGameInstance.h"
 #include "RoomManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -82,9 +84,13 @@ void ARoomGenerator::BeginPlay()
 
 void ARoomGenerator::GetParameters()
 {
-	if (URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
+	if (const URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
 	{
-		
+		if (const UFloorRoomData *FloorRoomData = RoomManager->GetCurrentFloorRoomData())
+		{
+			EndPointCount = FloorRoomData->EndPointCount;
+			MapSize = FloorRoomData->MapSize;
+		}
 	}
 }
 

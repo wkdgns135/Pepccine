@@ -42,17 +42,18 @@ public:
 	FRoomData* GetDirectionRoom();
 
 protected:
+	UFUNCTION()
+	virtual void OnStarted();
+	UFUNCTION()
+	virtual void OnCleared();
+	
 	virtual void BeginPlay() override;
-
+	virtual void EnterDoor();
+	
 private:
 	UFUNCTION()
 	void OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	                           int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-	void OnStarted();
-	UFUNCTION()
-	void OnCleared();
-
 	void LockDoor();
 	void OpenDoor();
 

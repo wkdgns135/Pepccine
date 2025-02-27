@@ -48,10 +48,16 @@ bool URoomManager::GetCheckRoom(const FIntPoint Point) const
 	return false;
 }
 
+void URoomManager::NextFloor()
+{
+	if (CurrentFloorIndex >= FloorRoomData.Num() - 1) return;
+	CurrentFloorIndex++;
+	UGameplayStatics::OpenLevel(GetWorld(), "GenerateRoomLevel");
+}
+
 void URoomManager::ChangeRoom(FRoomData* RoomData)
 {
 	const TSoftObjectPtr<UWorld> Level = RoomData->RoomLevel;
-	
 	const FString LevelPath = Level.ToSoftObjectPath().GetLongPackageName();
 	UE_LOG(LogTemp, Log, TEXT("Loading Level by Path: %s"), *LevelPath);
 

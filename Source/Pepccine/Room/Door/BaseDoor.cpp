@@ -54,17 +54,22 @@ void ABaseDoor::BeginPlay()
 	SpawnPosition->SetVisibility(false);
 }
 
+void ABaseDoor::EnterDoor()
+{
+	if (URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
+	{
+		RoomManager->ChangeRoom(GetDirectionRoom());
+	}
+}
+
 void ABaseDoor::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                      UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor->IsA(APepCharacter::StaticClass()))
 	{
 		if (bIsLocked == false)
 		{
-			if (URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
-			{
-				RoomManager->ChangeRoom(GetDirectionRoom());
-			}
+			EnterDoor();
 		}
 	}
 }
@@ -84,7 +89,7 @@ void ABaseDoor::OnStarted()
 
 void ABaseDoor::OnCleared()
 {
-	
+	OpenDoor();
 }
 
 FRoomData* ABaseDoor::GetDirectionRoom()
