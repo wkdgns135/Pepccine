@@ -6,6 +6,4 @@ AZombieCop::AZombieCop()
 {
 	AIControllerClass = ANormalMonsterAIC::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-
-	AttackComponent = CreateDefaultSubobject<UMonsterAttackComponent>(TEXT("AttackComponent"));
 }

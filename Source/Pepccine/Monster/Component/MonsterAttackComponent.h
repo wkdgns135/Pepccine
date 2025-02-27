@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -13,16 +11,20 @@ class PEPCCINE_API UMonsterAttackComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	UMonsterAttackComponent();
+	
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void PerformAttack();
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void AttackTrace();
 
 protected:
-	// Called when the game starts
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
+	UAnimMontage* AttackMontage;
+
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
+private:
+	void ApplyDamageToTarget(AActor* Target, float DamageAmount);
+	void PlayAttackMontage();
 };
