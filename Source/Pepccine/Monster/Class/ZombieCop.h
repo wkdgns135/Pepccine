@@ -4,8 +4,6 @@
 #include "BaseMonster.h"
 #include "ZombieCop.generated.h"
 
-class UMonsterAttackComponent;  // 전방 선언
-
 UCLASS()
 class PEPCCINE_API AZombieCop : public ABaseMonster
 {
@@ -15,6 +13,4 @@ public:
 	AZombieCop();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UMonsterAttackComponent* AttackComponent;
 };
