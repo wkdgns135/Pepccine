@@ -169,8 +169,8 @@ void ARoomGenerator::InitializeGrid()
 		Grid[Room.Y][Room.X] = 1;
 	}
 }
-void ARoomGenerator::MarkEndRooms()
 
+void ARoomGenerator::MarkEndRooms()
 {
 	TArray<FIntPoint> Offsets = { {0,1},{0,-1},{1,0},{-1,0} };
 	for (const FIntPoint& Point : Rooms)
