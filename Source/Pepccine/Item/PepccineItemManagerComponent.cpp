@@ -221,7 +221,7 @@ void UPepccineItemManagerComponent::EquipWeapon(UPepccineWeaponItemData* Weapon,
 	UE_LOG(LogTemp, Warning, TEXT("%s 장착!"), *Weapon->GetDisplayName());
 }
 
-void UPepccineItemManagerComponent::SwapWeapon(const EPepccineWeaponItemType WeaponType)
+void UPepccineItemManagerComponent::SwapWeapon(const EPepccineWeaponItemType WeaponType) const
 {
 	if (GetEquippedWeaponItemData()->GetWeaponItemType() != WeaponType)
 	{

@@ -32,11 +32,26 @@ APepccineDropItem::APepccineDropItem()
 void APepccineDropItem::BeginPlay()
 {
 	Super::BeginPlay();
+
+	StartZLocation = StaticMeshComp->GetRelativeLocation().Z;
 }
 
 void APepccineDropItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	// 스태틱 메쉬 상하 움직임
+	CurrentTime += DeltaTime;
+	CurrentTime = FMath::Fmod(CurrentTime, 360.0f);
+
+	const float NewZLocation = StartZLocation + 20.0f * FMath::Sin(CurrentTime * 0.5f * 2.0f * PI);
+
+	FVector NewLocation = StaticMeshComp->GetRelativeLocation();
+	NewLocation.Z = NewZLocation;
+	StaticMeshComp->SetRelativeLocation(NewLocation);
+	
+	// 스태틱 메쉬 회전
+	StaticMeshComp->AddLocalRotation(FRotator(0, DeltaTime * 45.0f, 0));
 }
 
 void APepccineDropItem::InitializeDropItem(const UPepccineItemDataBase* InDropItemData)

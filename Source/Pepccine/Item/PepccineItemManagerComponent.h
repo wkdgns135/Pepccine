@@ -59,7 +59,7 @@ public:
 
 	// 무기 교체
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
-	void SwapWeapon(EPepccineWeaponItemType WeaponType);
+	void SwapWeapon(EPepccineWeaponItemType WeaponType) const;
 
 	// 무기 메시 교체
 	UFUNCTION()
