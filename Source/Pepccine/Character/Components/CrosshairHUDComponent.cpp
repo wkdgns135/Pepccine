@@ -1,5 +1,5 @@
 #include "CrosshairHUDComponent.h"
-#include "PepCharacter.h"
+#include "Character/Player/PepCharacter.h"
 #include "Components/Image.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"

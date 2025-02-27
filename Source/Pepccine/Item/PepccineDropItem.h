@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
 #include "PepccineDropItem.generated.h"
 
 class UPepccineItemManagerComponent;
@@ -23,6 +24,12 @@ public:
 	// 아이템 초기화
 	void InitializeDropItem(const UPepccineItemDataBase* InDropItemData);
 
+	// 아이템 위젯 on / off (show = true, hidden = false)
+	void ShowInteractWidget(const bool bShow) const;
+
+	// 아이템 데이터 가져오기
+	UPepccineItemDataBase* GetDropItemData() const { return DropItemData; };
+
 	// 아이템 획득
 	UFUNCTION(BlueprintCallable)
 	void PickUpItem(UPepccineItemManagerComponent* ItemManagerComponent);
@@ -36,11 +43,14 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, category = "DropItem|Component",
 		meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* StaticMeshComp;
+
+public:
 	// 상호 작용 위젯 컴포넌트
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, category = "DropItem|Component",
 		meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* InteractWidgetComp;
 
+private:
 	// 드랍 아이템 데이터
 	UPROPERTY(VisibleAnywhere, category = "DropItem|Data")
 	UPepccineItemDataBase* DropItemData;

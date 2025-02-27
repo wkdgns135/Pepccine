@@ -45,8 +45,12 @@ void APepccineDropItem::InitializeDropItem(const UPepccineItemDataBase* InDropIt
 	{
 		// 스폰 메시 설정
 		StaticMeshComp->SetStaticMesh(DropItemData->GetMeshToSpawn());
-		
 	}
+}
+
+void APepccineDropItem::ShowInteractWidget(const bool bShow) const
+{
+	InteractWidgetComp->SetHiddenInGame(!bShow);
 }
 
 void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerComponent)
@@ -54,7 +58,7 @@ void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 	if (ItemManagerComponent)
 	{
 		bool IsDestroy = true;
-
+		
 		// 무기 아이템
 		if (const UPepccineWeaponItemData* WeaponItemData = Cast<UPepccineWeaponItemData>(DropItemData))
 		{

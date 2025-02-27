@@ -48,6 +48,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE UPepccineWeaponItemComponent* GetWeaponItemComp() const { return WeaponItemComp; };
 	// 무기 데이터 가져오기
+	UFUNCTION(BlueprintPure, category = "Item|Weapon")
 	FORCEINLINE UPepccineWeaponItemData* GetWeaponItemData(
 		const EPepccineWeaponItemType WeaponItemType)
 	{
@@ -63,12 +64,12 @@ public:
 		return WeaponItemComp->GetEquippedWeaponData();
 	}
 
-	// 주 무기 데이터 가져오기
-	UFUNCTION(BlueprintPure, category = "Item|Weapon")
-	FORCEINLINE UPepccineWeaponItemData* GetMainWeaponItemData() const { return MainWeaponItemData; };
-	// 보조 무기 데이터 가져오기
-	UFUNCTION(BlueprintPure, category = "Item|Weapon")
-	FORCEINLINE UPepccineWeaponItemData* GetSubWeaponItemData() const { return SubWeaponItemData; };
+	// 현재 장착중인 무기가 메인 무기인지 확인
+	FORCEINLINE bool IsMainWeaponEquipped() const
+	{
+		return GetEquippedWeaponItemData()->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Sub;
+	};
+
 	// 전체 패시브 데이터 가져오기
 	UFUNCTION(BlueprintPure, category = "Item|Passive")
 	FORCEINLINE TMap<int32, UPepccinePassiveItemData*> GetPassiveItemDatas() { return PassiveItemDatas; };
@@ -107,6 +108,8 @@ public:
 	};
 
 protected:
+	
+public:	
 	// 기본 무기 초기화
 	UFUNCTION()
 	void EquipDefaultWeapon();
@@ -123,7 +126,6 @@ protected:
 	UFUNCTION()
 	void ChangeWeaponEquippedMesh() const;
 
-public:
 	// 현재 장착 중인 무기 발사
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
 	void FireWeapon(float WeaponDamage) const;

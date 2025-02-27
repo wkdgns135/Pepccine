@@ -1,7 +1,7 @@
-#include "Character/Player/RadorComponent.h"
+#include "Character/Components/RadorComponent.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
-#include "PepCharacter.h"
+#include "Character/Player/PepCharacter.h"
 #include "DrawDebugHelpers.h"
 
 URadorComponent::URadorComponent()
