@@ -35,7 +35,6 @@ enum class EPepccineCharacterStatName : uint8
 	EPCSN_StaminaRecoveryTime UMETA(DisplayName = "기력 회복 시간"),
 	EPCSN_InvincibilityTime UMETA(DisplayName = "무적 시간"),
 	EPCSN_Defence UMETA(DisplayName = "방어력"),
-	EPCSN_FireRate UMETA(DisplayName = "무기 발사 속도"),
 	EPCSN_SprintSpeed UMETA(DisplayName = "달리기 속도"),
 	EPCSN_CrouchSpeed UMETA(DisplayName = "앉기 속도"),
 	EPCSN_RollingDistance UMETA(DisplayName = "구르기 거리"),

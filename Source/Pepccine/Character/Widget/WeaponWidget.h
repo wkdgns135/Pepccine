@@ -24,6 +24,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UI|Weapon")
 	void UpdateMainWeaponUI(UTexture2D* MainWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo);
+	UFUNCTION(BlueprintCallable, Category = "UI|Weapon")
 	void UpdateSubWeaponUI(UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo);
-
 };

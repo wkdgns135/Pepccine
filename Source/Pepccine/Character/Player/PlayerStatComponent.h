@@ -12,7 +12,6 @@
 #include "PlayerStatComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, CurrentHealth, float, MaxHealth);
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatsUpdated, const FPlayerStats&, PlayerStats);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PEPCCINE_API UPlayerStatComponent : public UBaseStatComponent
@@ -24,7 +23,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHealthChanged OnHealthChanged;
-
+	
 	void DecreaseHealth(float Amount);
 	
 	void DecreaseHealth_Timer();
@@ -40,13 +39,13 @@ public:
 	void AddStaminaObserver(IIStaminaObserver* Observer);
 	void RemoveStaminaObserver(IIStaminaObserver* Observer);
 
-	float GetAttackDamage() const { return AttackDamage; }
+	float GetAttackDamage() const { return CurrentStats.CombatStats.AttackDamage; }
 
 	// inline
-	FORCEINLINE_DEBUGGABLE float getCurrentStamina() const { return CurrentStamina; }
-	FORCEINLINE_DEBUGGABLE float getMaxStamina() const { return MaxStamina; }
-	FORCEINLINE_DEBUGGABLE float getCurrentHealth() const { return CurrentHealth; }
-	FORCEINLINE_DEBUGGABLE float getMaxHealth() const { return MaxHealth; }
+	FORCEINLINE_DEBUGGABLE float getCurrentStamina() const { return CurrentStats.StaminaStats.CurrentStamina; }
+	FORCEINLINE_DEBUGGABLE float getMaxStamina() const { return CurrentStats.StaminaStats.MaxStamina; }
+	FORCEINLINE_DEBUGGABLE float getCurrentHealth() const { return CurrentStats.HealthStats.CurrentHealth; }
+	FORCEINLINE_DEBUGGABLE float getMaxHealth() const { return CurrentStats.HealthStats.MaxHealth; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -54,26 +53,6 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 public:
-	float MaxHealth;
-	float MovementSpeed;
-	float AttackDamage;
-	
-	float HealthDecelerationSpeed;
-	float HealthDecelerationAmount;
-	
-	float MaxStamina;
-	float StaminaRecoveryRate;
-	float StaminaRecoveryTime;
-	
-	float InvincibilityTime;
-	float Defence;
-	float FireRate;
-	float SprintSpeed;
-	float CrouchSpeed;
-	float RollingDistance;
-	float JumpZVelocity;
-	float RollElapsedTime;
-	
 	void NotifyStaminaObservers();
 	void StartRepeatingTimer();
 
@@ -94,13 +73,21 @@ public:
 	/** 현재 스탯 정보를 가져온다. */
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	const FPlayerStats& GetCurrentStats() const { return CurrentStats; }
-	
-	/** 모든 Modifier를 적용하여 스탯을 다시 계산 */
-	void RecalculateStats();
+
 	/** 특정 Modifier를 적용 */
 	void ApplyStatModifier(const FStatModifier& Modifier);
 	/** 특정 Modifier를 제거 */
 	void RemoveStatModifier(const FStatModifier& Modifier);
+
+private:
+	/* 현재 스텟 */
+	FPlayerStats CurrentStats;
+
+	/** 적용된 스탯 수정 목록 (아이템, 버프 등) */
+	TArray<FStatModifier> ActiveModifiers;
+
+	/** 모든 Modifier를 적용하여 스탯을 다시 계산 */
+	void RecalculateStats();
 	/** 특정 Modifier를 한 개만 적용 */
 	void ApplySingleStatModifier(const FStatModifier& Modifier);
 	/** 스탯 값이 제한을 초과하지 않도록 보정 */
@@ -108,16 +95,6 @@ public:
 	/** 스탯 초기화 (기본값으로 리셋) */
 	void InitializeStats();
 	
-	FPlayerStats CurrentStats;
-
-	/** 적용된 스탯 수정 목록 (아이템, 버프 등) */
-	TArray<FStatModifier> ActiveModifiers;
-
-	/** 스탯 업데이트 델리게이트 (UI 업데이트 등에서 사용) */
-	//UPROPERTY(BlueprintAssignable, Category = "Stats")
-	//FOnStatsUpdated OnStatsUpdated;
-
-private:
 	/** 게임에서 사용할 기본 스탯을 저장하는 데이터 애셋 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
 	UPlayerStatDataAsset* PlayerStatDataAsset;

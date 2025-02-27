@@ -3,27 +3,16 @@
 #include "CoreMinimal.h"
 #include "PlayerStats.generated.h"
 
-// 기본 스탯 구조체
-USTRUCT(BlueprintType)
-struct FBaseStats
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Stats")
-    float MaxHealth = 100.0f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Stats")
-    float MovementSpeed = 400.0f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Stats")
-    float AttackDamage = 100.0f;
-};
-
 // 체력 관련 스탯
 USTRUCT(BlueprintType)
 struct FHealthStats
 {
     GENERATED_BODY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Stats")
+    float CurrentHealth = 100.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Stats")
+    float MaxHealth = 100.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
     float HealthDecelerationSpeed = 1.0f;
@@ -37,6 +26,9 @@ USTRUCT(BlueprintType)
 struct FStaminaStats
 {
     GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+    float CurrentStamina = 100.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
     float MaxStamina = 100.0f;
@@ -54,14 +46,14 @@ struct FCombatStats
 {
     GENERATED_BODY()
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Stats")
+    float AttackDamage = 100.0f;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
     float InvincibilityTime = 0.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
     float Defence = 0.0f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-    float FireRate = 0.0f;
 };
 
 // 이동 관련 스탯
@@ -69,6 +61,9 @@ USTRUCT(BlueprintType)
 struct FMovementStats
 {
     GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Base Stats")
+    float MovementSpeed = 400.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float SprintSpeed = 800.0f;
@@ -91,9 +86,6 @@ USTRUCT(BlueprintType)
 struct FPlayerStats
 {
     GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-    FBaseStats BaseStats;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
     FHealthStats HealthStats;

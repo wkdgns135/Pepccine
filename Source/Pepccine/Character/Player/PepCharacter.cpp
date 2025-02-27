@@ -75,8 +75,8 @@ void APepCharacter::TestApplyStatModifier()
 
     // 현재 스탯 출력
     UE_LOG(LogTemp, Log, TEXT("== 스탯 적용 전 =="));
-    UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.AttackDamage);
-    UE_LOG(LogTemp, Log, TEXT("현재 속도: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.MovementSpeed);
+    UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+    UE_LOG(LogTemp, Log, TEXT("현재 속도: %f"), PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed);
 
     // 테스트용 스탯 Modifier (공격력 +10, *1.2배)
     FStatModifier AttackModifier(EPepccineCharacterStatName::EPCSN_AttackDamage, 10.0f, 1.2f);
@@ -89,8 +89,8 @@ void APepCharacter::TestApplyStatModifier()
     // 현재 스탯 출력
     UE_LOG(LogTemp, Log, TEXT("== 스탯 적용 후 =="));
     UE_LOG(LogTemp, Log, TEXT("공격력 증가 아이템 사용!"));
-    UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.AttackDamage);
-    UE_LOG(LogTemp, Log, TEXT("현재 속도: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.MovementSpeed);
+    UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+    UE_LOG(LogTemp, Log, TEXT("현재 속도: %f"), PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed);
 }
 
 void APepCharacter::TestRemoveStatModifier()
@@ -103,8 +103,8 @@ void APepCharacter::TestRemoveStatModifier()
 
     // 현재 스탯 출력
     UE_LOG(LogTemp, Log, TEXT("== 스탯 제거 전 =="));
-    UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.AttackDamage);
-    UE_LOG(LogTemp, Log, TEXT("현재 속도: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.MovementSpeed);
+    UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+    UE_LOG(LogTemp, Log, TEXT("현재 속도: %f"), PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed);
 
     // 테스트용 스탯 Modifier 제거 (공격력 +10, *1.2배)
     FStatModifier AttackModifier(EPepccineCharacterStatName::EPCSN_AttackDamage, 10.0f, 1.2f);
@@ -117,8 +117,8 @@ void APepCharacter::TestRemoveStatModifier()
     // 현재 스탯 출력
     UE_LOG(LogTemp, Log, TEXT("== 스탯 제거 후 =="));
     UE_LOG(LogTemp, Log, TEXT("공격력 증가 아이템 제거!"));
-    UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.AttackDamage);
-    UE_LOG(LogTemp, Log, TEXT("현재 속도: %f"), PlayerStatComponent->GetCurrentStats().BaseStats.MovementSpeed);
+    UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+    UE_LOG(LogTemp, Log, TEXT("현재 속도: %f"), PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed);
 }
 
 // Initialize Character Status
@@ -129,8 +129,8 @@ void APepCharacter::InitializeCharacterMovement() const
   {
     if (!PlayerStatComponent) return;
     MovementComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
-    MovementComponent->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
-    MovementComponent->JumpZVelocity = PlayerStatComponent->JumpZVelocity;
+    MovementComponent->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
+    MovementComponent->JumpZVelocity = PlayerStatComponent->GetCurrentStats().MovementStats.JumpZVelocity;
   }
 }
 #pragma endregion
@@ -155,10 +155,10 @@ void APepCharacter::CheckSprinting()
       bIsSprinting = false;
       return;
     }
-    SetCharacterSpeed(PlayerStatComponent->SprintSpeed);
+    SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.SprintSpeed);
   }
   else {
-    SetCharacterSpeed(PlayerStatComponent->MovementSpeed);
+    SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed);
   }
 }
 
@@ -166,10 +166,10 @@ void APepCharacter::CheckRolling(float DeltaTime)
 {
   if (bIsRolling && PlayerStatComponent)
   {
-    float RollTime = PlayerStatComponent->RollElapsedTime;
+    float RollTime = PlayerStatComponent->GetCurrentStats().MovementStats.RollElapsedTime;
     RollTime += DeltaTime;
 
-    float RollSpeed = PlayerStatComponent->RollingDistance;
+    float RollSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.RollingDistance;
     AddMovementInput(RollDirection, RollSpeed * DeltaTime);
   }
 }
@@ -333,7 +333,8 @@ void APepCharacter::Roll()
   if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling()) return;
   
   bIsRolling = true;
-  PlayerStatComponent->RollElapsedTime = 0.0f;
+  FStatModifier SpeedModifier(EPepccineCharacterStatName::EPCSN_RollElapsedTime, 0.0f, 0.0f);
+  PlayerStatComponent->ApplyStatModifier(SpeedModifier);
   RollDirection = GetRollDirection();
 
   if (!PlayerStatComponent->DecreaseStaminaByPercentage(30))
@@ -352,7 +353,7 @@ void APepCharacter::EndRoll()
 
   if (GetCharacterMovement())
   {
-    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
+    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
   }
 }
 
@@ -364,11 +365,11 @@ FVector APepCharacter::GetRollDirection()
 
   if (!Velocity.IsNearlyZero())
   {
-    RollDirection = Velocity.GetSafeNormal() * PlayerStatComponent->RollingDistance;
+    RollDirection = Velocity.GetSafeNormal() * PlayerStatComponent->GetCurrentStats().MovementStats.RollingDistance;
   }
   else
   {
-    RollDirection = GetActorForwardVector() * PlayerStatComponent->RollingDistance;
+    RollDirection = GetActorForwardVector() * PlayerStatComponent->GetCurrentStats().MovementStats.RollingDistance;
   }
 
   return RollDirection;
@@ -384,12 +385,12 @@ void APepCharacter::Crouching()
   if (bIsCrouching)
   {
     UnCrouch();
-    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
+    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
   }
   else
   {
     Crouch();
-    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->CrouchSpeed;
+    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.CrouchSpeed;
   }
 }
 
@@ -488,13 +489,11 @@ void APepCharacter::Interactive()
   
   // 스텟연산 (저장 구조체)
   // 갖고있는 모든 패시브 아이템 적용 (캐릭터 스텟)
-  PlayerStatComponent->AttackDamage = (PlayerStatComponent->AttackDamage + ItemManagerComponent->GetTotalSumByCharacterStatName(EPepccineCharacterStatName::EPCSN_AttackDamage)) * ItemManagerComponent->GetTotalProductByCharacterStatName(EPepccineCharacterStatName::EPCSN_AttackDamage);
   // 1. 케릭터 스탯 연산 선행
   // 2. 무기 스탯 반영
   // 3. PlayerStatComponent->AttackDamage 
   
   // 갖고있는 무기 스텟 (총 스텟)
-  PlayerStatComponent->AttackDamage *= (ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().AttackMultiplier + ItemManagerComponent->GetTotalSumByWeaponItemStatName(EPepccineWeaponStatName::EPWSN_AttackMultiplier)) * ItemManagerComponent->GetTotalProductByWeaponItemStatName(EPepccineWeaponStatName::EPWSN_AttackMultiplier);
 
   // Delay 있는 상호작용 전용
   if (bIsInteracting)
@@ -550,7 +549,6 @@ void APepCharacter::Fire()
   TriggerCameraShake();
   
   PepccineMontageComponent->Fire();
-  // 탄퍼짐 관련 계산해서 넘겨주기
   ItemManagerComponent->FireWeapon(100);
 }
 
