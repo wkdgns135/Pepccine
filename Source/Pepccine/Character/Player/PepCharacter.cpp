@@ -487,7 +487,7 @@ void APepCharacter::Interactive()
 				UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
 			}
 
-			TArray<FPepccineCharacterFeature> CharacterFeatures = DropItem->CharacterFeatures;
+			TArray<FPepccineCharacterFeature> CharacterFeatures = DropItem->GetCharacterFeatures();
 			for (const FPepccineCharacterFeature& Feature : CharacterFeatures)
 			{
 				switch (Feature.CharacterFeatureName)
