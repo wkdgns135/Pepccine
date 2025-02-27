@@ -6,6 +6,8 @@
 #include "UObject/Object.h"
 #include "RoomManager.generated.h"
 
+class ULevelStreamingDynamic;
+enum class EDoorDirection : uint8;
 class UFloorRoomData;
 
 UENUM()
@@ -33,6 +35,8 @@ public:
 	ERoomType RoomType = ERoomType::ENone;
 	UPROPERTY()
 	FIntPoint RoomPoint;
+	UPROPERTY()
+	ULevelStreamingDynamic *StreamingLevel = nullptr;
 };
 
 UCLASS(DefaultToInstanced, EditInlineNew)
@@ -46,6 +50,7 @@ private:
 	
 	TArray<TArray<FRoomData*>> Map;
 	FRoomData *CurrentRoom;
+	FRoomData *PreviousRoom;
 	int CurrentFloorIndex;
 
 public:
@@ -53,6 +58,7 @@ public:
 	void StartFloor();
 	void ChangeRoom(FRoomData* RoomData);
 	bool GetCheckRoom(const FIntPoint Point) const;
+	void NextFloor();
 	
 private:
 	FRoomData* NewRoom(const ERoomType RoomType);
@@ -61,7 +67,9 @@ private:
 public:
 	FORCEINLINE TArray<TArray<FRoomData*>>& GetMap(){return Map;}
 	FORCEINLINE FIntPoint GetCurrentRoomPoint() const {return CurrentRoom ? CurrentRoom->RoomPoint : FIntPoint();}
-	FORCEINLINE int GetCurrentFloor() const {return CurrentFloorIndex + 1;}
+	FORCEINLINE int GetCurrentFloorIndex() const {return CurrentFloorIndex + 1;}
 	FORCEINLINE FRoomData* GetCurrentRoomData() const {return CurrentRoom;}
 	FORCEINLINE FRoomData* GetPointRoomData(const FIntPoint& Point){return GetCheckRoom(Point) ? Map[Point.Y][Point.X] : NewRoom(ERoomType::ENone);}
+	FORCEINLINE FRoomData* GetPreviousRoomData() const {return PreviousRoom;}
+	FORCEINLINE UFloorRoomData* GetCurrentFloorRoomData() const {return FloorRoomData[CurrentFloorIndex];}
 };

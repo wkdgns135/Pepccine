@@ -5,28 +5,43 @@
 
 #include "PepccineGameInstance.h"
 #include "PepccineGameState.h"
+#include "Character/Player/PepCharacter.h"
 #include "Room/Controller/BaseRoomController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SceneComponent.h"
 #include "Room/RoomManager.h"
 
 
 ABaseDoor::ABaseDoor()
 {
+	RootScene = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+	SetRootComponent(RootScene);
+	
 	TriggerVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerVolume"));
-	TriggerVolume->SetupAttachment(RootComponent);
+	TriggerVolume->SetupAttachment(RootScene);
 	TriggerVolume->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	TriggerVolume->SetCollisionObjectType(ECC_WorldDynamic);
 	TriggerVolume->SetCollisionResponseToAllChannels(ECR_Ignore);
 	TriggerVolume->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	TriggerVolume->OnComponentBeginOverlap.AddDynamic(this, &ABaseDoor::OnTriggerBeginOverlap);
-
+	
+	DoorStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorStaticMesh"));
+	DoorStaticMesh->SetupAttachment(RootScene);
+	SpawnPosition = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpawnPosition"));
+	SpawnPosition->SetupAttachment(RootScene);
+	
 	PrimaryActorTick.bCanEverTick = false;
 }
 
 void ABaseDoor::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	// LockDoor();
+	bIsLocked = false;
+	
 	if (APepccineGameState* GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld())))
 	{
 		if (ABaseRoomController* RoomController = GameState->GetRoomController())
@@ -35,19 +50,26 @@ void ABaseDoor::BeginPlay()
 			RoomController->OnRoomCleared.AddUObject(this, &ABaseDoor::OnCleared);
 		}
 	}
+	
+	SpawnPosition->SetVisibility(false);
+}
+
+void ABaseDoor::EnterDoor()
+{
+	if (URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
+	{
+		RoomManager->ChangeRoom(GetDirectionRoom());
+	}
 }
 
 void ABaseDoor::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                      UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!OtherActor->Tags.IsEmpty() && OtherActor->Tags[0] == "Player")
+	if (OtherActor->IsA(APepCharacter::StaticClass()))
 	{
 		if (bIsLocked == false)
 		{
-			if (URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
-			{
-				RoomManager->ChangeRoom(GetDirectionRoom());
-			}
+			EnterDoor();
 		}
 	}
 }
@@ -62,13 +84,12 @@ void ABaseDoor::OnStarted()
 			Destroy();
 			return;
 		}
-		LockDoor();
 	}
 }
 
 void ABaseDoor::OnCleared()
 {
-	
+	OpenDoor();
 }
 
 FRoomData* ABaseDoor::GetDirectionRoom()
@@ -97,7 +118,7 @@ FRoomData* ABaseDoor::GetDirectionRoom()
 void ABaseDoor::LockDoor()
 {
 	// HERE[장훈]: 문이 잠기는 애니메이션 재생 등 추가
-	bIsLocked = false;
+	bIsLocked = true;
 }
 
 void ABaseDoor::OpenDoor()
