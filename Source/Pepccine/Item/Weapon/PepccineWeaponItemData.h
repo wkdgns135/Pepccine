@@ -16,6 +16,7 @@ class PEPCCINE_API UPepccineWeaponItemData : public UPepccineItemDataBase
 
 public:
 	// getter
+	UFUNCTION(BlueprintCallable, category = "Item|Weapon")
 	FORCEINLINE EPepccineWeaponItemType GetWeaponItemType() const { return WeaponItemType; };
 	FORCEINLINE TObjectPtr<USkeletalMesh> GetEquippedMesh() const { return EquippedMesh; };
 	FORCEINLINE TSubclassOf<APepccineProjectile> GetProjectileClass() const { return ProjectileClass; };

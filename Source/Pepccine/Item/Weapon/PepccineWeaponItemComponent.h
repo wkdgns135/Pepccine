@@ -32,11 +32,15 @@ public:
 		bCanFire = true;
 	};
 
+
 	// getter
+	// 장착 무기 데이터 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE UPepccineWeaponItemData* GetEquippedWeaponData() const { return EquippedWeaponData; };
-
+	
 	// setter
+	
+	// 캐릭터 설정
 	FORCEINLINE void SetCharacter(ACharacter* Character) { OwnerCharacter = Character; };
 
 private:
@@ -47,7 +51,6 @@ private:
 	// 현재 장착중인 무기 데이터
 	UPROPERTY()
 	TObjectPtr<UPepccineWeaponItemData> EquippedWeaponData;
-
 	// 발사 가능 여부
 	bool bCanFire = true;
 

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Misc/MapErrors.h"
 
 #include "PepccineDropItem.generated.h"
 
@@ -33,6 +34,9 @@ public:
 	// 아이템 획득
 	UFUNCTION(BlueprintCallable)
 	void PickUpItem(UPepccineItemManagerComponent* ItemManagerComponent);
+
+	// getter
+	FORCEINLINE UStaticMeshComponent* GetStaticMeshComp() const { return StaticMeshComp; };
 
 private:
 	// 오버랩 컴포넌트

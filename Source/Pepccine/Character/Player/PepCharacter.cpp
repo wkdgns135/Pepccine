@@ -343,16 +343,39 @@ void APepCharacter::Reload()
 void APepCharacter::Interactive()
 {
   UE_LOG(LogTemp, Log, TEXT("Interactive!"));
-  CurrentDropItem->PickUpItem(ItemManagerComponent);
   // 아이템 줍는 모션
   
   // 아이템 인벤토리에 추가
   if (CurrentDropItem)
   {
+    CurrentDropItem->PickUpItem(ItemManagerComponent);
     if (CurrentDropItem->IsA(UPepccinePassiveItemData::StaticClass()))
     {
-      const UPepccineItemDataBase* DropItem = CurrentDropItem->GetDropItemData();
+      const UPepccinePassiveItemData* DropItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData());
       InventoryComponent->AddItem(DropItem->IconTexture, DropItem->GetDisplayName(), DropItem->GetDescription());
+
+      TArray<FPepccineWeaponStatModifier> WeaponStatModifiers =  DropItem->GetWeaponStatModifiers();
+      for (const FPepccineWeaponStatModifier& Modifier : WeaponStatModifiers)
+      {
+        EPepccineWeaponItemType WeaponItemType = Modifier.WeaponItemType;
+        EPepccineWeaponStatName WeaponStatName = Modifier.WeaponItemStatName;
+        EPepccineStatModifyType ModifyType = Modifier.StatModifierDefault.StatModifyType;
+        float Amount = Modifier.StatModifierDefault.StatModifyValue;
+      }
+      
+      TArray<FPepccineCharacterStatModifier> CharacterStatModifiers =  DropItem->GetCharacterStatModifiers();
+      for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)
+      {
+        EPepccineCharacterStatName CharacterStatName = Modifier.CharacterStatName;
+        EPepccineStatModifyType ModifyType = Modifier.StatModifierDefault.StatModifyType;
+        float Amount = Modifier.StatModifierDefault.StatModifyValue;
+      }
+
+      TArray<FPepccineCharacterFeature> CharacterFeatures = DropItem->CharacterFeatures;
+      for (const FPepccineCharacterFeature Feature : CharacterFeatures)
+      {
+        
+      }
     }
     else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
     {

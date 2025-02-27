@@ -8,7 +8,7 @@ enum class EPepccineWeaponStatName : uint8
 {
 	EPWSN_AttackMultiplier UMETA(DisplayName = "공격력 배율"),
 	EPWSN_RangeMultiplier UMETA(DisplayName = "사거리 배율"),
-	EPWSN_FireRateMultiplier UMETA(DisplayName = "연사 배율"),
+	EPWSN_FireRate UMETA(DisplayName = "연사 속도"),
 	EPWSN_ZoomMultiplier UMETA(DisplayName = "확대 배율"),
 	EPWSN_MagazineSize UMETA(DisplayName = "탄창 용량"),
 	EPWSN_MagazineAmmo UMETA(DisplayName = "현재 탄약 수"),
@@ -35,7 +35,6 @@ enum class EPepccineCharacterStatName : uint8
 	EPCSN_StaminaRecoveryTime UMETA(DisplayName = "기력 회복 시간"),
 	EPCSN_InvincibilityTime UMETA(DisplayName = "무적 시간"),
 	EPCSN_Defence UMETA(DisplayName = "방어력"),
-	EPCSN_FireRate UMETA(DisplayName = "무기 발사 속도"),
 	EPCSN_SprintSpeed UMETA(DisplayName = "달리기 속도"),
 	EPCSN_CrouchSpeed UMETA(DisplayName = "앉기 속도"),
 	EPCSN_RollingDistance UMETA(DisplayName = "구르기 거리"),

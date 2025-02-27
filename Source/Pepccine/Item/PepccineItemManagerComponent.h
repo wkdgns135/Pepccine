@@ -9,6 +9,7 @@
 
 #include "PepccineItemManagerComponent.generated.h"
 
+struct FPepccineItemSaveData;
 class UPepccinePassiveItemData;
 class UPepccineItemSpawner;
 class UPepccineItemDataAssetBase;
@@ -23,19 +24,62 @@ public:
 
 	virtual void BeginPlay() override;
 
-	// 이름으로 무기 스탯 찾기
-	UFUNCTION(BlueprintPure, category = "Item")
-	static float GetWeaponItemStatByName(const FPepccineWeaponStat& WeaponItemStats,
-	                                     const EPepccineWeaponStatName StatName);
-
+	float GetWeaponStatByName(EPepccineWeaponItemType WeaponType, EPepccineWeaponStatName WeaponStatName) const;
+	
+	// 아이템 획득
+	void PickUpItem(UPepccineItemDataBase* DropItemData);
 	// 무기 획득
-	TObjectPtr<UPepccineWeaponItemData> PickUpWeaponItem(const UPepccineWeaponItemData* WeaponItemData);
+	void PickUpItem(const UPepccineWeaponItemData* WeaponItemData);
+	// 패시브 획득
+	void PickUpItem(const UPepccinePassiveItemData* PassiveItemData);
 
-	// 패시브 아이템 추가
-	void AddPassiveItemData(const UPepccinePassiveItemData* PassiveItemData);
 	// 패시브 아이템 제거
-	void RemovePassiveItemDataById(const int32 Id);
+	void RemovePassiveItemDataById(const int32 ItemId);
 
+	//////////////////////////////////////////////////////////////////////////
+	// 데이터 저장 관련
+
+	// 아이템 세이브 데이터 구조체 가져오기
+	UFUNCTION(BlueprintCallable)
+	FPepccineItemSaveData GetSaveItemData() const;
+
+	// 아이템 세이브 데이터 불러오기
+	UFUNCTION(BlueprintCallable)
+	void LoadItemData(const FPepccineItemSaveData& SaveData);
+	//////////////////////////////////////////////////////////////////////////
+	
+
+	// 기본 무기 초기화
+	UFUNCTION()
+	void EquipDefaultWeapon();
+
+	// 무기 장착
+	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
+	void EquipWeapon(UPepccineWeaponItemData* Weapon);
+
+	// 무기 교체
+	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
+	void SwapWeapon(EPepccineWeaponItemType WeaponType);
+
+	// 무기 메시 교체
+	UFUNCTION()
+	void ChangeWeaponEquippedMesh() const;
+	
+	// 현재 장착 중인 무기 발사
+	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
+	void FireWeapon(float WeaponDamage) const;
+
+	// 현재 장착 중인 무기 재장전
+	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
+	void ReloadWeapon() const;
+
+	// 무기 스탯 합연산 및 곱연산 결과 값 가져오기
+	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
+	float GetCalculatedWeaponItemStat(const EPepccineWeaponItemType WeaponItemType, const EPepccineWeaponStatName WeaponItemStatName);
+
+	// 무기 스탯 업데이트
+	// void UpdateWeaponStatByName(EPepccineWeaponStatName WeaponItemStatName);
+	
 	// getter
 
 	// 아이템 스포너 가져오기
@@ -73,21 +117,19 @@ public:
 	// 전체 패시브 데이터 가져오기
 	UFUNCTION(BlueprintPure, category = "Item|Passive")
 	FORCEINLINE TMap<int32, UPepccinePassiveItemData*> GetPassiveItemDatas() { return PassiveItemDatas; };
-	// 번호로 패시브 데이터 가져오기
+	// 아이템 아이디로 패시브 데이터 가져오기
 	UFUNCTION(BlueprintPure, category = "Item|Weapon")
-	FORCEINLINE UPepccinePassiveItemData* GetPassiveItemById(const int32 Id) { return PassiveItemDatas[Id]; };
+	FORCEINLINE UPepccinePassiveItemData* GetPassiveItemById(const int32 ItemId) { return PassiveItemDatas[ItemId]; };
 	// 아이템 데이터 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE UPepccineItemDataAssetBase* GetItemData() const { return ItemSpawner->GetItemDataAsset(); };
 
 	// 스탯 이름으로 무기 스탯 합연산 총합 가져오기
-	UFUNCTION(BlueprintPure, category = "Item")
 	FORCEINLINE float GetTotalSumByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
 	{
 		return TotalWeaponStatSum.FindOrAdd({GetEquippedWeaponItemData()->GetWeaponItemType(), WeaponItemStatName});
 	};
 	// 스탯 이름으로 무기 스탯 곱연산 총합 가져오기
-	UFUNCTION(BlueprintPure, category = "Item")
 	FORCEINLINE float GetTotalProductByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
 	{
 		return TotalWeaponStatProduct.FindOrAdd({GetEquippedWeaponItemData()->GetWeaponItemType(), WeaponItemStatName},
@@ -106,32 +148,6 @@ public:
 	{
 		return TotalCharacterStatProduct.FindOrAdd(CharacterStatName, 1.0f);
 	};
-
-protected:
-	// 기본 무기 초기화
-	UFUNCTION()
-	void EquipDefaultWeapon();
-
-	// 무기 장착
-	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
-	void EquipWeapon(UPepccineWeaponItemData* Weapon);
-
-	// 무기 교체
-	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
-	void SwapWeapon(EPepccineWeaponItemType WeaponType);
-
-	// 무기 메시 교체
-	UFUNCTION()
-	void ChangeWeaponEquippedMesh() const;
-
-public:
-	// 현재 장착 중인 무기 발사
-	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
-	void FireWeapon(float WeaponDamage) const;
-
-	// 현재 장착 중인 무기 재장전
-	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
-	void ReloadWeapon() const;
 
 private:
 	// 아이템 스포너 클래스
@@ -162,10 +178,7 @@ private:
 	TMap<EPepccineCharacterStatName, float> TotalCharacterStatSum;
 	// 캐릭터 스탯 곱연산 총합
 	TMap<EPepccineCharacterStatName, float> TotalCharacterStatProduct;
-
-	// 패시브 아이템 아이디
-	int32 PassiveItemId = 0;
-
+	
 	// 패시브 아이템 목록
 	UPROPERTY(VisibleInstanceOnly, Category = "Item|Passive", meta = (DisplayName = "패시브 아이템 목록"))
 	TMap<int32, UPepccinePassiveItemData*> PassiveItemDatas;

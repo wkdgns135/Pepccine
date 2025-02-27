@@ -15,18 +15,37 @@ class PEPCCINE_API UPepccineItemDataAssetBase : public UPrimaryDataAsset
 public:
 	// getter
 	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE UStaticMesh* GetDefaultMeshToSpawn() { return DefaultMeshToSpawn; };
+	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE TArray<UPepccineWeaponItemData*> GetWeaponsItems() { return WeaponItems; };
 	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE UPepccineWeaponItemData* GetWeaponsItemById(const int32 Id) { return WeaponItems[Id]; };
+	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE TArray<UPepccinePassiveItemData*> GetPassiveItems() { return PassiveItems; };
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE UPepccinePassiveItemData* GetPassiveItemById(const int32 Id) { return PassiveItems[Id]; };
+
+
+#if WITH_EDITOR
+	template <typename T>
+	void InitItemData(TArray<T*> ItemDatas);
+
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 
 protected:
+	// 기본 스폰 메시
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "기본 스폰 메시"))
+	TObjectPtr<UStaticMesh> DefaultMeshToSpawn;
+
 	// 전체 무기 데이터 목록
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<TObjectPtr<UPepccineWeaponItemData>> WeaponItems;
+	TArray<UPepccineWeaponItemData*> WeaponItems;
 
 	// 전체 패시브 데이터 목록
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<TObjectPtr<UPepccinePassiveItemData>> PassiveItems;
+	TArray<UPepccinePassiveItemData*> PassiveItems;
 
-	// TODO[명관] : UseableItemData 추가
+	// TODO[명관] : 액티브 아이템 추가
+	// TODO[명관] : 재화(카드키, 돈) 추가
 };

@@ -12,6 +12,9 @@ class PEPCCINE_API UPepccineItemDataBase : public UObject
 public:
 	// getter
 	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE int32 GetItemId() const { return ItemId; }
+
+	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE FString GetDisplayName() const { return DisplayName; };
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE FString GetDescription() const { return Description; };
@@ -21,7 +24,15 @@ public:
 	FORCEINLINE TObjectPtr<UStaticMesh> GetMeshToSpawn() { return MeshToSpawn; };
 	FORCEINLINE TObjectPtr<USoundBase> GetPickUpSound() { return PickUpSound; };
 
+	// setter
+	FORCEINLINE void SetItemId(const int32 Id) { ItemId = Id; };
+	FORCEINLINE void SetMeshToSpawn(UStaticMesh* Mesh) { MeshToSpawn = Mesh; };
+
 protected:
+	// 아이템 아이디
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, category = "Info", meta = (DisplayName = "아이템 아이디"))
+	int32 ItemId;
+
 	// 화면에 보여질 이름
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "이름"))
 	FString DisplayName;
