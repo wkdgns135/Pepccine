@@ -18,7 +18,7 @@ void UMonsterAttackComponent::PerformAttack()
 {
     // 소유자를 ACharacter로 변환
     ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-    if (OwnerCharacter == nullptr)
+    if (!OwnerCharacter)
     {
         UE_LOG(LogTemp, Warning, TEXT("Owner is NOT an ACharacter!"));
         return;
@@ -46,18 +46,12 @@ void UMonsterAttackComponent::ApplyDamageToTarget(AActor* Target, float DamageAm
     }
 }
 
-void UMonsterAttackComponent::PlayAttackMontage()
+void UMonsterAttackComponent::PlayTransitionMontage()
 {
-    if (AttackMontage && GetOwner())
+    ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+    if (AttackTransitionMontage && OwnerCharacter)
     {
-        AActor* Owner = GetOwner();
-        USkeletalMeshComponent* MeshComp = Owner->FindComponentByClass<USkeletalMeshComponent>();
-
-        if (MeshComp && MeshComp->GetAnimInstance())
-        {
-            UAnimInstance* AnimInstance = MeshComp->GetAnimInstance();
-            AnimInstance->Montage_Play(AttackMontage);
-        }
+        OwnerCharacter->PlayAnimMontage(AttackTransitionMontage);
     }
 }
 

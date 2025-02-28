@@ -17,8 +17,12 @@ public:
 	void PerformAttack();
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void AttackTrace();
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void PlayTransitionMontage();
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
+	UAnimMontage* AttackTransitionMontage;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
 	UAnimMontage* AttackMontage;
 
@@ -26,5 +30,5 @@ protected:
 
 private:
 	void ApplyDamageToTarget(AActor* Target, float DamageAmount);
-	void PlayAttackMontage();
+	
 };
