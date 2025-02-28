@@ -304,7 +304,7 @@ void APepCharacter::Roll()
 	}
 	
 	// 임시
-	TriggerCameraShake();
+	//TriggerCameraShake();
 
 	bIsRolling = true;
 	RollDirection = GetRollDirection();
@@ -754,7 +754,7 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	{
 		EnhancedInput->BindAction(
 			PlayerController->FireAction,
-			ETriggerEvent::Started,
+			ETriggerEvent::Triggered,
 			this,
 			&APepCharacter::Fire
 		);
