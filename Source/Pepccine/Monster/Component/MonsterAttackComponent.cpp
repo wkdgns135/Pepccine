@@ -16,7 +16,7 @@ void UMonsterAttackComponent::BeginPlay()
 
 void UMonsterAttackComponent::PerformAttack()
 {
-    // ¼ÒÀ¯ÀÚ¸¦ ACharacter·Î º¯È¯
+    // ì†Œìœ ìë¥¼ ACharacterë¡œ ë³€í™˜
     ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
     if (OwnerCharacter == nullptr)
     {
@@ -35,13 +35,13 @@ void UMonsterAttackComponent::ApplyDamageToTarget(AActor* Target, float DamageAm
 {
     if (Target)
     {
-        // µ¥¹ÌÁö Àû¿ë
+        // ë°ë¯¸ì§€ ì ìš©
         UGameplayStatics::ApplyDamage(Target, DamageAmount, nullptr, GetOwner(), nullptr);
 
         APepCharacter* Player = Cast<APepCharacter>(Target);
         if (Player)
         {
-            // ÇÃ·¹ÀÌ¾î ÂÊ ÇÇ°İ ¹İÀÀ
+            // í”Œë ˆì´ì–´ ìª½ í”¼ê²© ë°˜ì‘
         }
     }
 }
@@ -72,17 +72,17 @@ void UMonsterAttackComponent::AttackTrace()
 
     FVector StartLocation = OwnerMonster->GetActorLocation(); 
     FVector ForwardVector = OwnerMonster->GetActorForwardVector(); 
-    FVector EndLocation = StartLocation + (ForwardVector * 100.0f);  // °ø°İ ¹üÀ§ 
+    FVector EndLocation = StartLocation + (ForwardVector * 100.0f);  // ê³µê²© ë²”ìœ„ 
 
-    // Ä¸½¶ Æ®·¹ÀÌ½º ¸Å°³º¯¼ö
+    // ìº¡ìŠ íŠ¸ë ˆì´ìŠ¤ ë§¤ê°œë³€ìˆ˜
     float CapsuleRadius = 30.0f; 
     float CapsuleHalfHeight = 100.0f; 
 
     FHitResult HitResult;
     FCollisionQueryParams CollisionParams;
-    CollisionParams.AddIgnoredActor(OwnerMonster); // ¸ó½ºÅÍ´Â Ãæµ¹ ¹«½Ã
+    CollisionParams.AddIgnoredActor(OwnerMonster); // ëª¬ìŠ¤í„°ëŠ” ì¶©ëŒ ë¬´ì‹œ
 
-    // Ä¸½¶ Æ®·¹ÀÌ½º ½ÇÇà
+    // ìº¡ìŠ íŠ¸ë ˆì´ìŠ¤ ì‹¤í–‰
     bool bHit = GetWorld()->SweepSingleByChannel(
         HitResult,
         StartLocation,
@@ -93,12 +93,12 @@ void UMonsterAttackComponent::AttackTrace()
         CollisionParams
     );
 
-    // Ãæµ¹ ½Ã Ã³¸®
+    // ì¶©ëŒ ì‹œ ì²˜ë¦¬
     if (bHit)
     {
         FVector ImpactPoint = HitResult.ImpactPoint;
 
-        // Ãæµ¹ ÁöÁ¡¿¡ ÀÛÀº ¿øÀ» ±×·Á¼­ ½Ã°¢ÀûÀ¸·Î Ç¥½Ã (Ãæµ¹ÀÌ ÀÖÀ» ¶§¸¸)
+        // ì¶©ëŒ ì§€ì ì— ì‘ì€ ì›ì„ ê·¸ë ¤ì„œ ì‹œê°ì ìœ¼ë¡œ í‘œì‹œ (ì¶©ëŒì´ ìˆì„ ë•Œë§Œ)
         DrawDebugSphere(
             GetWorld(),
             ImpactPoint,
@@ -109,10 +109,10 @@ void UMonsterAttackComponent::AttackTrace()
             1.0f  
         );
 
-        // Ãæµ¹ ´ë»óÀÌ ÇÃ·¹ÀÌ¾îÀÎ °æ¿ì µ¥¹ÌÁö Àû¿ë
+        // ì¶©ëŒ ëŒ€ìƒì´ í”Œë ˆì´ì–´ì¸ ê²½ìš° ë°ë¯¸ì§€ ì ìš©
         if (APepCharacter* Player = Cast<APepCharacter>(HitResult.GetActor()))
         {
-            ApplyDamageToTarget(Player, 20.0f);  // ¿¹½Ã: 20ÀÇ µ¥¹ÌÁö Àû¿ë
+            ApplyDamageToTarget(Player, 20.0f);  // ì˜ˆì‹œ: 20ì˜ ë°ë¯¸ì§€ ì ìš©
         }
     }
     else
@@ -130,7 +130,7 @@ void UMonsterAttackComponent::AttackTrace()
             1.0f  
         );
 
-        // ·Î±× Ãâ·Â
+        // ë¡œê·¸ ì¶œë ¥
         UE_LOG(LogTemp, Log, TEXT("No hit detected. Trace from (%s) to (%s)"), *StartLocation.ToString(), *EndLocation.ToString());
     }
 }
