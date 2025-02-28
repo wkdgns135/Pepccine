@@ -4,6 +4,7 @@
 #include "Engine/DataAsset.h"
 #include "PepccineItemDataAssetBase.generated.h"
 
+class UPepccineActiveItemData;
 class UPepccinePassiveItemData;
 class UPepccineWeaponItemData;
 
@@ -16,14 +17,21 @@ public:
 	// getter
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE UStaticMesh* GetDefaultMeshToSpawn() { return DefaultMeshToSpawn; };
+	
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE TArray<UPepccineWeaponItemData*> GetWeaponsItems() { return WeaponItems; };
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE UPepccineWeaponItemData* GetWeaponsItemById(const int32 Id) { return WeaponItems[Id]; };
+	
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE TArray<UPepccinePassiveItemData*> GetPassiveItems() { return PassiveItems; };
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE UPepccinePassiveItemData* GetPassiveItemById(const int32 Id) { return PassiveItems[Id]; };
+	
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE TArray<UPepccineActiveItemData*> GetActiveItems() { return ActiveItems; };
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE UPepccineActiveItemData* GetActiveItem(const int32 Id) { return ActiveItems[Id]; };
 
 
 #if WITH_EDITOR
@@ -46,6 +54,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<UPepccinePassiveItemData*> PassiveItems;
 
-	// TODO[명관] : 액티브 아이템 추가
+	// 액티브 아이템 데이터 목록
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<UPepccineActiveItemData*> ActiveItems;
+	
 	// TODO[명관] : 재화(카드키, 돈) 추가
 };
