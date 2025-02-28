@@ -1,8 +1,11 @@
 #include "Monster/Class/BaseMonster.h"
+
+#include "PepccineGameState.h"
 #include "Monster/Component/MonsterStatComponent.h"
 #include "Monster/Component/MonsterAttackComponent.h"
 #include "Monster/Component/HitReactionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Room/Controller/BaseRoomController.h"
 
 ABaseMonster::ABaseMonster()
 {
@@ -21,14 +24,14 @@ float ABaseMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 {
     Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-    // ·Î±× Ãß°¡: µ¥¹ÌÁö¸¦ ¹ÞÀº ¾×ÅÍ, µ¥¹ÌÁö ¾ç, µ¥¹ÌÁö ÀÌº¥Æ® Á¤º¸ È®ÀÎ
+    // ï¿½Î±ï¿½ ï¿½ß°ï¿½: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
     UE_LOG(LogTemp, Warning, TEXT("Monster %s took %f damage!"), *GetName(), DamageAmount);
 
     if (StatComponent)
     {
         StatComponent->DecreaseHealth(DamageAmount);
 
-        // ÇÇ°Ý ¹æÇâÀ» °è»êÇÏ¿© Àü´Þ
+        // ï¿½Ç°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½
         FVector HitDirection = DamageCauser ? (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal() : FVector::ZeroVector;
 
         if (HitReactionComponent)
@@ -38,7 +41,7 @@ float ABaseMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
         if (StatComponent->IsDead())
         {
-            // ¸ó½ºÅÍ Á×¾úÀ» ¶§ ·Î±× 
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½×¾ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Î±ï¿½ 
             UE_LOG(LogTemp, Warning, TEXT("Monster %s has died!"), *GetName());
             Die();
         }
@@ -52,7 +55,7 @@ void ABaseMonster::Die()
 {
     UE_LOG(LogTemp, Warning, TEXT("Monster Die!"));
 
-    // ¹°¸®Àû Ã³¸® (Ragdoll È°¼ºÈ­)
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ (Ragdoll È°ï¿½ï¿½È­)
     GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
     GetMesh()->Stop();
     GetMesh()->SetSimulatePhysics(true);
@@ -61,6 +64,14 @@ void ABaseMonster::Die()
     GetCharacterMovement()->DisableMovement();
     GetCharacterMovement()->StopMovementImmediately();
 
-    // ¼ö¸í ¼³Á¤ (ÁöÁ¤ ½Ã°£ ÈÄ »èÁ¦)
+    if (APepccineGameState *PepccineGameState = Cast<APepccineGameState>(GetWorld()->GetGameState()))
+    {
+        if (ABaseRoomController *RoomController = PepccineGameState->GetRoomController())
+        {
+            RoomController->DecreaseMonsterCount();
+        }
+    }
+    
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
     SetLifeSpan(10.0f);
 }

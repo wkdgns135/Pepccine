@@ -28,8 +28,8 @@ struct FPepccineWeaponStat
 	float RangeMultiplier;
 	// 연사 배율
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats",
-		meta = (DisplayName = "연사 배율", ClampMin = "0.1", ClampMax = "10.0"))
-	float FireRateMultiplier;
+		meta = (DisplayName = "연사 속도", ClampMin = "0.1", ClampMax = "10.0"))
+	float FireRate;
 	// 확대 배율
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats",
 		meta = (DisplayName = "확대 배율", ClampMin = "1.0", ClampMax = "10.0"))
@@ -71,7 +71,7 @@ struct FPepccineWeaponStat
 		meta = (DisplayName = "무게", ClampMin = "0.1", ClampMax = "10.0"))
 	float Weight;
 
-	FPepccineWeaponStat(): AttackMultiplier(1.0f), RangeMultiplier(1.0f), FireRateMultiplier(1.0f),
+	FPepccineWeaponStat(): AttackMultiplier(1.0f), RangeMultiplier(1.0f), FireRate(1.0f),
 	                       ZoomMultiplier(1.0f),
 	                       MagazineSize(12.0f),
 	                       MagazineAmmo(12.0f), SpareAmmo(48.0f),

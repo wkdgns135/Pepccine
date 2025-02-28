@@ -11,7 +11,7 @@ UCLASS()
 class PEPCCINE_API UWeaponWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* WeaponText;
@@ -23,7 +23,6 @@ public:
 	UImage* BackWeaponImage;
 
 	UFUNCTION(BlueprintCallable, Category = "UI|Weapon")
-	void UpdateMainWeaponUI(UTexture2D* MainWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo);
-	UFUNCTION(BlueprintCallable, Category = "UI|Weapon")
-	void UpdateSubWeaponUI(UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo);
+	void UpdateWeaponUI(UTexture2D* MainWeaponImage, UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo, bool bIsMainWeapon);
 };
+

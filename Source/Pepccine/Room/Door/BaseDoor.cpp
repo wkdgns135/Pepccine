@@ -33,15 +33,14 @@ ABaseDoor::ABaseDoor()
 	SpawnPosition->SetupAttachment(RootScene);
 	
 	PrimaryActorTick.bCanEverTick = false;
+
+	bIsLocked = false;
 }
 
 void ABaseDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	// LockDoor();
-	bIsLocked = false;
-	
+
 	if (APepccineGameState* GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld())))
 	{
 		if (ABaseRoomController* RoomController = GameState->GetRoomController())
@@ -76,19 +75,22 @@ void ABaseDoor::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 
 void ABaseDoor::OnStarted()
 {
+	bIsLocked = true;
+	LockDoor();
+	
 	if (URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
 	{
 		const FRoomData* RoomData = GetDirectionRoom();
 		if (RoomData->RoomType == ERoomType::ENone)
 		{
 			Destroy();
-			return;
 		}
 	}
 }
 
 void ABaseDoor::OnCleared()
 {
+	bIsLocked = false;
 	OpenDoor();
 }
 
@@ -115,14 +117,5 @@ FRoomData* ABaseDoor::GetDirectionRoom()
 	return RoomManager->GetPointRoomData(RoomPoint);
 }
 
-void ABaseDoor::LockDoor()
-{
-	// HERE[장훈]: 문이 잠기는 애니메이션 재생 등 추가
-	bIsLocked = true;
-}
-
-void ABaseDoor::OpenDoor()
-{
-	// HERE[장훈]: 문이 열리는 애니메이션 재생 등 추가
-	bIsLocked = false;
-}
+void ABaseDoor::OpenDoor_Implementation(){}
+void ABaseDoor::LockDoor_Implementation(){}

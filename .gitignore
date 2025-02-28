@@ -88,5 +88,6 @@ Content/*
 !Content/StarterContent/
 !Content/ThirdPerson/
 !Content/PA_UrbanCity/
+!Content/CyberpunkIndustries/
 
 Source/Pepccine/Character/Player/PrograssBarHUDComponent.h

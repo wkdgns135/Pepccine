@@ -24,18 +24,23 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Room")
 	bool bIsRoomClear;
 
+	int MonsterCount;
+	
 protected:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	
 public:
 	void ClearRoom();
+	void DecreaseMonsterCount();
 
 private:
+	void StartRoom();
 	void PlacePlayer();
+	void CheckAndClearRoom();
 	
 public:
 	FORCEINLINE bool GetIsRoomClear() const { return bIsRoomClear; }
-
+	FORCEINLINE void IncreaseMonsterCount() { MonsterCount++; }
 };
 
