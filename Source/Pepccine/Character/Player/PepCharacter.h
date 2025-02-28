@@ -155,6 +155,9 @@ private:
 	UFUNCTION()
 	void ZoomOut();
 
+	UFUNCTION()
+	void Die();
+
 	float CameraArmLength = 300.0f;
 	float SprintHoldStartTime = 0.0f;
 	float SprintHoldThreshold = 0.2f;

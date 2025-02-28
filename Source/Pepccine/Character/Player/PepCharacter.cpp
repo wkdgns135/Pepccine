@@ -71,9 +71,25 @@ void APepCharacter::Tick(float DeltaTime)
 
 float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	
+	UE_LOG(LogTemp, Warning, TEXT("=== TakeDamage() Called ==="));
+	UE_LOG(LogTemp, Warning, TEXT("Damage Amount: %f"), DamageAmount);
 
-	return 0; // 실제로 받은 데미지 반환
+	if (DamageCauser)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Damage Causer: %s"), *DamageCauser->GetName());
+	}
+    
+	if (EventInstigator)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Instigator Controller: %s"), *EventInstigator->GetName());
+	}
+
+	return DamageAmount;
+}
+
+void APepCharacter::Die()
+{
+	
 }
 
 // Initialize Character Status
