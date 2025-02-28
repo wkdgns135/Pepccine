@@ -26,8 +26,8 @@ void ABaseRoomController::BeginPlay()
 	GetWorldTimerManager().SetTimerForNextTick([this]()
 		{
 			OnRoomStarted.Broadcast();
+			PlacePlayer();
 		});
-	PlacePlayer();
 }
 
 void ABaseRoomController::ClearRoom()
