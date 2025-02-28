@@ -42,7 +42,7 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage)
 
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.SpawnCollisionHandlingOverride =
-					ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+					ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 				// 프로젝타일을 생성한 주체 설정
 				SpawnParams.Instigator = OwnerCharacter;
 				SpawnParams.Owner = GetOwner();
@@ -58,6 +58,7 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage)
 
 					if (SpawnedProjectile->GetCollisionComp())
 					{
+						SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(OwnerCharacter->GetInstigator(), true);
 						SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(OwnerCharacter, true);
 						SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(GetOwner(), true);
 					}
@@ -79,13 +80,13 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage)
 				//	}
 				//}
 
-				// 임시 무기 재사용 대기시간
-				const float FireRate = 0.2f * EquippedWeaponData->GetWeaponItemStats().FireRateMultiplier;
 
+				UE_LOG(LogTemp,Warning,TEXT("연사 속도 : %.2f발/초"), EquippedWeaponData->GetWeaponItemStats().FireRate);
+				
 				bCanFire = false;
 				// 무기 재사용 대기시간 적용
 				World->GetTimerManager().SetTimer(EquippedWeaponData->GetFireRateTimerHandle(), this,
-				                                  &UPepccineWeaponItemComponent::CanFire, FireRate, false);
+				                                  &UPepccineWeaponItemComponent::CanFire, 1.0f / EquippedWeaponData->GetWeaponItemStats().FireRate, false);
 
 				EquippedWeaponData->GetWeaponItemStatsPointer()->MagazineAmmo--;
 
@@ -152,13 +153,16 @@ bool UPepccineWeaponItemComponent::Reload() const
 	return true;
 }
 
-void UPepccineWeaponItemComponent::EquipWeapon(UPepccineWeaponItemData* WeaponItemData)
+void UPepccineWeaponItemComponent::EquipWeapon(UPepccineWeaponItemData* WeaponItemData, const bool bIsPlayEquipSound)
 {
 	EquippedWeaponData = WeaponItemData;
 
-	if (USoundBase* ReloadSound = EquippedWeaponData->GetReloadSound())
+	if (bIsPlayEquipSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ReloadSound, OwnerCharacter->GetActorLocation());
+		if (USoundBase* ReloadSound = EquippedWeaponData->GetReloadSound())
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, ReloadSound, OwnerCharacter->GetActorLocation());
+		}		
 	}
 }
 
@@ -185,10 +189,10 @@ FVector UPepccineWeaponItemComponent::GetFireDirection(const FVector& MuzzleLoca
 	QueryParams.AddIgnoredActor(OwnerCharacter);
 	
 	FVector HitLocation;
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams))
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldDynamic, QueryParams))
 	{
 		HitLocation = HitResult.Location; // 충돌한 위치
-		UE_LOG(LogTemp, Warning, TEXT("HitResult [%s]"), *HitResult.GetActor()->GetName());
+		// UE_LOG(LogTemp, Warning, TEXT("HitResult [%s]"), *HitResult.GetActor()->GetName());
 	}
 	else
 	{

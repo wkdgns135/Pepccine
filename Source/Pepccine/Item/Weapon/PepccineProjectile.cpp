@@ -1,7 +1,8 @@
 ﻿#include "Item/Weapon/PepccineProjectile.h"
+
+#include "PepccineCharacter.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
-#include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
 APepccineProjectile::APepccineProjectile()
@@ -29,18 +30,21 @@ APepccineProjectile::APepccineProjectile()
 void APepccineProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                                 FVector NormalImpulse, const FHitResult& Hit)
 {
+	
 	if (OtherActor != nullptr && OtherActor != this)
 	{
 		//OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
 
 		if (OwnerCharacter)
 		{
-			if (ACharacter* Enemy = Cast<ACharacter>(OtherActor))
+			if (APepccineCharacter* Enemy = Cast<APepccineCharacter>(OtherActor))
 			{
 				UGameplayStatics::ApplyDamage(Enemy, WeaponDamage, OwnerCharacter->GetController(), this,
 				                              UDamageType::StaticClass());
 			}
 		}
+
+		// UE_LOG(LogTemp, Warning, TEXT("Projectile Destroy!"));
 
 		Destroy();
 	}
