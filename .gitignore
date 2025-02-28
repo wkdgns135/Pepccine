@@ -87,5 +87,6 @@ Content/*
 !Content/LevelPrototyping/
 !Content/StarterContent/
 !Content/ThirdPerson/
+!Content/PA_UrbanCity/
 
 Source/Pepccine/Character/Player/PrograssBarHUDComponent.h
