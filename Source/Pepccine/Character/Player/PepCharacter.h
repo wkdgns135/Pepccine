@@ -25,6 +25,8 @@ class UPepccineItemManagerComponent;
 //class URadorComponent;
 class UCollisionRadarComponent;
 
+class UPepccineHitReactionComponent;
+
 UCLASS()
 class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver
 {
@@ -91,6 +93,8 @@ public:
 	UPepccineItemManagerComponent* ItemManagerComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineMontageComponent* PepccineMontageComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UPepccineHitReactionComponent* HitReactionComponent;
 
 private:
 	UFUNCTION()

@@ -11,13 +11,16 @@ UCLASS()
 class PEPCCINE_API UActiveItemWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ActiveText;
 	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ActiveButton;
+	UPROPERTY(meta = (BindWidget))
 	UProgressBar* ActiveProgressBar;
 
 	UFUNCTION(BlueprintCallable, Category = "UI|Active")
-	void UpdateActiveItemUI(UTexture2D* ActiveImage, const FString& ActiveName, FString& ActiveButton, const int32 Cooldown, const int32 MaxCooldown);
+	void UpdateActiveItemUI(UTexture2D* ActiveImage, const FString& ActiveName, const FString& Button, const float Cooldown, const float MaxCooldown);
 };
+

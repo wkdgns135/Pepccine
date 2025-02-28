@@ -16,6 +16,7 @@
 
 #include "GameFramework/SpringArmComponent.h"
 #include "Character/Animation/PepccineMontageComponent.h"
+#include "Character/Animation/PepccineHitReactionComponent.h"
 #include "Character/Data/ActorInfo.h"
 #include "Components/WidgetComponent.h"
 #include "Item/PepccineDropItem.h"
@@ -48,6 +49,8 @@ APepCharacter::APepCharacter()
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 	PepccineMontageComponent = CreateDefaultSubobject<UPepccineMontageComponent>(TEXT("MontageComponent"));
 	ItemManagerComponent = CreateDefaultSubobject<UPepccineItemManagerComponent>(TEXT("ItemManagerComponent"));
+
+	HitReactionComponent = CreateDefaultSubobject<UPepccineHitReactionComponent>(TEXT("HitReactionComponent"));
 }
 
 void APepCharacter::BeginPlay()
@@ -374,6 +377,7 @@ void APepCharacter::Crouching()
 void APepCharacter::Reload()
 {
 	UE_LOG(LogTemp, Log, TEXT("Reload!"));
+
 
 	if (bIsReloading)
 	{
