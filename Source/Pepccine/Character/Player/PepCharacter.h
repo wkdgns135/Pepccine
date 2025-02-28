@@ -11,6 +11,7 @@
 #include "Character/Data/ActorInfo.h"
 #include "Character/Interfaces/IStaminaObserver.h"
 #include "Item/PepccineDropItem.h"
+#include "Kismet/GameplayStatics.h"
 #include "PepCharacter.generated.h"
 
 class UInputMappingContext;
@@ -47,6 +48,13 @@ public:
 	bool bIsInteracting = false;
 	bool bIsRolling = false;
 	bool bIsRollable = true;
+
+	virtual float TakeDamage(
+				float DamageAmount,
+				struct FDamageEvent const& DamageEvent,
+				class AController* EventInstigator,
+				AActor* DamageCauser
+		) override;
 
 	// UE delegate
 	UFUNCTION()
