@@ -26,11 +26,11 @@ class PEPCCINE_API ABaseDoor : public AActor
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USceneComponent* RootScene;
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(EditAnywhere, Category = "Components")
 	UStaticMeshComponent* DoorStaticMesh;
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(EditAnywhere, Category = "Components")
 	UBoxComponent* TriggerVolume;
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(EditAnywhere, Category = "Components")
 	UStaticMeshComponent* SpawnPosition;
 	UPROPERTY(EditAnywhere, Category = "Components")
 	EDoorDirection Direction;
