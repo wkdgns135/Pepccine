@@ -6,6 +6,7 @@
 #include "Components/WidgetComponent.h"
 #include "Framework/Docking/LayoutExtender.h"
 #include "Passive/PepccinePassiveItemData.h"
+#include "Resource/PepccineResourceItemData.h"
 #include "Weapon/PepccineWeaponItemData.h"
 
 APepccineDropItem::APepccineDropItem()
@@ -99,15 +100,48 @@ void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 	
 		UPepccineWeaponItemData* BeforeWeapon = nullptr;
 
-		// 무기 아이템일 경우
+		// 무기 아이템
 		if (const UPepccineWeaponItemData* DropWeapon = Cast<UPepccineWeaponItemData>(DropItemData))
 		{
 			// 이전 무기 가져오기
 			BeforeWeapon = ItemManagerComponent->GetWeaponItemData(DropWeapon->GetWeaponItemType());
 		}
+		// 자원 아이템
+		else if (UPepccineResourceItemData* ResourceItemData = Cast<UPepccineResourceItemData>(DropItemData))
+		{
+			int32 RemainingCount = 0;
+			
+			if (ResourceItemData->GetResourceItemType() == EPepccineResourceItemType::EPRIT_AmmoBox)
+			{
+				const UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main);
+				if (!MainWeaponData)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("주 무기가 없습니다."));
+					return;
+				}
+				RemainingCount = (MainWeaponData->GetWeaponItemStats().SpareAmmo + ResourceItemData->GetResourceCount()) - 999;
+			}
+			// else if (ResourceItemData->GetResourceItemType() == EPepccineResourceItemType::EPRIT_CardKey)
+			// {
+			// 	RemainingCount = 99 - (ItemManagerComponent->GetCardKeyCount() + ResourceItemData->GetResourceCount());
+			// }
+			else if (ResourceItemData->GetResourceItemType() == EPepccineResourceItemType::EPRIT_Coin)
+			{
+				RemainingCount = (ItemManagerComponent->GetCoinCount() + ResourceItemData->GetResourceCount()) - 99;
+			}
+
+			if (RemainingCount > 0)
+			{
+				IsDestroy = false;
+				ResourceItemData->SetResourceCount(ResourceItemData->GetResourceCount() - RemainingCount);
+			}
+		}
 
 		// 아이템 획득
-		ItemManagerComponent->PickUpItem(DropItemData);
+		if (!ItemManagerComponent->PickUpItem(DropItemData))
+		{
+			return;
+		}
 
 		// 이전 무기가 있을 경우
 		if (BeforeWeapon)

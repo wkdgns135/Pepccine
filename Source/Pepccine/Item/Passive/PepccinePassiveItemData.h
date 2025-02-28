@@ -20,7 +20,6 @@ public:
 	int FindStatModifierByName(EPepccineCharacterStatName CharacterStatName);
 	
 	// 캐릭터 기능 추가 여부 확인
-	UFUNCTION(BlueprintCallable, category = "Modifier")
 	bool HasCharacterFeaturesByName(const EPepccineCharacterFeatureName CharacterFeatureName);
 	
 	// getter

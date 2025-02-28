@@ -2,11 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Weapon/PepccineWeaponItemDataAsset.h"
 #include "PepccineItemDataAssetBase.generated.h"
 
-class UPepccineActiveItemData;
-class UPepccinePassiveItemData;
-class UPepccineWeaponItemData;
+class UPepccineActiveItemDataAsset;
+class UPepccinePassiveItemDataAsset;
+class UPepccineWeaponItemDataAsset;
+class UPepccineResourceItemData;
 
 UCLASS(BlueprintType)
 class PEPCCINE_API UPepccineItemDataAssetBase : public UPrimaryDataAsset
@@ -15,48 +17,52 @@ class PEPCCINE_API UPepccineItemDataAssetBase : public UPrimaryDataAsset
 
 public:
 	// getter
-	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE UStaticMesh* GetDefaultMeshToSpawn() { return DefaultMeshToSpawn; };
-	
-	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE TArray<UPepccineWeaponItemData*> GetWeaponsItems() { return WeaponItems; };
-	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE UPepccineWeaponItemData* GetWeaponsItemById(const int32 Id) { return WeaponItems[Id]; };
-	
-	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE TArray<UPepccinePassiveItemData*> GetPassiveItems() { return PassiveItems; };
-	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE UPepccinePassiveItemData* GetPassiveItemById(const int32 Id) { return PassiveItems[Id]; };
-	
-	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE TArray<UPepccineActiveItemData*> GetActiveItems() { return ActiveItems; };
-	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE UPepccineActiveItemData* GetActiveItem(const int32 Id) { return ActiveItems[Id]; };
 
+	// 무기 데이터 에셋
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE UPepccineWeaponItemDataAsset* GetWeaponItemDataAsset() const { return WeaponItemDataAsset; };
 
-#if WITH_EDITOR
-	template <typename T>
-	void InitItemData(TArray<T*> ItemDatas);
+	// 패시브 데이터 에셋
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE UPepccinePassiveItemDataAsset* GetPassiveItemDataAsset() const { return PassiveItemDataAsset; };
 
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif
+	// 액티브 데이터 에셋
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE UPepccineActiveItemDataAsset* GetActiveItemDataAsset() const { return ActiveItemDataAsset; };
+
+	// 탄약통
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE UPepccineResourceItemData* GetAmmoBoxItem() const { return AmmoBoxItem; };
+
+	// // 열쇠
+	// UFUNCTION(BlueprintPure, Category = "Item")
+	// FORCEINLINE UPepccineResourceItemData* GetKeyItem() const { return KeyItem; };
+
+	// 코인
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE UPepccineResourceItemData* GetCoinItem() const { return CoinItem; };
 
 protected:
-	// 기본 스폰 메시
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "기본 스폰 메시"))
-	TObjectPtr<UStaticMesh> DefaultMeshToSpawn;
 
-	// 전체 무기 데이터 목록
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<UPepccineWeaponItemData*> WeaponItems;
+	// 무기 데이터 에셋
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "무기 아이템 데이터 에셋"))
+	UPepccineWeaponItemDataAsset* WeaponItemDataAsset;
 
-	// 전체 패시브 데이터 목록
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<UPepccinePassiveItemData*> PassiveItems;
+	// 패시브 데이터 에셋
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "패시브 아이템 데이터 에셋"))
+	UPepccinePassiveItemDataAsset* PassiveItemDataAsset;
 
-	// 액티브 아이템 데이터 목록
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<UPepccineActiveItemData*> ActiveItems;
-	
-	// TODO[명관] : 재화(카드키, 돈) 추가
+	// 액티브 데이터 에셋
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "액티브 아이템 데이터 에셋"))
+	UPepccineActiveItemDataAsset* ActiveItemDataAsset;
+
+	// 탄약통
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "탄약통"))
+	UPepccineResourceItemData* AmmoBoxItem;
+	// // 열쇠
+	// UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "열쇠"))
+	// UPepccineResourceItemData* KeyItem;
+	// 코인
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "코인"))
+	UPepccineResourceItemData* CoinItem;
 };

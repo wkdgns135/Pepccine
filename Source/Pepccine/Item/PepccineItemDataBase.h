@@ -4,7 +4,7 @@
 
 #include "PepccineItemDataBase.generated.h"
 
-UCLASS(DefaultToInstanced, EditInlineNew, Abstract)
+UCLASS(DefaultToInstanced, EditInlineNew)
 class PEPCCINE_API UPepccineItemDataBase : public UObject
 {
 	GENERATED_BODY()
@@ -21,8 +21,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE int32 GetItemTier() const { return ItemTier; };
 
-	FORCEINLINE TObjectPtr<UStaticMesh> GetMeshToSpawn() { return MeshToSpawn; };
-	FORCEINLINE TObjectPtr<USoundBase> GetPickUpSound() { return PickUpSound; };
+	FORCEINLINE UStaticMesh* GetMeshToSpawn() { return MeshToSpawn; };
+	FORCEINLINE FRotator GetMeshRotationToSpawn() const {return MeshRotationToSpawn; };
+	FORCEINLINE FVector GetMeshScaleToSpawn() const { return MeshScaleToSpawn; };
+	FORCEINLINE USoundBase* GetPickUpSound() { return PickUpSound; };
 
 	// setter
 	FORCEINLINE void SetItemId(const int32 Id) { ItemId = Id; };
@@ -46,6 +48,12 @@ protected:
 	// 스폰할 때 보여질 메시
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "스폰 메시"))
 	TObjectPtr<UStaticMesh> MeshToSpawn;
+	// 스폰 메시 회전
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "스폰 메시 회전"))
+	FRotator MeshRotationToSpawn = FRotator::ZeroRotator;
+	// 스폰 메시 스케일
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "스폰 메시 스케일"))
+	FVector MeshScaleToSpawn = FVector::OneVector;
 	// 아이템 획득 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "아이템 획득 사운드"))
 	TObjectPtr<USoundBase> PickUpSound;

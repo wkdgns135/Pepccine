@@ -16,13 +16,13 @@ class PEPCCINE_API UPepccineWeaponItemData : public UPepccineItemDataBase
 
 public:
 	// getter
-	UFUNCTION(BlueprintCallable, category = "Item|Weapon")
+	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE EPepccineWeaponItemType GetWeaponItemType() const { return WeaponItemType; };
 	FORCEINLINE TObjectPtr<USkeletalMesh> GetEquippedMesh() const { return EquippedMesh; };
 	FORCEINLINE TSubclassOf<APepccineProjectile> GetProjectileClass() const { return ProjectileClass; };
 	FORCEINLINE FTimerHandle& GetFireRateTimerHandle() { return FireRateTimerHandle; };
 
-	UFUNCTION(BlueprintPure, category = "Item|Weapon")
+	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE FPepccineWeaponStat GetWeaponItemStats() const { return WeaponStats; };
 	FORCEINLINE FPepccineWeaponStat* GetWeaponItemStatsPointer() { return &WeaponStats; };
 	FORCEINLINE TObjectPtr<USoundBase> GetFireSound() const { return FireSound; };
