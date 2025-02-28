@@ -38,9 +38,7 @@ ABaseDoor::ABaseDoor()
 void ABaseDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	// LockDoor();
-	bIsLocked = false;
+	LockDoor();
 	
 	if (APepccineGameState* GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld())))
 	{
@@ -115,14 +113,20 @@ FRoomData* ABaseDoor::GetDirectionRoom()
 	return RoomManager->GetPointRoomData(RoomPoint);
 }
 
-void ABaseDoor::LockDoor()
+void ABaseDoor::LockDoor_Implementation()
 {
-	// HERE[장훈]: 문이 잠기는 애니메이션 재생 등 추가
 	bIsLocked = true;
+	UE_LOG(LogTemp, Warning, TEXT("The door is now locked!"));
 }
 
-void ABaseDoor::OpenDoor()
+void ABaseDoor::OpenDoor_Implementation()
 {
-	// HERE[장훈]: 문이 열리는 애니메이션 재생 등 추가
-	bIsLocked = false;
+	if (!bIsLocked)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("The door is now open!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("The door is locked and cannot be opened!"));
+	}
 }

@@ -12,6 +12,7 @@ class UBoxComponent;
 UENUM()
 enum class EDoorDirection : uint8
 {
+	ENone UMETA(DisplayName = "None"),
 	ELeft UMETA(DisplayName = "Left"),
 	ERight UMETA(DisplayName = "Right"),
 	EUp UMETA(DisplayName = "Up"),
@@ -46,18 +47,22 @@ protected:
 	virtual void OnStarted();
 	UFUNCTION()
 	virtual void OnCleared();
-	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void LockDoor();
+	virtual void LockDoor_Implementation();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void OpenDoor();
+	virtual void OpenDoor_Implementation();
+
 	virtual void BeginPlay() override;
 	virtual void EnterDoor();
-	
+
 private:
 	UFUNCTION()
 	void OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	                           int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	void LockDoor();
-	void OpenDoor();
 
 public:
 	FORCEINLINE FVector GetSpawnPosition() const { return SpawnPosition->GetComponentLocation(); }
-	FORCEINLINE FRotator GetSpawnRotation() const{ return GetActorRotation(); }
+	FORCEINLINE FRotator GetSpawnRotation() const { return GetActorRotation(); }
 };
