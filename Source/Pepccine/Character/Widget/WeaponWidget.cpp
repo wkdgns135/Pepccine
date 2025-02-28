@@ -2,12 +2,23 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 
-void UWeaponWidget::UpdateMainWeaponUI(UTexture2D* MainWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo)
-{
-	
-}
 
-void UWeaponWidget::UpdateSubWeaponUI(UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo)
+void UWeaponWidget::UpdateWeaponUI(UTexture2D* MainWeaponImage, UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo, bool bIsMainWeapon)
 {
-	
+	WeaponText->SetText(FText::FromString(WeaponName));
+	WeaponAmmo->SetText(FText::FromString(FString::Printf(TEXT("%i/%i"), Ammo, MaxAmmo)));
+
+	if (MainWeaponImage && SubWeaponImage)
+	{
+		if (bIsMainWeapon)
+		{
+			FrontWeaponImage->SetBrushFromTexture(MainWeaponImage);
+			BackWeaponImage->SetBrushFromTexture(SubWeaponImage);
+		}
+		else
+		{
+			FrontWeaponImage->SetBrushFromTexture(SubWeaponImage);
+			BackWeaponImage->SetBrushFromTexture(MainWeaponImage);
+		}
+	}
 }

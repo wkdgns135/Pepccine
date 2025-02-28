@@ -30,6 +30,8 @@ void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
+// Stat
+#pragma region
 void UPlayerStatComponent::InitializeStats()
 {
 	if (PlayerStatDataAsset)
@@ -103,9 +105,6 @@ void UPlayerStatComponent::SetPlayerStatDataAsset(UPlayerStatDataAsset* NewDataA
 
 void UPlayerStatComponent::RecalculateStats()
 {
-	// 기본값으로 초기화
-	InitializeStats();
-
 	FPlayerStats* Base = &CurrentStats;
 	FPlayerStats* Add = &CurrentTotalAdd;
 	FPlayerStats* Mul = &CurrentTotalMul;
@@ -124,9 +123,6 @@ void UPlayerStatComponent::RecalculateStats()
 
 	// 전투 관련 스탯
 	Base->CombatStats.AttackDamage = (Base->CombatStats.AttackDamage + Add->CombatStats.AttackDamage) * Mul->CombatStats.AttackDamage;
-	UE_LOG(LogTemp, Log, TEXT("Mul->CombatStats.AttackDamage [%f]"), Mul->CombatStats.AttackDamage);
-	UE_LOG(LogTemp, Log, TEXT("Add->CombatStats.AttackDamage [%f]"), Add->CombatStats.AttackDamage);
-	UE_LOG(LogTemp, Log, TEXT("Base->CombatStats.AttackDamage [%f]"), Base->CombatStats.AttackDamage);
 	Base->CombatStats.InvincibilityTime = (Base->CombatStats.InvincibilityTime + Add->CombatStats.InvincibilityTime) * Mul->CombatStats.InvincibilityTime;
 	Base->CombatStats.Defence = (Base->CombatStats.Defence + Add->CombatStats.Defence) * Mul->CombatStats.Defence;
 
@@ -145,55 +141,20 @@ void UPlayerStatComponent::RecalculateStats()
 void UPlayerStatComponent::RemoveStatModifier(const FStatModifier& Modifier)
 {
 	ActiveModifiers.Remove(Modifier);
+	InitializeStats();
 
-	FPlayerStats* Add = &CurrentTotalAdd;
-	FPlayerStats* Mul = &CurrentTotalMul;
+	if (ActiveModifiers.Num() == 0)
+	{
+		ClampStats();
+		return;
+	}
 
-	// 기존 Modifier 값 제거 (합 연산 -, 곱 연산 /)
-	Add->HealthStats.CurrentHealth -= Modifier.AdditiveValue;
-	Mul->HealthStats.CurrentHealth /= Modifier.MultiplicativeValue;
+	TArray<FStatModifier> ModifiersCopy = ActiveModifiers;
 
-	Add->HealthStats.MaxHealth -= Modifier.AdditiveValue;
-	Mul->HealthStats.MaxHealth /= Modifier.MultiplicativeValue;
-
-	Add->HealthStats.HealthDecelerationSpeed -= Modifier.AdditiveValue;
-	Mul->HealthStats.HealthDecelerationSpeed /= Modifier.MultiplicativeValue;
-
-	Add->StaminaStats.CurrentStamina -= Modifier.AdditiveValue;
-	Mul->StaminaStats.CurrentStamina /= Modifier.MultiplicativeValue;
-
-	Add->StaminaStats.MaxStamina -= Modifier.AdditiveValue;
-	Mul->StaminaStats.MaxStamina /= Modifier.MultiplicativeValue;
-
-	Add->CombatStats.AttackDamage -= Modifier.AdditiveValue;
-	Mul->CombatStats.AttackDamage /= Modifier.MultiplicativeValue;
-
-	Add->CombatStats.InvincibilityTime -= Modifier.AdditiveValue;
-	Mul->CombatStats.InvincibilityTime /= Modifier.MultiplicativeValue;
-
-	Add->CombatStats.Defence -= Modifier.AdditiveValue;
-	Mul->CombatStats.Defence /= Modifier.MultiplicativeValue;
-
-	Add->MovementStats.MovementSpeed -= Modifier.AdditiveValue;
-	Mul->MovementStats.MovementSpeed /= Modifier.MultiplicativeValue;
-
-	Add->MovementStats.SprintSpeed -= Modifier.AdditiveValue;
-	Mul->MovementStats.SprintSpeed /= Modifier.MultiplicativeValue;
-
-	Add->MovementStats.CrouchSpeed -= Modifier.AdditiveValue;
-	Mul->MovementStats.CrouchSpeed /= Modifier.MultiplicativeValue;
-
-	Add->MovementStats.RollingDistance -= Modifier.AdditiveValue;
-	Mul->MovementStats.RollingDistance /= Modifier.MultiplicativeValue;
-
-	Add->MovementStats.JumpZVelocity -= Modifier.AdditiveValue;
-	Mul->MovementStats.JumpZVelocity /= Modifier.MultiplicativeValue;
-
-	Add->MovementStats.RollElapsedTime -= Modifier.AdditiveValue;
-	Mul->MovementStats.RollElapsedTime /= Modifier.MultiplicativeValue;
-
-	// 스탯 재계산
-	RecalculateStats();
+	for (const FStatModifier& Mod : ModifiersCopy)
+	{
+		ApplyStatModifier(Mod);
+	}
 }
 
 void UPlayerStatComponent::ApplyStatModifier(const FStatModifier& Modifier)
@@ -232,8 +193,6 @@ void UPlayerStatComponent::ApplyStatModifier(const FStatModifier& Modifier)
 	// 전투 관련 스탯
 	Add->CombatStats.AttackDamage += Modifier.AdditiveValue;
 	Mul->CombatStats.AttackDamage *= Modifier.MultiplicativeValue;
-	UE_LOG(LogTemp, Log, TEXT("Modifier.MultiplicativeValue [%f]"), Modifier.MultiplicativeValue);
-	UE_LOG(LogTemp, Log, TEXT("Mul->CombatStats.AttackDamage [%f]"), Mul->CombatStats.AttackDamage);
 
 	Add->CombatStats.InvincibilityTime += Modifier.AdditiveValue;
 	Mul->CombatStats.InvincibilityTime *= Modifier.MultiplicativeValue;
@@ -285,6 +244,7 @@ void UPlayerStatComponent::ClampStats()
 	CurrentStats.MovementStats.JumpZVelocity = FMath::Clamp(CurrentStats.MovementStats.JumpZVelocity, 200.0f, 1500.0f);
 	CurrentStats.MovementStats.RollElapsedTime = FMath::Clamp(CurrentStats.MovementStats.RollElapsedTime, 0.0f, 2.0f);
 }
+#pragma endregion
 
 // Timer
 #pragma region
