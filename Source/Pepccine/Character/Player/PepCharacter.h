@@ -33,6 +33,7 @@ class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver
 public:
 	APepCharacter();
 
+	bool bIsFiring = false;
 	bool bIsFirstPersonView = false;
 	bool bIsInventoryOpened = false;
 	
@@ -135,6 +136,9 @@ private:
 	UFUNCTION()
 	void Fire();
 	UFUNCTION()
+	void StopFire();
+	
+	UFUNCTION()
 	void ZoomIn();
 	UFUNCTION()
 	void ZoomOut();
@@ -142,7 +146,7 @@ private:
 	float CameraArmLength = 300.0f;
 	float SprintHoldStartTime = 0.0f;
 	float SprintHoldThreshold = 0.2f;
-
+	
 	FVector RollDirection;
 	
 	UPROPERTY()

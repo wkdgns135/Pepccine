@@ -520,16 +520,21 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 	}
 }
 
+void APepCharacter::StopFire()
+{
+	bIsFiring = false;
+}
+
 void APepCharacter::Fire()
 {
 	if (bIsRolling)
 	{
 		return;
 	}
-	
+
+	bIsFiring = true;
 	PepccineMontageComponent->Fire();
 	// 무기 데미지
-	
 	ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 }
 
@@ -757,6 +762,16 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			ETriggerEvent::Triggered,
 			this,
 			&APepCharacter::Fire
+		);
+	}
+
+	if (PlayerController->FireAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->FireAction,
+			ETriggerEvent::Completed,
+			this,
+			&APepCharacter::StopFire
 		);
 	}
 
