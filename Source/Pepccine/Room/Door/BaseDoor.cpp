@@ -33,13 +33,14 @@ ABaseDoor::ABaseDoor()
 	SpawnPosition->SetupAttachment(RootScene);
 	
 	PrimaryActorTick.bCanEverTick = false;
+
+	bIsLocked = false;
 }
 
 void ABaseDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	LockDoor();
-	
+
 	if (APepccineGameState* GameState = Cast<APepccineGameState>(UGameplayStatics::GetGameState(GetWorld())))
 	{
 		if (ABaseRoomController* RoomController = GameState->GetRoomController())
@@ -74,19 +75,22 @@ void ABaseDoor::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 
 void ABaseDoor::OnStarted()
 {
+	bIsLocked = true;
+	LockDoor();
+	
 	if (URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
 	{
 		const FRoomData* RoomData = GetDirectionRoom();
 		if (RoomData->RoomType == ERoomType::ENone)
 		{
 			Destroy();
-			return;
 		}
 	}
 }
 
 void ABaseDoor::OnCleared()
 {
+	bIsLocked = false;
 	OpenDoor();
 }
 
@@ -113,20 +117,5 @@ FRoomData* ABaseDoor::GetDirectionRoom()
 	return RoomManager->GetPointRoomData(RoomPoint);
 }
 
-void ABaseDoor::LockDoor_Implementation()
-{
-	bIsLocked = true;
-	UE_LOG(LogTemp, Warning, TEXT("The door is now locked!"));
-}
-
-void ABaseDoor::OpenDoor_Implementation()
-{
-	if (!bIsLocked)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("The door is now open!"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("The door is locked and cannot be opened!"));
-	}
-}
+void ABaseDoor::OpenDoor_Implementation(){}
+void ABaseDoor::LockDoor_Implementation(){}
