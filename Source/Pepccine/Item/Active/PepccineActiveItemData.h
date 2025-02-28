@@ -2,10 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Item/PepccineItemDataBase.h"
+#include "Item/Passive/PepccineStatModifier.h"
 #include "PepccineActiveItemData.generated.h"
-
-struct FPepccineCharacterStatModifier;
-struct FPepccineWeaponStatModifier;
 
 UCLASS(BlueprintType, Abstract)
 class PEPCCINE_API UPepccineActiveItemData : public UPepccineItemDataBase
@@ -25,23 +23,23 @@ protected:
 	float Cooldown;
 };
 
-UCLASS(BlueprintType)
-class PEPCCINE_API UPepccinePotionItemData : public UPepccineActiveItemData
-{
-	GENERATED_BODY()
-
-public:
-	virtual void ActivateItem() override;
-	
-	TArray<FPepccineWeaponStatModifier> GetWeaponStatModifiers() const;
-	TArray<FPepccineCharacterStatModifier> GetCharacterStatModifiers() const;
-
-protected:
-	// 무기 스탯 수정 목록
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Potion", meta = (DisplayName = "무기 스탯 수정 목록 / 지속시간"))
-	TMap<FPepccineWeaponStatModifier, float> WeaponStatModifiers;
-
-	// 캐릭터 스탯 수정 목록
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Potion", meta = (DisplayName = "캐릭터 스탯 수정 목록 / 지속시간"))
-	TMap<FPepccineCharacterStatModifier, float> CharacterStatModifiers;
-};
+// UCLASS(BlueprintType)
+// class PEPCCINE_API UPepccinePotionItemData : public UPepccineActiveItemData
+// {
+// 	GENERATED_BODY()
+//
+// public:
+// 	virtual void ActivateItem() override;
+// 	
+// 	TArray<FPepccineWeaponStatModifier> GetWeaponStatModifiers() const;
+// 	TArray<FPepccineCharacterStatModifier> GetCharacterStatModifiers() const;
+//
+// protected:
+// 	// 무기 스탯 수정 목록
+// 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Potion", meta = (DisplayName = "무기 스탯 수정 목록 / 지속시간"))
+// 	TMap<FPepccineWeaponStatModifier, float> WeaponStatModifiers;
+//
+// 	// 캐릭터 스탯 수정 목록
+// 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Potion", meta = (DisplayName = "캐릭터 스탯 수정 목록 / 지속시간"))
+// 	TMap<FPepccineCharacterStatModifier, float> CharacterStatModifiers;
+// };
