@@ -69,6 +69,13 @@ void APepCharacter::Tick(float DeltaTime)
 	CheckRolling(DeltaTime);
 }
 
+float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	
+
+	return 0; // 실제로 받은 데미지 반환
+}
+
 // Initialize Character Status
 #pragma region
 void APepCharacter::InitializeCharacterMovement() const
