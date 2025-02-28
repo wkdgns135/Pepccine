@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "PepccineCharacter.generated.h"
@@ -47,9 +48,14 @@ class APepccineCharacter : public ACharacter
 public:
 	APepccineCharacter();
 
+	//////////////////////////////////////////////////////////////////////////
+	// 테스트용
+	
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
 	                         AActor* DamageCauser) override;
-
+	
+	//////////////////////////////////////////////////////////////////////////
+	
 protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);

@@ -32,6 +32,8 @@ public:
 	UPROPERTY()
 	bool bIsCleared = false;
 	UPROPERTY()
+	bool bIsLocked = false;
+	UPROPERTY()
 	ERoomType RoomType = ERoomType::ENone;
 	UPROPERTY()
 	FIntPoint RoomPoint;
