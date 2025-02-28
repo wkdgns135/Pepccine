@@ -79,10 +79,11 @@ public:
 	APepccinePlayerController* PlayerController;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
-	USpringArmComponent* SpringArmComp;
+	USpringArmComponent* SpringArmCompFirst;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	UCameraComponent* FirstPersonCamera;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
+	USpringArmComponent* SpringArmCompThird;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	UCameraComponent* ThirdPersonCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")

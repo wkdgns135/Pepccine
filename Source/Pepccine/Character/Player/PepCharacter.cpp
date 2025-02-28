@@ -27,18 +27,23 @@ APepCharacter::APepCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArmComp->SetupAttachment(RootComponent);
-	SpringArmComp->TargetArmLength = CameraArmLength;
-	SpringArmComp->bUsePawnControlRotation = true;
+	SpringArmCompThird = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmThird"));
+	SpringArmCompThird->SetupAttachment(RootComponent);
+	SpringArmCompThird->TargetArmLength = CameraArmLength;
+	SpringArmCompThird->bUsePawnControlRotation = true;
 
 	ThirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
-	ThirdPersonCamera->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
+	ThirdPersonCamera->SetupAttachment(SpringArmCompThird, USpringArmComponent::SocketName);
 	ThirdPersonCamera->bUsePawnControlRotation = false;
 
+	SpringArmCompFirst = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmFirst"));
+	SpringArmCompFirst->SetupAttachment(RootComponent);
+	SpringArmCompFirst->TargetArmLength = CameraArmLength;
+	SpringArmCompFirst->bUsePawnControlRotation = true;
+
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCamera->SetupAttachment(RootComponent);
-	FirstPersonCamera->bUsePawnControlRotation = true;
+	FirstPersonCamera->SetupAttachment(SpringArmCompFirst);
+	FirstPersonCamera->bUsePawnControlRotation = false;
 
 	PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
 	CrosshairComponent = CreateDefaultSubobject<UCrosshairHUDComponent>(TEXT("CrosshairHUDComponent"));
@@ -401,6 +406,7 @@ void APepCharacter::Reload()
 {
 	UE_LOG(LogTemp, Log, TEXT("Reload!"));
 
+	HitReactionComponent->EnterRagdoll(5);
 
 	if (bIsReloading)
 	{
@@ -502,9 +508,11 @@ void APepCharacter::Interactive()
 	// Delay 있는 상호작용 전용
 	if (bIsInteracting)
 	{
+		
 	}
 	else
 	{
+		
 	}
 }
 
