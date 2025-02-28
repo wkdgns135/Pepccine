@@ -30,6 +30,14 @@ void URoomManager::GenerateMap(const TArray<TArray<int>>& Grid)
 			{
 				CurrentRoom = Map[i][j];
 			}
+			else if (Map[i][j]->RoomType == ERoomType::EShop)
+			{
+				Map[i][j]->bIsLocked = true;
+			}
+			else if (Map[i][j]->RoomType == ERoomType::EItem)
+			{
+				Map[i][j]->bIsLocked = true;
+			}
 		}
 	}
 }
@@ -64,7 +72,7 @@ void URoomManager::ChangeRoom(FRoomData* RoomData)
 	UGameplayStatics::OpenLevel(GetWorld(), FName(*LevelPath));
 	PreviousRoom = CurrentRoom;
 	CurrentRoom = RoomData;
-	PrintFloor();
+	// PrintFloor();
 }
 
 FRoomData* URoomManager::NewRoom(const ERoomType RoomType)
