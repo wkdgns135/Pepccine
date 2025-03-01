@@ -17,11 +17,13 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Character/Animation/PepccineMontageComponent.h"
 #include "Character/Animation/PepccineHitReactionComponent.h"
+#include "Character/Components/BattleComponent.h"
 #include "Character/Data/ActorInfo.h"
 #include "Components/WidgetComponent.h"
 #include "Item/PepccineDropItem.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
 #include "Kismet/GameplayStatics.h"
+#include "Monster/Class/ZombieGirl.h"
 
 APepCharacter::APepCharacter()
 {
@@ -56,6 +58,7 @@ APepCharacter::APepCharacter()
 	ItemManagerComponent = CreateDefaultSubobject<UPepccineItemManagerComponent>(TEXT("ItemManagerComponent"));
 
 	HitReactionComponent = CreateDefaultSubobject<UPepccineHitReactionComponent>(TEXT("HitReactionComponent"));
+	BattleComponent = CreateDefaultSubobject<UBattleComponent>(TEXT("BattleComponent"));
 }
 
 void APepCharacter::BeginPlay()
@@ -105,6 +108,8 @@ float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Instigator Controller: %s"), *EventInstigator->GetName());
 	}
+
+	PlayerStatComponent->DecreaseHealth(DamageAmount);
 
 	return DamageAmount;
 }

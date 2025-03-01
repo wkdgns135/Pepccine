@@ -23,6 +23,7 @@ class UPrograssBarHUDComponent;
 class UItemIconHUDComponent;
 class UInventoryComponent;
 class UPepccineItemManagerComponent;
+class UBattleComponent;
 //class URadorComponent;
 class UCollisionRadarComponent;
 
@@ -106,7 +107,9 @@ public:
 	UPepccineMontageComponent* PepccineMontageComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineHitReactionComponent* HitReactionComponent;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UBattleComponent* BattleComponent;
+	
 private:
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
