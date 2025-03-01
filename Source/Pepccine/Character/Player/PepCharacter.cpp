@@ -1,4 +1,4 @@
-#include "PepCharacter.h"
+﻿#include "PepCharacter.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -16,6 +16,7 @@
 
 #include "GameFramework/SpringArmComponent.h"
 #include "Character/Animation/PepccineMontageComponent.h"
+#include "Character/Animation/PepccineHitReactionComponent.h"
 #include "Character/Data/ActorInfo.h"
 #include "Components/WidgetComponent.h"
 #include "Item/PepccineDropItem.h"
@@ -26,31 +27,35 @@ APepCharacter::APepCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArmComp->SetupAttachment(RootComponent);
-	SpringArmComp->TargetArmLength = CameraArmLength;
-	SpringArmComp->bUsePawnControlRotation = true;
+	SpringArmCompThird = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmThird"));
+	SpringArmCompThird->SetupAttachment(RootComponent);
+	SpringArmCompThird->TargetArmLength = CameraArmLength;
+	SpringArmCompThird->bUsePawnControlRotation = true;
 
 	ThirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
-	ThirdPersonCamera->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
+	ThirdPersonCamera->SetupAttachment(SpringArmCompThird, USpringArmComponent::SocketName);
 	ThirdPersonCamera->bUsePawnControlRotation = false;
 
+	SpringArmCompFirst = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmFirst"));
+	SpringArmCompFirst->SetupAttachment(RootComponent);
+	SpringArmCompFirst->TargetArmLength = CameraArmLength;
+	SpringArmCompFirst->bUsePawnControlRotation = true;
+
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCamera->SetupAttachment(RootComponent);
-	FirstPersonCamera->bUsePawnControlRotation = true;
+	FirstPersonCamera->SetupAttachment(SpringArmCompFirst);
+	FirstPersonCamera->bUsePawnControlRotation = false;
 
 	PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
 	CrosshairComponent = CreateDefaultSubobject<UCrosshairHUDComponent>(TEXT("CrosshairHUDComponent"));
 	PrograssBarComponent = CreateDefaultSubobject<UPrograssBarHUDComponent>(TEXT("PrograssBarComponent"));
 	ItemIconComponent = CreateDefaultSubobject<UItemIconHUDComponent>(TEXT("ItemIconComponent"));
 
-	//RadarComponent = CreateDefaultSubobject<URadorComponent>(TEXT("RadarComponent"));
-	//RadarComponent->DetectionClass = AActor::StaticClass();
-
 	EnhancedRadarComponent = CreateDefaultSubobject<UCollisionRadarComponent>(TEXT("EnhancedRadarComponent"));
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 	PepccineMontageComponent = CreateDefaultSubobject<UPepccineMontageComponent>(TEXT("MontageComponent"));
 	ItemManagerComponent = CreateDefaultSubobject<UPepccineItemManagerComponent>(TEXT("ItemManagerComponent"));
+
+	HitReactionComponent = CreateDefaultSubobject<UPepccineHitReactionComponent>(TEXT("HitReactionComponent"));
 }
 
 void APepCharacter::BeginPlay()
@@ -59,61 +64,37 @@ void APepCharacter::BeginPlay()
 
 	InitializeCharacterMovement();
 	AddObservers();
-
-	TestApplyStatModifier();
-	TestRemoveStatModifier();
 }
 
-void APepCharacter::TestApplyStatModifier()
+void APepCharacter::Tick(float DeltaTime)
 {
-	if (!PlayerStatComponent)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerStatComponent가 없습니다!"));
-		return;
-	}
+	Super::Tick(DeltaTime);
 
-	UE_LOG(LogTemp, Log, TEXT("== 1. 스탯 적용 =="));
-	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
-	UE_LOG(LogTemp, Log, TEXT("적용 예정: 10.0f, 1.2f"));
-
-	FStatModifier AttackModifier(EPepccineCharacterStatName::EPCSN_AttackDamage, 10.0f, 1.2f);
-	PlayerStatComponent->ApplyStatModifier(AttackModifier);
-
-	UE_LOG(LogTemp, Log, TEXT("== 2. 스탯 적용 =="));
-	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
-	UE_LOG(LogTemp, Log, TEXT("적용 예정: 50.0f, 1.1f"));
-
-	FStatModifier SpeedModifier(EPepccineCharacterStatName::EPCSN_MovementSpeed, 50.0f, 1.1f);
-	PlayerStatComponent->ApplyStatModifier(SpeedModifier);
-
-	UE_LOG(LogTemp, Log, TEXT("== 2. 스탯 적용 =="));
-	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	CheckSprinting();
+	CheckRolling(DeltaTime);
 }
 
-void APepCharacter::TestRemoveStatModifier()
+float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (!PlayerStatComponent)
+	UE_LOG(LogTemp, Warning, TEXT("=== TakeDamage() Called ==="));
+	UE_LOG(LogTemp, Warning, TEXT("Damage Amount: %f"), DamageAmount);
+
+	if (DamageCauser)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerStatComponent가 없습니다!"));
-		return;
+		UE_LOG(LogTemp, Warning, TEXT("Damage Causer: %s"), *DamageCauser->GetName());
+	}
+    
+	if (EventInstigator)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Instigator Controller: %s"), *EventInstigator->GetName());
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("== 1. 스탯 제거 =="));
-	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
-	UE_LOG(LogTemp, Log, TEXT("적용 예정: 10.0f, 1.2f"));
+	return DamageAmount;
+}
 
-	FStatModifier AttackModifier(EPepccineCharacterStatName::EPCSN_AttackDamage, 10.0f, 1.2f);
-	PlayerStatComponent->RemoveStatModifier(AttackModifier);
-
-	UE_LOG(LogTemp, Log, TEXT("== 2. 스탯 제거 =="));
-	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
-	UE_LOG(LogTemp, Log, TEXT("적용 예정: 50.0f, 1.1f"));
-
-	FStatModifier SpeedModifier(EPepccineCharacterStatName::EPCSN_MovementSpeed, 50.0f, 1.1f);
-	PlayerStatComponent->RemoveStatModifier(SpeedModifier);
-
-	UE_LOG(LogTemp, Log, TEXT("== 3. 스탯 제거 =="));
-	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+void APepCharacter::Die()
+{
+	
 }
 
 // Initialize Character Status
@@ -132,14 +113,6 @@ void APepCharacter::InitializeCharacterMovement() const
 	}
 }
 #pragma endregion
-
-void APepCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	CheckSprinting();
-	CheckRolling(DeltaTime);
-}
 
 // Tick Method
 #pragma region
@@ -360,10 +333,11 @@ void APepCharacter::Roll()
 	{
 		return;
 	}
+	
+	// 임시
+	//TriggerCameraShake();
 
 	bIsRolling = true;
-	FStatModifier SpeedModifier(EPepccineCharacterStatName::EPCSN_RollElapsedTime, 0.0f, 0.0f);
-	PlayerStatComponent->ApplyStatModifier(SpeedModifier);
 	RollDirection = GetRollDirection();
 
 	if (!PlayerStatComponent->DecreaseStaminaByPercentage(30))
@@ -432,6 +406,8 @@ void APepCharacter::Reload()
 {
 	UE_LOG(LogTemp, Log, TEXT("Reload!"));
 
+	HitReactionComponent->EnterRagdoll(5);
+
 	if (bIsReloading)
 	{
 		bIsReloading = false;
@@ -487,7 +463,7 @@ void APepCharacter::Interactive()
 				UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
 			}
 
-			TArray<FPepccineCharacterFeature> CharacterFeatures = DropItem->CharacterFeatures;
+			TArray<FPepccineCharacterFeature> CharacterFeatures = DropItem->GetCharacterFeatures();
 			for (const FPepccineCharacterFeature& Feature : CharacterFeatures)
 			{
 				switch (Feature.CharacterFeatureName)
@@ -532,9 +508,11 @@ void APepCharacter::Interactive()
 	// Delay 있는 상호작용 전용
 	if (bIsInteracting)
 	{
+		
 	}
 	else
 	{
+		
 	}
 }
 
@@ -577,6 +555,11 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 	}
 }
 
+void APepCharacter::StopFire()
+{
+	bIsFiring = false;
+}
+
 void APepCharacter::Fire()
 {
 	if (bIsRolling)
@@ -584,11 +567,9 @@ void APepCharacter::Fire()
 		return;
 	}
 
-	TriggerCameraShake();
-
+	bIsFiring = true;
 	PepccineMontageComponent->Fire();
 	// 무기 데미지
-	
 	ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 }
 
@@ -769,7 +750,7 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	{
 		EnhancedInput->BindAction(
 			PlayerController->ReloadingAction,
-			ETriggerEvent::Triggered,
+			ETriggerEvent::Started,
 			this,
 			&APepCharacter::Reload
 		);
@@ -813,9 +794,19 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	{
 		EnhancedInput->BindAction(
 			PlayerController->FireAction,
-			ETriggerEvent::Started,
+			ETriggerEvent::Triggered,
 			this,
 			&APepCharacter::Fire
+		);
+	}
+
+	if (PlayerController->FireAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->FireAction,
+			ETriggerEvent::Completed,
+			this,
+			&APepCharacter::StopFire
 		);
 	}
 
@@ -841,5 +832,59 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		);
 	}
 }
+#pragma endregion
 
+// Test Code
+#pragma region
+void APepCharacter::TestApplyStatModifier()
+{
+	if (!PlayerStatComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerStatComponent가 없습니다!"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("== 1. 스탯 적용 =="));
+	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	UE_LOG(LogTemp, Log, TEXT("적용 예정: 10.0f, 1.2f"));
+
+	FStatModifier AttackModifier(EPepccineCharacterStatName::EPCSN_AttackDamage, 10.0f, 1.2f);
+	PlayerStatComponent->ApplyStatModifier(AttackModifier);
+
+	UE_LOG(LogTemp, Log, TEXT("== 2. 스탯 적용 =="));
+	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	UE_LOG(LogTemp, Log, TEXT("적용 예정: 50.0f, 1.1f"));
+
+	FStatModifier AttackModifierA(EPepccineCharacterStatName::EPCSN_AttackDamage, 50.0f, 1.1f);
+	PlayerStatComponent->ApplyStatModifier(AttackModifierA);
+
+	UE_LOG(LogTemp, Log, TEXT("== 3. 스탯 적용 =="));
+	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+}
+
+void APepCharacter::TestRemoveStatModifier()
+{
+	if (!PlayerStatComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerStatComponent가 없습니다!"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("== 1. 스탯 제거 =="));
+	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	UE_LOG(LogTemp, Log, TEXT("적용 예정: 10.0f, 1.2f"));
+
+	FStatModifier AttackModifier(EPepccineCharacterStatName::EPCSN_AttackDamage, 50.0f, 1.1f);
+	PlayerStatComponent->RemoveStatModifier(AttackModifier);
+
+	UE_LOG(LogTemp, Log, TEXT("== 2. 스탯 제거 =="));
+	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	UE_LOG(LogTemp, Log, TEXT("적용 예정: 50.0f, 1.1f"));
+
+	FStatModifier AttackModifierA(EPepccineCharacterStatName::EPCSN_AttackDamage, 10.0f, 1.2f);
+	PlayerStatComponent->RemoveStatModifier(AttackModifierA);
+
+	UE_LOG(LogTemp, Log, TEXT("== 3. 스탯 제거 =="));
+	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+}
 #pragma endregion

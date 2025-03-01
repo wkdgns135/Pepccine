@@ -53,6 +53,31 @@ void UPepccineMontageComponent::Death()
 	}
 }
 
+void UPepccineMontageComponent::Draw()
+{
+	if (AnimInstance && DrawMontage)
+	{
+		AnimInstance->Montage_Play(DrawMontage);
+	}
+}
+
+void UPepccineMontageComponent::GetUp()
+{
+	if (AnimInstance && GetUpMontage)
+	{
+		AnimInstance->Montage_Play(GetUpMontage);
+	}
+}
+
+void UPepccineMontageComponent::Pick()
+{
+	if (AnimInstance && PickMontage)
+	{
+		AnimInstance->Montage_Play(PickMontage);
+	}
+}
+
+
 void UPepccineMontageComponent::Roll(FVector Dir, FRotator ActorRotation)
 {
 	float ForwardDeltaDegree = 0;

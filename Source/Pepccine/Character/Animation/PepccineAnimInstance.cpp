@@ -28,10 +28,6 @@ void UPepccineAnimInstance::NativeInitializeAnimation()
 	if (Owner)
 	{
 		Movement = Owner->GetCharacterMovement();
-		if (Movement)
-		{
-			WalkSpeed = Movement->MaxWalkSpeed;
-		}
 	}
 }
 
@@ -47,7 +43,7 @@ void UPepccineAnimInstance::NativeUpdateAnimation(float dt)
 		bIsIdle = Speed < MovingThreshould;
 		bIsFalling = Movement->IsFalling();
 		bIsCrouch = Movement->IsCrouching();
-		bIsSprint = WalkSpeed < Movement->MaxWalkSpeed;
+		bIsSprint = Owner->bIsSprinting;
 		float Pitch = Owner->GetControlRotation().Pitch;
 		(Pitch > 90) ? ControllerPitch = Pitch - 360 : ControllerPitch = Pitch;
 		//bIsMainWeapon = Owner->IsMainWeapon();

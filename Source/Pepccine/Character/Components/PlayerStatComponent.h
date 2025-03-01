@@ -61,7 +61,6 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 public:
-	// 스텟 관련 리팩중
 	/** 새로운 PlayerStatDataAsset을 설정하고 스탯을 초기화 */
 	UFUNCTION(BlueprintCallable, Category="Stats")
 	void SetPlayerStatDataAsset(UPlayerStatDataAsset* NewDataAsset);
@@ -100,7 +99,4 @@ private:
 	/** 게임에서 사용할 기본 스탯을 저장하는 데이터 애셋 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
 	UPlayerStatDataAsset* PlayerStatDataAsset;
-
-
-
 };

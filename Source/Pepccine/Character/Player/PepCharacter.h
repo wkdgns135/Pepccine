@@ -11,6 +11,7 @@
 #include "Character/Data/ActorInfo.h"
 #include "Character/Interfaces/IStaminaObserver.h"
 #include "Item/PepccineDropItem.h"
+#include "Kismet/GameplayStatics.h"
 #include "PepCharacter.generated.h"
 
 class UInputMappingContext;
@@ -25,6 +26,8 @@ class UPepccineItemManagerComponent;
 //class URadorComponent;
 class UCollisionRadarComponent;
 
+class UPepccineHitReactionComponent;
+
 UCLASS()
 class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver
 {
@@ -33,6 +36,7 @@ class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver
 public:
 	APepCharacter();
 
+	bool bIsFiring = false;
 	bool bIsFirstPersonView = false;
 	bool bIsInventoryOpened = false;
 	
@@ -46,6 +50,13 @@ public:
 	bool bIsInteracting = false;
 	bool bIsRolling = false;
 	bool bIsRollable = true;
+
+	virtual float TakeDamage(
+				float DamageAmount,
+				struct FDamageEvent const& DamageEvent,
+				class AController* EventInstigator,
+				AActor* DamageCauser
+		) override;
 
 	// UE delegate
 	UFUNCTION()
@@ -68,10 +79,11 @@ public:
 	APepccinePlayerController* PlayerController;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
-	USpringArmComponent* SpringArmComp;
+	USpringArmComponent* SpringArmCompFirst;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	UCameraComponent* FirstPersonCamera;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
+	USpringArmComponent* SpringArmCompThird;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	UCameraComponent* ThirdPersonCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -90,6 +102,8 @@ public:
 	UPepccineItemManagerComponent* ItemManagerComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineMontageComponent* PepccineMontageComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UPepccineHitReactionComponent* HitReactionComponent;
 
 private:
 	UFUNCTION()
@@ -135,18 +149,20 @@ private:
 	UFUNCTION()
 	void Fire();
 	UFUNCTION()
+	void StopFire();
+	
+	UFUNCTION()
 	void ZoomIn();
 	UFUNCTION()
 	void ZoomOut();
-	
-	void TestApplyStatModifier();
-	void TestRemoveStatModifier();
+
+	UFUNCTION()
+	void Die();
 
 	float CameraArmLength = 300.0f;
-	
 	float SprintHoldStartTime = 0.0f;
 	float SprintHoldThreshold = 0.2f;
-
+	
 	FVector RollDirection;
 	
 	UPROPERTY()
@@ -166,4 +182,8 @@ private:
 	void CheckRolling(float DeltaTime);
 
 	FVector GetRollDirection();
+
+	// TEST CODE
+	void TestApplyStatModifier();
+	void TestRemoveStatModifier();
 };

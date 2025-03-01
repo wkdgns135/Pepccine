@@ -1,7 +1,6 @@
 ﻿#include "PepccineItemSpawner.h"
 #include "PepccineDropItem.h"
-#include "GameFramework/Character.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "PepccineItemDataBase.h"
 
 void UPepccineItemSpawner::SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData)
 {
@@ -12,11 +11,13 @@ void UPepccineItemSpawner::SpawnItem(const FVector& SpawnLocation, UPepccineItem
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 		// 아이템 스폰
-		if (APepccineDropItem* DropItem = World->SpawnActor<APepccineDropItem>(SpawnedActor, SpawnLocation, FRotator::ZeroRotator, SpawnParams))
+		if (APepccineDropItem* DropItem = World->SpawnActor<APepccineDropItem>(
+			SpawnedActor, SpawnLocation, DropItemData->GetMeshRotationToSpawn(), SpawnParams))
 		{
+			DropItem->SetActorScale3D(DropItemData->GetMeshScaleToSpawn());
+			
 			// 아이템 초기화
 			DropItem->InitializeDropItem(DropItemData);
 		}
-		
 	}
 }

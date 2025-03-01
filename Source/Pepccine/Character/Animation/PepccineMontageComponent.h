@@ -26,6 +26,12 @@ public:
 	void Death();
 	UFUNCTION()
 	void Roll(FVector Dir, FRotator ActorRotation);
+	UFUNCTION()
+	void Draw();
+	UFUNCTION()
+	void GetUp();
+	UFUNCTION()
+	void Pick();
 
 protected:
 	// Called when the game starts
@@ -46,4 +52,10 @@ protected:
 	UAnimMontage* DeathMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* RollMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* DrawMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* GetUpMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* PickMontage;
 };

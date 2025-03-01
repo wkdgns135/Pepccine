@@ -23,16 +23,29 @@ void ABaseRoomController::PostInitializeComponents()
 void ABaseRoomController::BeginPlay()
 {
 	Super::BeginPlay();
-	GetWorldTimerManager().SetTimerForNextTick([this]()
-		{
-			OnRoomStarted.Broadcast();
-		});
-	PlacePlayer();
+	MonsterCount = 0;
+	GetWorldTimerManager().SetTimerForNextTick([this]{StartRoom();});
 }
 
 void ABaseRoomController::ClearRoom()
 {
 	OnRoomCleared.Broadcast();
+}
+
+void ABaseRoomController::DecreaseMonsterCount()
+{
+	MonsterCount--;
+	if (MonsterCount <= 0)
+	{
+		ClearRoom();
+	}
+}
+
+void ABaseRoomController::StartRoom()
+{
+	OnRoomStarted.Broadcast();
+	PlacePlayer();
+	CheckAndClearRoom();
 }
 
 void ABaseRoomController::PlacePlayer()
@@ -70,4 +83,17 @@ void ABaseRoomController::PlacePlayer()
 			PlayerCharacter->SetActorRotation({0,0,0});
 		}
 	}
+}
+
+void ABaseRoomController::CheckAndClearRoom()
+{
+	if (MonsterCount <= 0)
+	{
+		ClearRoom();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Monster Count after Broadcast: %d"), MonsterCount);
+	}
+
 }

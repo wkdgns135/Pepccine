@@ -21,9 +21,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "UI")
 	UWeaponWidget* WeaponWidget;
 
-	void SetActiveItem(UTexture2D* ActiveImage, const FString& ActiveName, FString& ActiveButton, const int32 Cooldown, const int32 MaxCooldown);
-	void SetMainWeaponItem(UTexture2D* MainWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo);
-	void SetSubWeaponItem(UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo);
+	void SetActiveItem(UTexture2D* ActiveImage, const FString& ActiveName, const FString& ActiveButton, const int32 Cooldown, const int32 MaxCooldown);
+	void SetWeaponItem(UTexture2D* MainWeaponImage, UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo, bool bIsMainWeapon);
 
 protected:
 	virtual void BeginPlay() override;
