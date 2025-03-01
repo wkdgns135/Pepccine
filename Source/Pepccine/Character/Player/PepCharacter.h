@@ -23,6 +23,7 @@ class UPrograssBarHUDComponent;
 class UItemIconHUDComponent;
 class UInventoryComponent;
 class UPepccineItemManagerComponent;
+class UBattleComponent;
 //class URadorComponent;
 class UCollisionRadarComponent;
 
@@ -50,6 +51,8 @@ public:
 	bool bIsInteracting = false;
 	bool bIsRolling = false;
 	bool bIsRollable = true;
+
+	bool bIsPlayerAlive = true;
 
 	virtual float TakeDamage(
 				float DamageAmount,
@@ -104,7 +107,9 @@ public:
 	UPepccineMontageComponent* PepccineMontageComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineHitReactionComponent* HitReactionComponent;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UBattleComponent* BattleComponent;
+	
 private:
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
@@ -157,7 +162,7 @@ private:
 	void ZoomOut();
 
 	UFUNCTION()
-	void Die();
+	void Dead();
 
 	float CameraArmLength = 300.0f;
 	float SprintHoldStartTime = 0.0f;
