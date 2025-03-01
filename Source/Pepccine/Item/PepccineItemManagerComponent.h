@@ -7,6 +7,7 @@
 #include "Components/ActorComponent.h"
 #include "Item/Weapon/PepccineWeaponItemData.h"
 #include "Item/Weapon/PepccineWeaponItemComponent.h"
+#include "Weapon/PepccineWeaponItemManager.h"
 
 #include "PepccineItemManagerComponent.generated.h"
 
@@ -32,8 +33,6 @@ public:
 
 	// 아이템 획득
 	bool PickUpItem(UPepccineItemDataBase* DropItemData, bool bIsPlayPickUpSound = true);
-	// 무기 획득
-	void PickUpItem(const UPepccineWeaponItemData* WeaponItemData);
 	// 패시브 획득
 	void PickUpItem(const UPepccinePassiveItemData* PassiveItemData);
 	// 액티브 아이템 획득
@@ -45,31 +44,18 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// 데이터 저장 관련
 
-	// 아이템 세이브 데이터 구조체 가져오기
-	UFUNCTION(BlueprintCallable)
-	FPepccineItemSaveData GetSaveItemData() const;
-
-	// 아이템 세이브 데이터 불러오기
-	UFUNCTION(BlueprintCallable)
-	void LoadItemData(const FPepccineItemSaveData& SaveData);
+	// // 아이템 세이브 데이터 구조체 가져오기
+	// UFUNCTION(BlueprintCallable)
+	// FPepccineItemSaveData GetSaveItemData() const;
+	//
+	// // 아이템 세이브 데이터 불러오기
+	// UFUNCTION(BlueprintCallable)
+	// void LoadItemData(const FPepccineItemSaveData& SaveData);
 	//////////////////////////////////////////////////////////////////////////
-
-
-	// 기본 무기 초기화
-	UFUNCTION()
-	void EquipDefaultWeapon();
-
-	// 무기 장착
-	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
-	void EquipWeapon(UPepccineWeaponItemData* Weapon, bool bIsPlayEquipSound = true) const;
 
 	// 무기 교체
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
 	void SwapWeapon(EPepccineWeaponItemType WeaponType) const;
-
-	// 무기 메시 교체
-	UFUNCTION()
-	void ChangeWeaponEquippedMesh() const;
 
 	// 현재 장착 중인 무기 발사
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
@@ -94,9 +80,6 @@ public:
 	// 캐릭터 스탯 합연산 및 곱연산 감소
 	void DecreaseStatsOperations(TArray<FPepccineCharacterStatModifier> Modifiers);
 
-	// 무기 스탯 업데이트
-	// void UpdateWeaponStatByName(EPepccineWeaponStatName WeaponItemStatName);
-
 	// 액티브 아이템 사용
 	void UseActiveItem();
 
@@ -110,14 +93,14 @@ public:
 	// 아이디로 적용된 버프 포션 목록에서 찾기
 	UFUNCTION(BlueprintPure, Category = "Item|Active")
 	UPepccinePotionItemData* GetAppliedPotionItemDataById(const int32 Id) const;
-	
+
 	// // 카드키 사용
 	// UFUNCTION(BlueprintCallable, Category = "Item|Resource")
 	// bool UseCardKey(int32 Count);
 	// 코인 사용
 	UFUNCTION(BlueprintCallable, Category = "Item|Resource")
 	bool UseCoin(int32 Count);
-	
+
 	// getter
 
 	// 아이템 스포너 가져오기
@@ -128,22 +111,23 @@ public:
 
 	// 무기 컴포넌트 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
-	FORCEINLINE UPepccineWeaponItemComponent* GetWeaponItemComp() const { return WeaponItemComp; };
+	FORCEINLINE UPepccineWeaponItemComponent* GetWeaponItemComp() const
+	{
+		return WeaponItemManager->GetWeaponItemComp();
+	};
 	// 무기 데이터 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE UPepccineWeaponItemData* GetWeaponItemData(
-		const EPepccineWeaponItemType WeaponItemType)
+		const EPepccineWeaponItemType WeaponItemType) const
 	{
-		return WeaponItemType == EPepccineWeaponItemType::EPWIT_Main
-			       ? MainWeaponItemData
-			       : SubWeaponItemData;
+		return WeaponItemManager->GetWeaponItemData(WeaponItemType);
 	}
 
 	// 장착 중인 무기 데이터 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE UPepccineWeaponItemData* GetEquippedWeaponItemData() const
 	{
-		return WeaponItemComp->GetEquippedWeaponData();
+		return WeaponItemManager->GetEquippedWeaponItemData();
 	}
 
 	// 현재 장착중인 무기가 메인 무기인지 확인
@@ -158,10 +142,6 @@ public:
 	// 아이템 아이디로 패시브 데이터 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item|Passive")
 	FORCEINLINE UPepccinePassiveItemData* GetPassiveItemById(const int32 ItemId) { return PassiveItemDatas[ItemId]; };
-
-	// 아이템 데이터 에셋 가져오기
-	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE UPepccineItemDataAssetBase* GetItemDataBase() const { return ItemSpawner->GetItemDataAsset(); };
 
 	// 스탯 이름으로 무기 스탯 합연산 총합 가져오기
 	FORCEINLINE float GetTotalSumByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
@@ -205,7 +185,7 @@ public:
 	// 현재 재사용 대기 중 인지 확인
 	UFUNCTION(BlueprintCallable, Category = "Item|Active")
 	FORCEINLINE bool IsActiveItemCooldown() const { return bIsActiveItemCooldown; };
-	
+
 	UFUNCTION(BlueprintCallable, Category = "Item|Resource")
 	FORCEINLINE int32 GetCoinCount() const { return CoinCount; };
 
@@ -218,16 +198,20 @@ private:
 	UPROPERTY()
 	UPepccineItemSpawner* ItemSpawner;
 
-	// 무기 컴포넌트
-	UPROPERTY(VisibleInstanceOnly, Category = "Item|Weapon")
-	UPepccineWeaponItemComponent* WeaponItemComp;
+	// 무기 아이템 매니저
+	UPROPERTY(VisibleInstanceOnly, Category = "Item|Manager")
+	UPepccineWeaponItemManager* WeaponItemManager;
 
-	// 원본 주 무기 데이터
-	UPROPERTY(VisibleInstanceOnly, Category = "Item|Weapon", meta = (DisplayName = "원본 주 무기 데이터"))
-	TObjectPtr<UPepccineWeaponItemData> MainWeaponItemData;
-	// 원본 보조 무기 데이터
-	UPROPERTY(VisibleInstanceOnly, Category = "Item|Weapon", meta = (DisplayName = "원본 보조 무기 데이터"))
-	TObjectPtr<UPepccineWeaponItemData> SubWeaponItemData;
+	// // 무기 컴포넌트
+	// UPROPERTY(VisibleInstanceOnly, Category = "Item|Weapon")
+	// UPepccineWeaponItemComponent* WeaponItemComp;
+	//
+	// // 원본 주 무기 데이터
+	// UPROPERTY(VisibleInstanceOnly, Category = "Item|Weapon", meta = (DisplayName = "원본 주 무기 데이터"))
+	// TObjectPtr<UPepccineWeaponItemData> MainWeaponItemData;
+	// // 원본 보조 무기 데이터
+	// UPROPERTY(VisibleInstanceOnly, Category = "Item|Weapon", meta = (DisplayName = "원본 보조 무기 데이터"))
+	// TObjectPtr<UPepccineWeaponItemData> SubWeaponItemData;
 
 	// 패시브 아이템 목록
 	UPROPERTY(VisibleInstanceOnly, Category = "Item|Passive", meta = (DisplayName = "패시브 아이템 목록"))
@@ -255,11 +239,8 @@ private:
 	float ActiveItemRemainingCooldown = 0.0f;
 	// 액티브 아이템 재사용 대기 중 상태
 	bool bIsActiveItemCooldown = true;
-	
+
 	// 코인
 	UPROPERTY(VisibleInstanceOnly, Category = "Item|Resource", meta = (DisplayName = "코인 수"))
 	int32 CoinCount = 0;
-
-	// 캐릭터에 부착되어 있는 무기 액터 설정
-	void SetWeaponItemComponent();
 };

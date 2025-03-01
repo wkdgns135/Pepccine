@@ -430,8 +430,8 @@ void APepCharacter::Interactive()
 		if (CurrentDropItem->IsA(UPepccinePassiveItemData::StaticClass()))
 		{
 			// 패시브 아이템
-			const UPepccinePassiveItemData* DropItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData());
-			InventoryComponent->AddItem(DropItem->IconTexture, DropItem->GetDisplayName(), DropItem->GetDescription());
+			UPepccinePassiveItemData* DropItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData());
+			InventoryComponent->AddItem(DropItem->GetIconTexture(), DropItem->GetDisplayName(), DropItem->GetDescription());
 
 			TArray<FPepccineCharacterStatModifier> CharacterStatModifiers = DropItem->GetCharacterStatModifiers();
 			for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)

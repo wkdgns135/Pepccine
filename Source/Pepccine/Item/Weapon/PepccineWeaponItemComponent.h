@@ -6,6 +6,8 @@
 
 #include "PepccineWeaponItemComponent.generated.h"
 
+class UPepccinePoolSubSystem;
+class APepccineProjectile;
 class UPepccineItemManagerComponent;
 class UWeaponStatModifier;
 class UPepccineWeaponItemData;
@@ -18,6 +20,9 @@ class PEPCCINE_API UPepccineWeaponItemComponent : public USkeletalMeshComponent
 public:
 	virtual void BeginPlay() override;
 
+	// 초기화
+	void InitWeaponComponent(ACharacter* InOwnerCharacter);
+	
 	// 무기 발사
 	void Fire(const float& WeaponDamage);
 	// 무기 재장전
@@ -31,17 +36,19 @@ public:
 		UE_LOG(LogTemp, Warning, TEXT("발사 가능!"));
 		bCanFire = true;
 	};
-
-
+	
 	// getter
+
+	// 발사 방향 가져오기
+	FVector GetFireDirection(const FVector& MuzzleLocation) const;
+	
 	// 장착 무기 데이터 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE UPepccineWeaponItemData* GetEquippedWeaponData() const { return EquippedWeaponData; };
+	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
+	FORCEINLINE TSubclassOf<APepccineProjectile> GetProjectileClass() const { return ProjectileClass; };
 	
 	// setter
-	
-	// 캐릭터 설정
-	FORCEINLINE void SetCharacter(ACharacter* Character) { OwnerCharacter = Character; };
 
 private:
 	// 무기를 들고 있는 캐릭터
@@ -51,12 +58,16 @@ private:
 	// 현재 장착중인 무기 데이터
 	UPROPERTY()
 	TObjectPtr<UPepccineWeaponItemData> EquippedWeaponData;
+
+	// 투사체(프로젝타일) 클래스
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Info|Weapon", meta = (DisplayName = "투사체 클래스", AllowPrivateAccess = true))
+	TSubclassOf<APepccineProjectile> ProjectileClass;
+	
 	// 발사 가능 여부
 	bool bCanFire = true;
-
-	// 발사 방향 가져오기
-	FVector GetFireDirection(const FVector& MuzzleLocation) const;
-
-	// 디버그용 카메라 방향으로 회전
-	void RotateToCamera() const;
+	
+	// 오브젝트 풀 서브 시스템
+	UPROPERTY()
+	UPepccinePoolSubSystem* PoolSubSystem;
+	
 };

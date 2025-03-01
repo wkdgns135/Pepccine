@@ -19,7 +19,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE EPepccineWeaponItemType GetWeaponItemType() const { return WeaponItemType; };
 	FORCEINLINE TObjectPtr<USkeletalMesh> GetEquippedMesh() const { return EquippedMesh; };
-	FORCEINLINE TSubclassOf<APepccineProjectile> GetProjectileClass() const { return ProjectileClass; };
 	FORCEINLINE FTimerHandle& GetFireRateTimerHandle() { return FireRateTimerHandle; };
 
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
@@ -40,10 +39,6 @@ protected:
 	// 장착시 보여지는 메시
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Weapon", meta = (DisplayName = "장착 메시"))
 	TObjectPtr<USkeletalMesh> EquippedMesh;
-
-	// 투사체(프로젝타일) 클래스
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Weapon", meta = (DisplayName = "투사체 클래스"))
-	TSubclassOf<APepccineProjectile> ProjectileClass;
 
 	// 무기 발사 소리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Weapon", meta = (DisplayName = "무기 발사 소리"))

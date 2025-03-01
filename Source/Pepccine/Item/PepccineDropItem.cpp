@@ -34,7 +34,7 @@ void APepccineDropItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StartZLocation = StaticMeshComp->GetRelativeLocation().Z;
+	StartLocation = StaticMeshComp->GetRelativeLocation();
 }
 
 void APepccineDropItem::Tick(float DeltaTime)
@@ -45,14 +45,13 @@ void APepccineDropItem::Tick(float DeltaTime)
 	CurrentTime += DeltaTime;
 	CurrentTime = FMath::Fmod(CurrentTime, 360.0f);
 
-	const float NewZLocation = StartZLocation + 20.0f * FMath::Sin(CurrentTime * 0.5f * 2.0f * PI);
+	const float Offset = 20.0f * FMath::Sin(CurrentTime * 0.5f * 2.0f * PI);
 
-	FVector NewLocation = StaticMeshComp->GetRelativeLocation();
-	NewLocation.Z = NewZLocation;
+	const FVector NewLocation = StartLocation + (GetActorUpVector() * Offset);
 	StaticMeshComp->SetRelativeLocation(NewLocation);
 	
 	// 스태틱 메쉬 회전
-	StaticMeshComp->AddLocalRotation(FRotator(0, DeltaTime * 45.0f, 0));
+	AddActorLocalRotation(FRotator(0, DeltaTime * 45.0f, 0));
 }
 
 void APepccineDropItem::InitializeDropItem(const UPepccineItemDataBase* InDropItemData)
@@ -65,13 +64,16 @@ void APepccineDropItem::InitializeDropItem(const UPepccineItemDataBase* InDropIt
 		// 스폰 메시 설정
 		StaticMeshComp->SetStaticMesh(DropItemData->GetMeshToSpawn());
 
+		StaticMeshComp->SetRelativeRotation(DropItemData->GetMeshRotationToSpawn());
+		StaticMeshComp->SetRelativeScale3D(DropItemData->GetMeshScaleToSpawn());
+
 		// 패시브일 경우 메시 추가 설정
 		if (DropItemData->IsA(UPepccinePassiveItemData::StaticClass()))
 		{
 			StaticMeshComp->SetRelativeScale3D(FVector(0.25f, 0.25f, 0.25f));
 
 			UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(StaticMeshComp->GetMaterial(0), this);
-			DynMaterial->SetTextureParameterValue(FName("ItemIcon"), DropItemData->IconTexture);
+			DynMaterial->SetTextureParameterValue(FName("ItemIcon"), DropItemData->GetIconTexture());
 
 			StaticMeshComp->SetMaterial(0, DynMaterial);
 		}

@@ -12,10 +12,8 @@ void UPepccineItemSpawner::SpawnItem(const FVector& SpawnLocation, UPepccineItem
 
 		// 아이템 스폰
 		if (APepccineDropItem* DropItem = World->SpawnActor<APepccineDropItem>(
-			SpawnedActor, SpawnLocation, DropItemData->GetMeshRotationToSpawn(), SpawnParams))
+			SpawnedActor, SpawnLocation, FRotator::ZeroRotator, SpawnParams))
 		{
-			DropItem->SetActorScale3D(DropItemData->GetMeshScaleToSpawn());
-			
 			// 아이템 초기화
 			DropItem->InitializeDropItem(DropItemData);
 		}
