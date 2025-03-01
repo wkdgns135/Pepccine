@@ -28,7 +28,8 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHealthChanged OnHealthChanged;
-	
+
+	void CheckHealthStatus() const;
 	void DecreaseHealth(float Amount);
 	
 	void DecreaseHealth_Timer();

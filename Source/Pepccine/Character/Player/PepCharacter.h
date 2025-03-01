@@ -51,6 +51,8 @@ public:
 	bool bIsRolling = false;
 	bool bIsRollable = true;
 
+	bool bIsPlayerAlive = true;
+
 	virtual float TakeDamage(
 				float DamageAmount,
 				struct FDamageEvent const& DamageEvent,
@@ -157,7 +159,7 @@ private:
 	void ZoomOut();
 
 	UFUNCTION()
-	void Die();
+	void Dead();
 
 	float CameraArmLength = 300.0f;
 	float SprintHoldStartTime = 0.0f;
