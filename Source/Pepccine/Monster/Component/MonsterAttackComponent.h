@@ -2,11 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Character/Components/BattleComponent.h"
 #include "MonsterAttackComponent.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PEPCCINE_API UMonsterAttackComponent : public UActorComponent
+class PEPCCINE_API UMonsterAttackComponent : public UBattleComponent
 {
 	GENERATED_BODY()
 

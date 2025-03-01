@@ -122,6 +122,7 @@ void UMonsterAttackComponent::AttackTrace()
         if (APepCharacter* Player = Cast<APepCharacter>(HitResult.GetActor()))
         {
             ApplyDamageToTarget(Player, 20.0f);
+            SendHitResult(Player, 20.0f, HitResult);
         }
     }
     else
