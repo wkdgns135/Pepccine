@@ -18,7 +18,7 @@ struct FHealthStats
     float HealthDecelerationSpeed = 1.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-    float HealthDecelerationAmount = 1.0f;
+    float HealthDecelerationAmount = 0.0f;
 };
 
 // 스태미나 관련 스탯

@@ -16,7 +16,7 @@ void UMonsterAttackComponent::BeginPlay()
 
 void UMonsterAttackComponent::PerformAttack()
 {
-    // ¼ÒÀ¯ÀÚ¸¦ ACharacter·Î º¯È¯
+    // ì†Œìœ ìë¥¼ ACharacterë¡œ ë³€í™˜
     ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
     if (!OwnerCharacter)
     {
@@ -35,13 +35,13 @@ void UMonsterAttackComponent::ApplyDamageToTarget(AActor* Target, float DamageAm
 {
     if (Target)
     {
-        // µ¥¹ÌÁö Àû¿ë
+        // ë°ë¯¸ì§€ ì ìš©
         UGameplayStatics::ApplyDamage(Target, DamageAmount, nullptr, GetOwner(), nullptr);
 
         APepCharacter* Player = Cast<APepCharacter>(Target);
         if (Player)
         {
-            // ÇÃ·¹ÀÌ¾î ÂÊ ÇÇ°İ ¹İÀÀ
+            // í”Œë ˆì´ì–´ ìª½ í”¼ê²© ë°˜ì‘
         }
     }
 }
@@ -64,20 +64,20 @@ void UMonsterAttackComponent::AttackTrace()
         return;
     }
 
-    // °ø°İ ¹üÀ§ ¼³Á¤
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     FVector StartLocation = OwnerMonster->GetActorLocation();
     FVector ForwardVector = OwnerMonster->GetActorForwardVector();
-    FVector EndLocation = StartLocation + (ForwardVector * AttackRange); // AttackRange ¹İ¿µ
+    FVector EndLocation = StartLocation + (ForwardVector * AttackRange); // AttackRange ï¿½İ¿ï¿½
 
-    // Ä¸½¶ Å©±â Á¶Á¤
+    // Ä¸ï¿½ï¿½ Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     float CapsuleRadius = 30.0f;
-    float CapsuleHalfHeight = AttackRange * 0.5f; // °ø°İ ¹üÀ§¿¡ ¸Â°Ô Á¶Á¤
+    float CapsuleHalfHeight = AttackRange * 0.5f; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Â°ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     FHitResult HitResult;
     FCollisionQueryParams CollisionParams;
-    CollisionParams.AddIgnoredActor(OwnerMonster); // ¸ó½ºÅÍ´Â Ãæµ¹ ¹«½Ã
+    CollisionParams.AddIgnoredActor(OwnerMonster); // ëª¬ìŠ¤í„°ëŠ” ì¶©ëŒ ë¬´ì‹œ
 
-    // Ä¸½¶ Æ®·¹ÀÌ½º ½ÇÇà
+    // ìº¡ìŠ íŠ¸ë ˆì´ìŠ¤ ì‹¤í–‰
     bool bHit = GetWorld()->SweepSingleByChannel(
         HitResult,
         StartLocation,
@@ -88,37 +88,37 @@ void UMonsterAttackComponent::AttackTrace()
         CollisionParams
     );
 
-    // µğ¹ö±× Ä¸½¶ ±×¸®±â (Ç×»ó Ç¥½Ã)
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ Ä¸ï¿½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½ (ï¿½×»ï¿½ Ç¥ï¿½ï¿½)
     DrawDebugCapsule(
         GetWorld(),
-        (StartLocation + EndLocation) * 0.5f, // Ä¸½¶ Áß½É À§Ä¡
+        (StartLocation + EndLocation) * 0.5f, // Ä¸ï¿½ï¿½ ï¿½ß½ï¿½ ï¿½ï¿½Ä¡
         CapsuleHalfHeight,
         CapsuleRadius,
         FQuat::Identity,
-        bHit ? FColor::Green : FColor::Red, // È÷Æ® ¿©ºÎ¿¡ µû¶ó »ö»ó º¯°æ
+        bHit ? FColor::Green : FColor::Red, // ï¿½ï¿½Æ® ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         false,
         1.0f,
         0,
         1.0f
     );
 
-    // Ãæµ¹ ½Ã Ã³¸®
+    // ï¿½æµ¹ ï¿½ï¿½ Ã³ï¿½ï¿½
     if (bHit)
     {
         FVector ImpactPoint = HitResult.ImpactPoint;
 
-        // Ãæµ¹ ÁöÁ¡¿¡ ÀÛÀº ¿øÀ» ±×·Á¼­ ½Ã°¢ÀûÀ¸·Î Ç¥½Ã
+        // ï¿½æµ¹ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½×·ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½
         DrawDebugSphere(
             GetWorld(),
             ImpactPoint,
             CapsuleRadius,
             12,
-            FColor::Blue, // Ãæµ¹ ÁöÁ¡ »ö»ó
+            FColor::Blue, // ï¿½æµ¹ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             false,
             1.0f
         );
 
-        // Ãæµ¹ ´ë»óÀÌ ÇÃ·¹ÀÌ¾îÀÎ °æ¿ì µ¥¹ÌÁö Àû¿ë
+        // ì¶©ëŒ ëŒ€ìƒì´ í”Œë ˆì´ì–´ì¸ ê²½ìš° ë°ë¯¸ì§€ ì ìš©
         if (APepCharacter* Player = Cast<APepCharacter>(HitResult.GetActor()))
         {
             ApplyDamageToTarget(Player, 20.0f);
