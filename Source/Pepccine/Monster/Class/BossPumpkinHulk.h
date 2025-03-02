@@ -11,6 +11,7 @@ UCLASS()
 class PEPCCINE_API ABossPumpkinHulk : public ABossMonster
 {
 	GENERATED_BODY()
+
 public:
 	ABossPumpkinHulk();
 
