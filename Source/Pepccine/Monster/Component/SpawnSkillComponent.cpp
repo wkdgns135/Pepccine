@@ -35,6 +35,7 @@ void USpawnSkillComponent::SpawnMonster()
             if (SpawnedMonster)
             {
                 UE_LOG(LogTemp, Warning, TEXT("Monster spawned at: %s"), *SpawnLocation.ToString());
+                FadeInMonster(SpawnedMonster);
             }
         }
     }

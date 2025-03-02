@@ -4,7 +4,7 @@
 #include "Monster/Component/BaseSkillComponent.h"
 #include "SpawnSkillComponent.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class PEPCCINE_API USpawnSkillComponent : public UBaseSkillComponent
 {
 	GENERATED_BODY()
@@ -13,8 +13,8 @@ public:
 	virtual void ActivateSkill() override;
 
 protected:
-	//UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Spawn")
-	//void FadeInMonster(AActor* SpawnedMonster);
+	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Spawn")
+	void FadeInMonster(AActor* SpawnedMonster);
 
 	void SpawnMonster();
 private:

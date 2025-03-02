@@ -69,9 +69,8 @@ void UMonsterAttackComponent::AttackTrace()
     FVector ForwardVector = OwnerMonster->GetActorForwardVector();
     FVector EndLocation = StartLocation + (ForwardVector * AttackRange); // AttackRange �ݿ�
 
-    // ĸ�� ũ�� ����
     float CapsuleRadius = 30.0f;
-    float CapsuleHalfHeight = AttackRange * 0.5f; // ���� ������ �°� ����
+    float CapsuleHalfHeight = AttackRange * 0.5f;
 
     FHitResult HitResult;
     FCollisionQueryParams CollisionParams;
@@ -83,37 +82,34 @@ void UMonsterAttackComponent::AttackTrace()
         StartLocation,
         EndLocation,
         FQuat::Identity,
-        ECC_Pawn,
+        ECC_GameTraceChannel1,
         FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
         CollisionParams
     );
 
-    // ����� ĸ�� �׸��� (�׻� ǥ��)
     DrawDebugCapsule(
         GetWorld(),
-        (StartLocation + EndLocation) * 0.5f, // ĸ�� �߽� ��ġ
+        (StartLocation + EndLocation) * 0.5f,
         CapsuleHalfHeight,
         CapsuleRadius,
         FQuat::Identity,
-        bHit ? FColor::Green : FColor::Red, // ��Ʈ ���ο� ���� ���� ����
+        bHit ? FColor::Green : FColor::Red,
         false,
         1.0f,
         0,
         1.0f
     );
 
-    // �浹 �� ó��
     if (bHit)
     {
         FVector ImpactPoint = HitResult.ImpactPoint;
 
-        // �浹 ������ ���� ���� �׷��� �ð������� ǥ��
         DrawDebugSphere(
             GetWorld(),
             ImpactPoint,
             CapsuleRadius,
             12,
-            FColor::Blue, // �浹 ���� ����
+            FColor::Blue,
             false,
             1.0f
         );
@@ -121,7 +117,6 @@ void UMonsterAttackComponent::AttackTrace()
         // 충돌 대상이 플레이어인 경우 데미지 적용
         if (APepCharacter* Player = Cast<APepCharacter>(HitResult.GetActor()))
         {
-            ApplyDamageToTarget(Player, 20.0f);
             SendHitResult(Player, 20.0f, HitResult);
         }
     }
