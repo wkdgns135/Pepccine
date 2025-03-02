@@ -17,21 +17,22 @@ ABaseMonster::ABaseMonster()
 void ABaseMonster::BeginPlay()
 {
     Super::BeginPlay();
+
+    if (AttackComponent)
+    {
+        AttackComponent->OnCharacterHited.AddDynamic(this, &ABaseMonster::OnHitReceived);
+    }
+
     UE_LOG(LogTemp, Warning, TEXT("Monster Spawned!"));
 }
 
-float ABaseMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ABaseMonster::OnHitReceived(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult)
 {
-    Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-    // �α� �߰�: �������� ���� ����, ������ ��, ������ �̺�Ʈ ���� Ȯ��
-    UE_LOG(LogTemp, Warning, TEXT("Monster %s took %f damage!"), *GetName(), DamageAmount);
-
+    UE_LOG(LogTemp, Warning, TEXT("Monster hit! Damage: %f, Hit Location: %s"), DamageAmount, *HitResult.Location.ToString());
     if (StatComponent)
     {
         StatComponent->DecreaseHealth(DamageAmount);
 
-        // �ǰ� ������ ����Ͽ� ����
         FVector HitDirection = DamageCauser ? (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal() : FVector::ZeroVector;
 
         if (HitReactionComponent)
@@ -41,13 +42,10 @@ float ABaseMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
         if (StatComponent->IsDead())
         {
-            // ���� �׾��� �� �α� 
             UE_LOG(LogTemp, Warning, TEXT("Monster %s has died!"), *GetName());
             Die();
         }
     }
-
-    return DamageAmount;
 }
 
 
@@ -71,7 +69,6 @@ void ABaseMonster::Die()
             RoomController->DecreaseMonsterCount();
         }
     }
-    
-    // ���� ���� (���� �ð� �� ����)
-    SetLifeSpan(10.0f);
+
+    SetLifeSpan(5.0f);
 }

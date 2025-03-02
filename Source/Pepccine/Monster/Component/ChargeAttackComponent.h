@@ -8,28 +8,33 @@
 UCLASS()
 class PEPCCINE_API UChargeAttackComponent : public UBaseSkillComponent
 {
-	GENERATED_BODY()
-public:
-	UChargeAttackComponent();
+    GENERATED_BODY()
 
-	virtual void ActivateSkill() override;
+public:
+    UChargeAttackComponent();
+
+    virtual void ActivateSkill() override;
 
 protected:
-	virtual void BeginPlay() override;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
+    UAnimMontage* ChargeSkillEndMontage;
+    virtual void BeginPlay() override;
+    virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-    void StartCharge();
-    void StopCharge();
-    void OnHit(AActor* HitActor);
-
     UPROPERTY(EditAnywhere, Category = "Skill")
     float ChargeSpeed = 1000.0f;  // 돌진 속도
-
     UPROPERTY(EditAnywhere, Category = "Skill")
     float ChargeDuration = 3.0f;  // 돌진 지속 시간
 
-    UPROPERTY(EditAnywhere, Category = "Skill")
-    float ChargeDamage = 30.0f;
+    
+    void StartCharge();
+    void StopCharge();
+    void PlayEndAnimation();
+    void OnHit(AActor* HitActor);
 
     FTimerHandle ChargeTimerHandle;
+
+    bool bIsCharging;  // Charging 상태 추적
+    float ChargeStartTime;  // Charge 시작 시간 추적
 };

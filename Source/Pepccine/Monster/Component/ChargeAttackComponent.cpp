@@ -3,10 +3,14 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "AIController.h"
+#include "Animation/AnimInstance.h"
 
 UChargeAttackComponent::UChargeAttackComponent()
 {
-    PrimaryComponentTick.bCanEverTick = false;
+    PrimaryComponentTick.bCanEverTick = true;  // Tick 활성화
+    bIsCharging = false;
+    ChargeStartTime = 0.0f;
 }
 
 void UChargeAttackComponent::BeginPlay()
@@ -22,24 +26,20 @@ void UChargeAttackComponent::ActivateSkill()
     }
 
     StartCooldown();
-    PlaySkillMontage();
+    PlaySkillMontage();  // 기존 charge 애니메이션 재생
     StartCharge();
 }
 
 void UChargeAttackComponent::StartCharge()
 {
-    ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-    if (OwnerCharacter)
+    ACharacter* OwnerMonster = Cast<ACharacter>(GetOwner());
+    if (OwnerMonster)
     {
-        // 몬스터의 현재 이동 방향으로 돌진
-        FVector ForwardDirection = OwnerCharacter->GetActorForwardVector();
+        // 돌진 시작 시 속도 설정
+        OwnerMonster->GetCharacterMovement()->MaxWalkSpeed = ChargeSpeed;
 
-        // 이동 속도 설정 (MaxWalkSpeed가 아닌 CharacterMovementComponent의 AddMovementInput 사용)
-        OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = ChargeSpeed;
-
-        // LaunchCharacter를 사용하여 이동
-        FVector LaunchVelocity = ForwardDirection * ChargeSpeed;
-        OwnerCharacter->LaunchCharacter(LaunchVelocity, true, true);  // 물리적인 힘을 통해 캐릭터 이동
+        bIsCharging = true;
+        ChargeStartTime = GetWorld()->GetTimeSeconds();
 
         // 일정 시간 후 돌진 중지
         GetWorld()->GetTimerManager().SetTimer(ChargeTimerHandle, this, &UChargeAttackComponent::StopCharge, ChargeDuration, false);
@@ -51,9 +51,42 @@ void UChargeAttackComponent::StopCharge()
     ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
     if (OwnerCharacter)
     {
-        // 돌진을 멈추고, 다시 기본 속도로 이동
         OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
-        OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = 400.0f;  // 기본 이동 속도
+        OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = 400.0f;
+    }
+
+    // 애니메이션 끝내기 (차지 종료 후 종료 애니메이션 재생)
+    PlayEndAnimation();
+
+    bIsCharging = false;
+}
+
+void UChargeAttackComponent::PlayEndAnimation()
+{
+    ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+    if (OwnerCharacter)
+    {
+        UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance();
+        if (AnimInstance && ChargeSkillEndMontage)  // EndAnimationMontage는 에디터에서 설정한 종료 애니메이션 몽타주
+        {
+            AnimInstance->Montage_Play(ChargeSkillEndMontage);
+        }
+    }
+}
+
+void UChargeAttackComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+    if (bIsCharging)
+    {
+        ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+        if (OwnerCharacter)
+        {
+            // 돌진 중 계속 이동 처리
+            FVector ForwardDirection = OwnerCharacter->GetActorForwardVector();
+            OwnerCharacter->AddMovementInput(ForwardDirection, 1.0f);
+        }
     }
 }
 
@@ -61,6 +94,7 @@ void UChargeAttackComponent::OnHit(AActor* HitActor)
 {
     if (HitActor)
     {
-        UGameplayStatics::ApplyDamage(HitActor, ChargeDamage, nullptr, GetOwner(), nullptr);
+        UGameplayStatics::ApplyDamage(HitActor, Damage, nullptr, GetOwner(), nullptr);
+        StopCharge();  // 충돌 시 돌진 중지
     }
 }

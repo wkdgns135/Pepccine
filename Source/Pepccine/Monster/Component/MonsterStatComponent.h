@@ -16,7 +16,9 @@ public:
     FORCEINLINE void IncreaseATK(float amount) { Attack = Attack * amount; }
     FORCEINLINE void IncreaseDEF(float amount) { Defense = Defense * amount; }
     FORCEINLINE void IncreaseSPD(float amount) { Speed = Speed * amount; }
-
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+    float Attack = 10.0f;
     void DecreaseHealth(float Amount);
     void IncreaseHealth(float Amount);
     bool IsDead() const;
@@ -28,8 +30,7 @@ protected:
     float MaxHealth = 100.0f;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat")
     float CurrentHealth;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-    float Attack = 10.0f;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
     float Defense = 5.0f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")

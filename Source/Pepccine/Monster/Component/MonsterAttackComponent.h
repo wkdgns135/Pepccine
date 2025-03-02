@@ -32,6 +32,5 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	void ApplyDamageToTarget(AActor* Target, float DamageAmount);
 	
 };
