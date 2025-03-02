@@ -3,6 +3,8 @@
 #include "EnhancedInputComponent.h"
 #include "Character/Widget/MenuWidget.h"
 #include "Character/Components/CrosshairHUDComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Components/Button.h"
 
 APepccinePlayerController::APepccinePlayerController()
 {
@@ -22,6 +24,7 @@ APepccinePlayerController::APepccinePlayerController()
   ZoomAction = nullptr;
 
   MenuInstance = nullptr;
+  MenuClass = nullptr;
 }
 
 void APepccinePlayerController::BeginPlay()
@@ -29,6 +32,52 @@ void APepccinePlayerController::BeginPlay()
 	Super::BeginPlay();
 
   AddMappingContext();
+  SetMenu();
+}
+
+void APepccinePlayerController::SetMenu()
+{
+  if (!MenuClass) return;
+
+  if (!MenuInstance && MenuClass)
+  {
+    MenuInstance = CreateWidget<UMenuWidget>(this, MenuClass);
+  }
+
+  MenuInstance->AddToViewport();
+  MenuInstance->SetVisibility(ESlateVisibility::Hidden);
+
+  if (UButton* ExitButton = MenuInstance->ExitButton)
+  {
+    ExitButton->OnClicked.AddDynamic(this, &APepccinePlayerController::OnExitButtonClicked);
+  }
+
+  if (UButton* BackButton = MenuInstance->BackButton)
+  {
+    BackButton->OnClicked.AddDynamic(this, &APepccinePlayerController::OnBackButtonClicked);
+  }
+}
+
+void APepccinePlayerController::OnBackButtonClicked()
+{
+  MenuInstance->SetVisibility(ESlateVisibility::Hidden);
+  bShowMouseCursor = false;
+  SetInputMode(FInputModeGameOnly());
+}
+
+void APepccinePlayerController::OnExitButtonClicked()
+{
+  UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, false);
+}
+
+void APepccinePlayerController::ToggleExitMenu()
+{
+  if (ESlateVisibility::Hidden == MenuInstance->GetVisibility())
+  {
+    MenuInstance->SetVisibility(ESlateVisibility::Visible);
+    bShowMouseCursor = true;
+    SetInputMode(FInputModeUIOnly());
+  }
 }
 
 void APepccinePlayerController::AddMappingContext()
@@ -49,25 +98,4 @@ void APepccinePlayerController::SetupInputComponent()
 {
   UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
   if (!EnhancedInputComponent) return;
-}
-
-void APepccinePlayerController::ToggleExitMenu()
-{
-  if (!MenuInstance && MenuClass)
-  {
-    MenuInstance = CreateWidget<UMenuWidget>(this, MenuClass);
-  }
-
-  if (MenuInstance && !MenuInstance->IsInViewport())
-  {
-    MenuInstance->AddToViewport();
-    bShowMouseCursor = true;
-    SetInputMode(FInputModeUIOnly());
-  }
-  else
-  {
-    MenuInstance->RemoveFromParent();
-    bShowMouseCursor = false;
-    SetInputMode(FInputModeGameOnly());
-  }
 }

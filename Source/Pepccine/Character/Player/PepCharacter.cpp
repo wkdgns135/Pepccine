@@ -109,6 +109,8 @@ float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		UE_LOG(LogTemp, Warning, TEXT("Instigator Controller: %s"), *EventInstigator->GetName());
 	}
 
+	if (bIsRolling) return 0;
+
 	PlayerStatComponent->DecreaseHealth(DamageAmount);
 
 	return DamageAmount;

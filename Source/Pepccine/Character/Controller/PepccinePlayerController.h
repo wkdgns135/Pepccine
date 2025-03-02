@@ -65,12 +65,20 @@ protected:
   virtual void SetupInputComponent() override;
 
 private:
-  void AddMappingContext();
-  void AddCrosshairHUD();
-
   UPROPERTY(EditDefaultsOnly, Category = "UI")
   TSubclassOf<class UMenuWidget> MenuClass;
 
   UPROPERTY()
   UMenuWidget* MenuInstance;
+  
+  void AddMappingContext();
+  void AddCrosshairHUD();
+
+  UFUNCTION()
+  void OnExitButtonClicked();
+
+  UFUNCTION()
+  void OnBackButtonClicked();
+
+  void SetMenu();
 };
