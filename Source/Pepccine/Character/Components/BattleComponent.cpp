@@ -19,13 +19,11 @@ void UBattleComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UBattleComponent::SendHitResult(AActor* HitTarget, float DamageAmount, FHitResult HitResult)
+void UBattleComponent::SendHitResult(AActor* HitTarget, float DamageAmount, const FHitResult& HitResult) const
 {
 	if (HitTarget)
 	{
-		UBattleComponent* TargetBattleComponent = HitTarget->FindComponentByClass<UBattleComponent>();
-
-		if (TargetBattleComponent)
+		if (UBattleComponent* TargetBattleComponent = HitTarget->FindComponentByClass<UBattleComponent>())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Sending Hit: %s -> %s (Damage: %f)"), *GetOwner()->GetName(), *HitTarget->GetName(), DamageAmount);
 			TargetBattleComponent->ReceiveHitResult(DamageAmount, GetOwner(), HitResult);
@@ -33,10 +31,9 @@ void UBattleComponent::SendHitResult(AActor* HitTarget, float DamageAmount, FHit
 	}
 }
 
-void UBattleComponent::ReceiveHitResult(float DamageAmount, AActor* DamageCauser, FHitResult HitResult)
+void UBattleComponent::ReceiveHitResult(float DamageAmount, AActor* DamageCauser, const FHitResult& HitResult) const
 {
-	AActor* OwnerActor = GetOwner();
-	if (OwnerActor)
+	if (const AActor* OwnerActor = GetOwner())
 	{
 		OnCharacterHited.Broadcast(DamageCauser, DamageAmount, HitResult);
 	}

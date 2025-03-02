@@ -83,7 +83,7 @@ void UMonsterAttackComponent::AttackTrace()
         StartLocation,
         EndLocation,
         FQuat::Identity,
-        ECC_Pawn,
+        ECC_GameTraceChannel1,
         FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
         CollisionParams
     );
@@ -121,7 +121,6 @@ void UMonsterAttackComponent::AttackTrace()
         // 충돌 대상이 플레이어인 경우 데미지 적용
         if (APepCharacter* Player = Cast<APepCharacter>(HitResult.GetActor()))
         {
-            ApplyDamageToTarget(Player, 20.0f);
             SendHitResult(Player, 20.0f, HitResult);
         }
     }
