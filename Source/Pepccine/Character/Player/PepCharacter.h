@@ -167,7 +167,7 @@ private:
 	void Dead();
 
 	UFUNCTION()
-	void ShowMwnu();
+	void ShowMenu();
 
 	float CameraArmLength = 300.0f;
 	float SprintHoldStartTime = 0.0f;

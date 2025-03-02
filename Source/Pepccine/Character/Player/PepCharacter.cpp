@@ -96,19 +96,6 @@ void APepCharacter::InitializeCharacterMovement() const
 
 float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	UE_LOG(LogTemp, Warning, TEXT("=== TakeDamage() Called ==="));
-	UE_LOG(LogTemp, Warning, TEXT("Damage Amount: %f"), DamageAmount);
-
-	if (DamageCauser)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Damage Causer: %s"), *DamageCauser->GetName());
-	}
-    
-	if (EventInstigator)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Instigator Controller: %s"), *EventInstigator->GetName());
-	}
-
 	if (bIsRolling) return 0;
 
 	PlayerStatComponent->DecreaseHealth(DamageAmount);
@@ -683,7 +670,7 @@ void APepCharacter::TriggerCameraShake()
 	}
 }
 
-void APepCharacter::ShowMwnu()
+void APepCharacter::ShowMenu()
 {
 	if (!PlayerController) return;
 	PlayerController->ToggleExitMenu();
@@ -888,7 +875,7 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			PlayerController->MenuAction,
 			ETriggerEvent::Started,
 			this,
-			&APepCharacter::ShowMwnu
+			&APepCharacter::ShowMenu
 		);
 	}
 }
