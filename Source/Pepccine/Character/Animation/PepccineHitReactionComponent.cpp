@@ -14,7 +14,6 @@ UPepccineHitReactionComponent::UPepccineHitReactionComponent()
 	PrimaryComponentTick.bCanEverTick = true;
     
     BlendSpeed = 2.0f;
-    CurrentBlendWeight = 0.5f;
 	// ...
 }
 
@@ -44,10 +43,7 @@ void UPepccineHitReactionComponent::TickComponent(float DeltaTime, ELevelTick Ti
 
 void UPepccineHitReactionComponent::HitReaction(FName HitBoneName, FVector HitDirection)
 {
-    if (HitBoneName == "Hips") return;
-
-    Mesh = Cast<USkeletalMeshComponent>(GetOwner()->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-    if (!Mesh) return;
+    if (HitBoneName == "Hips" || !Mesh) return;
 
     Mesh->SetAllBodiesBelowSimulatePhysics(HitBoneName, true, true);
     Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -55,6 +51,7 @@ void UPepccineHitReactionComponent::HitReaction(FName HitBoneName, FVector HitDi
     FVector ForceStrength = HitDirection * 5000.0f;
     Mesh->AddForce(ForceStrength, HitBoneName, true);
 
+    CurrentBlendWeight = 0.5f;
     Mesh->SetAllBodiesBelowPhysicsBlendWeight(HitBoneName, CurrentBlendWeight, false, true);
 
     // 타이머 설정

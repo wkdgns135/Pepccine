@@ -160,7 +160,7 @@ void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const 
 	FName HitBoneName = HitResult.BoneName;
 	FVector HitDirection = HitResult.ImpactNormal;
 	
-	HitReactionComponent->HitReaction(HitBoneName, HitDirection);
+	HitReactionComponent->HitReaction("Spine", HitDirection);
 }
 
 void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth)
