@@ -22,7 +22,6 @@
 #include "Components/WidgetComponent.h"
 #include "Item/PepccineDropItem.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
-#include "Kismet/GameplayStatics.h"
 #include "Monster/Class/ZombieGirl.h"
 
 APepCharacter::APepCharacter()
@@ -94,26 +93,6 @@ void APepCharacter::InitializeCharacterMovement() const
 }
 #pragma endregion
 
-float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	UE_LOG(LogTemp, Warning, TEXT("=== TakeDamage() Called ==="));
-	UE_LOG(LogTemp, Warning, TEXT("Damage Amount: %f"), DamageAmount);
-
-	if (DamageCauser)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Damage Causer: %s"), *DamageCauser->GetName());
-	}
-    
-	if (EventInstigator)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Instigator Controller: %s"), *EventInstigator->GetName());
-	}
-
-	PlayerStatComponent->DecreaseHealth(DamageAmount);
-
-	return DamageAmount;
-}
-
 // Tick Method
 #pragma region
 void APepCharacter::CheckSprinting()
@@ -165,6 +144,23 @@ void APepCharacter::AddObservers()
 	{
 		EnhancedRadarComponent->OnActorDetectedEnhanced.AddDynamic(this, &APepCharacter::OnActorDetectedEnhanced);
 	}
+
+	if (BattleComponent)
+	{
+		BattleComponent->OnCharacterHited.AddDynamic(this, &APepCharacter::OnPlayerHit);
+	}
+}
+
+void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult)
+{
+	if (bIsRolling) return;
+
+	PlayerStatComponent->DecreaseHealth(DamageAmount);
+	
+	FName HitBoneName = HitResult.BoneName;
+	FVector HitDirection = HitResult.ImpactNormal;
+	
+	HitReactionComponent->HitReaction(HitBoneName, HitDirection);
 }
 
 void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth)
@@ -669,6 +665,12 @@ void APepCharacter::TriggerCameraShake()
 		}
 	}
 }
+
+void APepCharacter::ShowMenu()
+{
+	if (!PlayerController) return;
+	PlayerController->ToggleExitMenu();
+}
 #pragma endregion
 
 // Key Mapping
@@ -859,6 +861,17 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			ETriggerEvent::Completed,
 			this,
 			&APepCharacter::ZoomOut
+		);
+	}
+
+	// Menu: Escape
+	if (PlayerController->MenuAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->MenuAction,
+			ETriggerEvent::Started,
+			this,
+			&APepCharacter::ShowMenu
 		);
 	}
 }

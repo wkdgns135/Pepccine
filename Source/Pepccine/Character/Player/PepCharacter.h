@@ -54,18 +54,13 @@ public:
 
 	bool bIsPlayerAlive = true;
 
-	virtual float TakeDamage(
-				float DamageAmount,
-				struct FDamageEvent const& DamageEvent,
-				class AController* EventInstigator,
-				AActor* DamageCauser
-		) override;
-
 	// UE delegate
 	UFUNCTION()
 	void OnHealthChanged(const float NewHealth, const float MaxHealth);
 	// Observer Pattern
 	virtual void OnStaminaChanged(float NewStamina, float MaxStamina) override;
+	UFUNCTION()
+	void OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult);
 	
 	void TriggerCameraShake();
 	
@@ -163,6 +158,9 @@ private:
 
 	UFUNCTION()
 	void Dead();
+
+	UFUNCTION()
+	void ShowMenu();
 
 	float CameraArmLength = 300.0f;
 	float SprintHoldStartTime = 0.0f;
