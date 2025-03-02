@@ -467,48 +467,33 @@ void APepCharacter::Interactive()
 			for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)
 			{
 				float Amount = Modifier.StatModifierDefault.StatModifyValue;
-				UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
+				//UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
 
 				EPepccineCharacterStatName CharacterStatName = Modifier.CharacterStatName;
 				FString StatName = UEnum::GetValueAsString(CharacterStatName);
-				UE_LOG(LogTemp, Warning, TEXT("CharacterStatName: %s"), *StatName);
+				//UE_LOG(LogTemp, Warning, TEXT("CharacterStatName: %s"), *StatName);
 
 				EPepccineStatModifyType ModifyType = Modifier.StatModifierDefault.StatModifyType;
 				FString MT = UEnum::GetValueAsString(ModifyType);
-				UE_LOG(LogTemp, Warning, TEXT("ModifyType: %s"), *MT);
+				//UE_LOG(LogTemp, Warning, TEXT("ModifyType: %s"), *MT);
 
 				switch (ModifyType)
 				{
 				case EPepccineStatModifyType::EPSMT_Add:
 					{
-						UE_LOG(LogTemp, Warning, TEXT("EPSMT_Add: %f"), Amount);
+						//UE_LOG(LogTemp, Warning, TEXT("EPSMT_Add: %f"), Amount);
 						FStatModifier AddStatModifier(CharacterStatName, Amount, 1.0f);
 						PlayerStatComponent->ApplyStatModifier(AddStatModifier);
 						break;
 					}
 				case EPepccineStatModifyType::EPSMT_Multiply:
 					{
-						UE_LOG(LogTemp, Warning, TEXT("EPSMT_Multiply: %f"), Amount);
+						//UE_LOG(LogTemp, Warning, TEXT("EPSMT_Multiply: %f"), Amount);
 						FStatModifier MulStatModifier(CharacterStatName, 0.0f, Amount);
 						PlayerStatComponent->ApplyStatModifier(MulStatModifier);
 						break;
 					}
 				}
-			}
-
-			TArray<FPepccineWeaponStatModifier> WeaponStatModifiers = PassiveItem->GetWeaponStatModifiers();
-			for (const FPepccineWeaponStatModifier& Modifier : WeaponStatModifiers)
-			{
-				EPepccineWeaponItemType WeaponItemType = Modifier.WeaponItemType;
-				EPepccineWeaponStatName WeaponItemStatName = Modifier.WeaponItemStatName;
-				float Amount = Modifier.StatModifierDefault.StatModifyValue;
-
-				FString WeaponType = UEnum::GetValueAsString(WeaponItemType);
-				UE_LOG(LogTemp, Warning, TEXT("WeaponItemType: %s"), *WeaponType);
-
-				FString WeaponStatName = UEnum::GetValueAsString(WeaponItemStatName);
-				UE_LOG(LogTemp, Warning, TEXT("WeaponItemStatName: %s"), *WeaponStatName);
-				UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
 			}
 
 			TArray<FPepccineCharacterFeature> CharacterFeatures = PassiveItem->GetCharacterFeatures();
@@ -616,7 +601,6 @@ void APepCharacter::Fire()
 
 	bIsFiring = true;
 	PepccineMontageComponent->Fire();
-	// 무기 데미지
 	ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 }
 
