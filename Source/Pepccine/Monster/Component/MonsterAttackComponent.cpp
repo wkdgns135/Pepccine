@@ -1,4 +1,5 @@
 #include "Monster/Component/MonsterAttackComponent.h"
+#include "Monster/Component/MonsterStatComponent.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/Player/PepCharacter.h" 
@@ -31,20 +32,6 @@ void UMonsterAttackComponent::PerformAttack()
     }
 }
 
-void UMonsterAttackComponent::ApplyDamageToTarget(AActor* Target, float DamageAmount)
-{
-    if (Target)
-    {
-        // 데미지 적용
-        UGameplayStatics::ApplyDamage(Target, DamageAmount, nullptr, GetOwner(), nullptr);
-
-        APepCharacter* Player = Cast<APepCharacter>(Target);
-        if (Player)
-        {
-            // 플레이어 쪽 피격 반응
-        }
-    }
-}
 
 void UMonsterAttackComponent::PlayTransitionMontage()
 {
@@ -64,7 +51,6 @@ void UMonsterAttackComponent::AttackTrace()
         return;
     }
 
-    // ���� ���� ����
     FVector StartLocation = OwnerMonster->GetActorLocation();
     FVector ForwardVector = OwnerMonster->GetActorForwardVector();
     FVector EndLocation = StartLocation + (ForwardVector * AttackRange); // AttackRange �ݿ�
@@ -117,7 +103,8 @@ void UMonsterAttackComponent::AttackTrace()
         // 충돌 대상이 플레이어인 경우 데미지 적용
         if (APepCharacter* Player = Cast<APepCharacter>(HitResult.GetActor()))
         {
-            SendHitResult(Player, 20.0f, HitResult);
+            UMonsterStatComponent* StatComp = OwnerMonster->FindComponentByClass<UMonsterStatComponent>();
+            SendHitResult(Player, StatComp->Attack, HitResult);
         }
     }
     else
