@@ -1,6 +1,7 @@
 #include "PepccinePlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Character/Widget/MenuWidget.h"
 #include "Character/Components/CrosshairHUDComponent.h"
 
 APepccinePlayerController::APepccinePlayerController()
@@ -19,6 +20,8 @@ APepccinePlayerController::APepccinePlayerController()
   InventoryAction = nullptr;
   FireAction = nullptr;
   ZoomAction = nullptr;
+
+  MenuInstance = nullptr;
 }
 
 void APepccinePlayerController::BeginPlay()
@@ -46,12 +49,25 @@ void APepccinePlayerController::SetupInputComponent()
 {
   UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
   if (!EnhancedInputComponent) return;
-
-  // BindAction(const UInputAction* Action, ETriggerEvent TriggerEvent, UObject* Object, FName FunctionName)
-  EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Started, this, &APepccinePlayerController::OpenMenu);
 }
 
-void APepccinePlayerController::OpenMenu()
+void APepccinePlayerController::ToggleExitMenu()
 {
-  UE_LOG(LogTemp, Log, TEXT("Menu Opened!"));
+  if (!MenuInstance && MenuClass)
+  {
+    MenuInstance = CreateWidget<UMenuWidget>(this, MenuClass);
+  }
+
+  if (MenuInstance && !MenuInstance->IsInViewport())
+  {
+    MenuInstance->AddToViewport();
+    bShowMouseCursor = true;
+    SetInputMode(FInputModeUIOnly());
+  }
+  else
+  {
+    MenuInstance->RemoveFromParent();
+    bShowMouseCursor = false;
+    SetInputMode(FInputModeGameOnly());
+  }
 }

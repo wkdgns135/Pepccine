@@ -39,6 +39,6 @@ void UBattleComponent::ReceiveHitResult(float DamageAmount, AActor* DamageCauser
 	AActor* OwnerActor = GetOwner();
 	if (OwnerActor)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Received Hit: %s from %s (Damage: %f)"), *OwnerActor->GetName(), *DamageCauser->GetName(), DamageAmount);
+		OnCharacterHited.Broadcast(DamageCauser, HitResult);
 	}
 }

@@ -165,6 +165,17 @@ void APepCharacter::AddObservers()
 	{
 		EnhancedRadarComponent->OnActorDetectedEnhanced.AddDynamic(this, &APepCharacter::OnActorDetectedEnhanced);
 	}
+
+	if (BattleComponent)
+	{
+		BattleComponent->OnCharacterHited.AddDynamic(this, &APepCharacter::OnPlayerHit);
+	}
+}
+
+void APepCharacter::OnPlayerHit(AActor* DamageCauser, const FHitResult& HitResult)
+{
+	// 몬스터로 부터 데미지 받았을때
+	
 }
 
 void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth)
@@ -669,6 +680,12 @@ void APepCharacter::TriggerCameraShake()
 		}
 	}
 }
+
+void APepCharacter::ShowMwnu()
+{
+	if (!PlayerController) return;
+	PlayerController->ToggleExitMenu();
+}
 #pragma endregion
 
 // Key Mapping
@@ -859,6 +876,17 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			ETriggerEvent::Completed,
 			this,
 			&APepCharacter::ZoomOut
+		);
+	}
+
+	// Menu: Escape
+	if (PlayerController->MenuAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->MenuAction,
+			ETriggerEvent::Started,
+			this,
+			&APepCharacter::ShowMwnu
 		);
 	}
 }

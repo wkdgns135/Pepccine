@@ -66,6 +66,8 @@ public:
 	void OnHealthChanged(const float NewHealth, const float MaxHealth);
 	// Observer Pattern
 	virtual void OnStaminaChanged(float NewStamina, float MaxStamina) override;
+	UFUNCTION()
+	void OnPlayerHit(AActor* DamageCauser, const FHitResult& HitResult);
 	
 	void TriggerCameraShake();
 	
@@ -163,6 +165,9 @@ private:
 
 	UFUNCTION()
 	void Dead();
+
+	UFUNCTION()
+	void ShowMwnu();
 
 	float CameraArmLength = 300.0f;
 	float SprintHoldStartTime = 0.0f;
