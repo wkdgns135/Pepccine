@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,6 +6,7 @@
 
 class UInputMappingContext;
 class UInputAction;
+class UMenuWidget;
 
 UCLASS()
 class PEPCCINE_API APepccinePlayerController : public APlayerController
@@ -59,14 +58,27 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
   UInputAction* ZoomAction;
 
+  UFUNCTION()
+  void ToggleExitMenu();
 protected:
   virtual void BeginPlay() override;
   virtual void SetupInputComponent() override;
 
-  UFUNCTION()
-  virtual void OpenMenu();
-
 private:
+  UPROPERTY(EditDefaultsOnly, Category = "UI")
+  TSubclassOf<class UMenuWidget> MenuClass;
+
+  UPROPERTY()
+  UMenuWidget* MenuInstance;
+  
   void AddMappingContext();
   void AddCrosshairHUD();
+
+  UFUNCTION()
+  void OnExitButtonClicked();
+
+  UFUNCTION()
+  void OnBackButtonClicked();
+
+  void SetMenu();
 };

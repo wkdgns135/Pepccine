@@ -5,7 +5,7 @@
 
 UPlayerStatComponent::UPlayerStatComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 void UPlayerStatComponent::BeginPlay()
@@ -28,6 +28,8 @@ void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                          FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	CheckHealthStatus();
 }
 
 // Stat
@@ -276,6 +278,14 @@ void UPlayerStatComponent::DecreaseHealth_Timer()
 
 // Health
 #pragma region
+void UPlayerStatComponent::CheckHealthStatus() const
+{
+	if (CurrentStats.HealthStats.CurrentHealth == 0)
+	{
+		OnHealthChanged.Broadcast(CurrentStats.HealthStats.CurrentHealth, CurrentStats.HealthStats.MaxHealth);
+	}
+}
+
 void UPlayerStatComponent::DecreaseHealth(float Amount)
 {
 	if (Amount <= 0.0f || CurrentStats.HealthStats.CurrentHealth <= 0)

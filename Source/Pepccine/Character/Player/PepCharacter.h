@@ -23,6 +23,7 @@ class UPrograssBarHUDComponent;
 class UItemIconHUDComponent;
 class UInventoryComponent;
 class UPepccineItemManagerComponent;
+class UBattleComponent;
 //class URadorComponent;
 class UCollisionRadarComponent;
 
@@ -51,18 +52,15 @@ public:
 	bool bIsRolling = false;
 	bool bIsRollable = true;
 
-	virtual float TakeDamage(
-				float DamageAmount,
-				struct FDamageEvent const& DamageEvent,
-				class AController* EventInstigator,
-				AActor* DamageCauser
-		) override;
+	bool bIsPlayerAlive = true;
 
 	// UE delegate
 	UFUNCTION()
 	void OnHealthChanged(const float NewHealth, const float MaxHealth);
 	// Observer Pattern
 	virtual void OnStaminaChanged(float NewStamina, float MaxStamina) override;
+	UFUNCTION()
+	void OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult);
 	
 	void TriggerCameraShake();
 	
@@ -104,7 +102,9 @@ public:
 	UPepccineMontageComponent* PepccineMontageComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPepccineHitReactionComponent* HitReactionComponent;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UBattleComponent* BattleComponent;
+	
 private:
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
@@ -157,7 +157,10 @@ private:
 	void ZoomOut();
 
 	UFUNCTION()
-	void Die();
+	void Dead();
+
+	UFUNCTION()
+	void ShowMenu();
 
 	float CameraArmLength = 300.0f;
 	float SprintHoldStartTime = 0.0f;
