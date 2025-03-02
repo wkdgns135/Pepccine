@@ -127,67 +127,78 @@ void UPlayerStatComponent::RemoveStatModifier(const FStatModifier& Modifier)
 void UPlayerStatComponent::ApplyStatModifier(const FStatModifier& Modifier)
 {
 	CurrentStats.PrintStats();
-	
+
 	ActiveModifiers.Add(Modifier);
 
 	FPlayerStats* Add = &CurrentTotalAdd;
 	FPlayerStats* Mul = &CurrentTotalMul;
 
 	// 체력 관련 스탯
+	UE_LOG(LogTemp, Log, TEXT("Before: Health -> Add(%.2f) / Mul(%.2f)"), Add->HealthStats.CurrentHealth,
+	       Mul->HealthStats.CurrentHealth);
 	Add->HealthStats.CurrentHealth += Modifier.AdditiveValue;
 	Mul->HealthStats.CurrentHealth *= Modifier.MultiplicativeValue;
-	UE_LOG(LogTemp, Log, TEXT("Health -> Add(%.2f) / Mul(%.2f)"), Add->HealthStats.CurrentHealth, Mul->HealthStats.CurrentHealth);
+	UE_LOG(LogTemp, Log, TEXT("After: Health -> Add(%.2f) / Mul(%.2f)"), Add->HealthStats.CurrentHealth,
+	       Mul->HealthStats.CurrentHealth);
 
+	UE_LOG(LogTemp, Log, TEXT("Before: MaxHealth -> Add(%.2f) / Mul(%.2f)"), Add->HealthStats.MaxHealth,
+	       Mul->HealthStats.MaxHealth);
 	Add->HealthStats.MaxHealth += Modifier.AdditiveValue;
 	Mul->HealthStats.MaxHealth *= Modifier.MultiplicativeValue;
+	UE_LOG(LogTemp, Log, TEXT("After: MaxHealth -> Add(%.2f) / Mul(%.2f)"), Add->HealthStats.MaxHealth,
+	       Mul->HealthStats.MaxHealth);
 
+	UE_LOG(LogTemp, Log, TEXT("Before: HealthDecelerationSpeed -> Add(%.2f) / Mul(%.2f)"),
+	       Add->HealthStats.HealthDecelerationSpeed, Mul->HealthStats.HealthDecelerationSpeed);
 	Add->HealthStats.HealthDecelerationSpeed += Modifier.AdditiveValue;
 	Mul->HealthStats.HealthDecelerationSpeed *= Modifier.MultiplicativeValue;
-
-	Add->HealthStats.HealthDecelerationAmount += Modifier.AdditiveValue;
-	Mul->HealthStats.HealthDecelerationAmount *= Modifier.MultiplicativeValue;
+	UE_LOG(LogTemp, Log, TEXT("After: HealthDecelerationSpeed -> Add(%.2f) / Mul(%.2f)"),
+	       Add->HealthStats.HealthDecelerationSpeed, Mul->HealthStats.HealthDecelerationSpeed);
 
 	// 스태미나 관련 스탯
+	UE_LOG(LogTemp, Log, TEXT("Before: CurrentStamina -> Add(%.2f) / Mul(%.2f)"), Add->StaminaStats.CurrentStamina,
+	       Mul->StaminaStats.CurrentStamina);
 	Add->StaminaStats.CurrentStamina += Modifier.AdditiveValue;
 	Mul->StaminaStats.CurrentStamina *= Modifier.MultiplicativeValue;
+	UE_LOG(LogTemp, Log, TEXT("After: CurrentStamina -> Add(%.2f) / Mul(%.2f)"), Add->StaminaStats.CurrentStamina,
+	       Mul->StaminaStats.CurrentStamina);
 
+	UE_LOG(LogTemp, Log, TEXT("Before: MaxStamina -> Add(%.2f) / Mul(%.2f)"), Add->StaminaStats.MaxStamina,
+	       Mul->StaminaStats.MaxStamina);
 	Add->StaminaStats.MaxStamina += Modifier.AdditiveValue;
 	Mul->StaminaStats.MaxStamina *= Modifier.MultiplicativeValue;
-
-	Add->StaminaStats.StaminaRecoveryRate += Modifier.AdditiveValue;
-	Mul->StaminaStats.StaminaRecoveryRate *= Modifier.MultiplicativeValue;
-
-	Add->StaminaStats.StaminaRecoveryTime += Modifier.AdditiveValue;
-	Mul->StaminaStats.StaminaRecoveryTime *= Modifier.MultiplicativeValue;
+	UE_LOG(LogTemp, Log, TEXT("After: MaxStamina -> Add(%.2f) / Mul(%.2f)"), Add->StaminaStats.MaxStamina,
+	       Mul->StaminaStats.MaxStamina);
 
 	// 전투 관련 스탯
+	UE_LOG(LogTemp, Log, TEXT("Before: AttackDamage -> Add(%.2f) / Mul(%.2f)"), Add->CombatStats.AttackDamage,
+	       Mul->CombatStats.AttackDamage);
 	Add->CombatStats.AttackDamage += Modifier.AdditiveValue;
 	Mul->CombatStats.AttackDamage *= Modifier.MultiplicativeValue;
+	UE_LOG(LogTemp, Log, TEXT("After: AttackDamage -> Add(%.2f) / Mul(%.2f)"), Add->CombatStats.AttackDamage,
+	       Mul->CombatStats.AttackDamage);
 
-	Add->CombatStats.InvincibilityTime += Modifier.AdditiveValue;
-	Mul->CombatStats.InvincibilityTime *= Modifier.MultiplicativeValue;
-
+	UE_LOG(LogTemp, Log, TEXT("Before: Defence -> Add(%.2f) / Mul(%.2f)"), Add->CombatStats.Defence,
+	       Mul->CombatStats.Defence);
 	Add->CombatStats.Defence += Modifier.AdditiveValue;
 	Mul->CombatStats.Defence *= Modifier.MultiplicativeValue;
+	UE_LOG(LogTemp, Log, TEXT("After: Defence -> Add(%.2f) / Mul(%.2f)"), Add->CombatStats.Defence,
+	       Mul->CombatStats.Defence);
 
 	// 이동 관련 스탯
+	UE_LOG(LogTemp, Log, TEXT("Before: MovementSpeed -> Add(%.2f) / Mul(%.2f)"), Add->MovementStats.MovementSpeed,
+	       Mul->MovementStats.MovementSpeed);
 	Add->MovementStats.MovementSpeed += Modifier.AdditiveValue;
 	Mul->MovementStats.MovementSpeed *= Modifier.MultiplicativeValue;
+	UE_LOG(LogTemp, Log, TEXT("After: MovementSpeed -> Add(%.2f) / Mul(%.2f)"), Add->MovementStats.MovementSpeed,
+	       Mul->MovementStats.MovementSpeed);
 
-	Add->MovementStats.SprintSpeed += Modifier.AdditiveValue;
-	Mul->MovementStats.SprintSpeed *= Modifier.MultiplicativeValue;
-
-	Add->MovementStats.CrouchSpeed += Modifier.AdditiveValue;
-	Mul->MovementStats.CrouchSpeed *= Modifier.MultiplicativeValue;
-
-	Add->MovementStats.RollingDistance += Modifier.AdditiveValue;
-	Mul->MovementStats.RollingDistance *= Modifier.MultiplicativeValue;
-
+	UE_LOG(LogTemp, Log, TEXT("Before: JumpZVelocity -> Add(%.2f) / Mul(%.2f)"), Add->MovementStats.JumpZVelocity,
+	       Mul->MovementStats.JumpZVelocity);
 	Add->MovementStats.JumpZVelocity += Modifier.AdditiveValue;
 	Mul->MovementStats.JumpZVelocity *= Modifier.MultiplicativeValue;
-
-	Add->MovementStats.RollElapsedTime += Modifier.AdditiveValue;
-	Mul->MovementStats.RollElapsedTime *= Modifier.MultiplicativeValue;
+	UE_LOG(LogTemp, Log, TEXT("After: JumpZVelocity -> Add(%.2f) / Mul(%.2f)"), Add->MovementStats.JumpZVelocity,
+	       Mul->MovementStats.JumpZVelocity);
 
 	// 스탯 재계산
 	RecalculateStats();
@@ -202,29 +213,75 @@ void UPlayerStatComponent::RecalculateStats()
 	FPlayerStats* Mul = &CurrentTotalMul;
 
 	// 체력 관련 스탯
-	Base->HealthStats.CurrentHealth = (Base->HealthStats.CurrentHealth + Add->HealthStats.CurrentHealth) * Mul->HealthStats.CurrentHealth;
+	UE_LOG(LogTemp, Log, TEXT("Before: CurrentHealth: Base(%.2f) + Add(%.2f) * Mul(%.2f)"),
+	       Base->HealthStats.CurrentHealth, Add->HealthStats.CurrentHealth, Mul->HealthStats.CurrentHealth);
+	Base->HealthStats.CurrentHealth = (Base->HealthStats.CurrentHealth + Add->HealthStats.CurrentHealth) * Mul->
+		HealthStats.CurrentHealth;
+	UE_LOG(LogTemp, Log, TEXT("After: CurrentHealth = %.2f"), Base->HealthStats.CurrentHealth);
+
+	UE_LOG(LogTemp, Log, TEXT("Before: MaxHealth: Base(%.2f) + Add(%.2f) * Mul(%.2f)"),
+	       Base->HealthStats.MaxHealth, Add->HealthStats.MaxHealth, Mul->HealthStats.MaxHealth);
 	Base->HealthStats.MaxHealth = (Base->HealthStats.MaxHealth + Add->HealthStats.MaxHealth) * Mul->HealthStats.MaxHealth;
-	Base->HealthStats.HealthDecelerationSpeed = (Base->HealthStats.HealthDecelerationSpeed + Add->HealthStats.HealthDecelerationSpeed) * Mul->HealthStats.HealthDecelerationSpeed;
-	Base->HealthStats.HealthDecelerationAmount = (Base->HealthStats.HealthDecelerationAmount + Add->HealthStats.HealthDecelerationAmount) * Mul->HealthStats.HealthDecelerationAmount;
+	UE_LOG(LogTemp, Log, TEXT("After: MaxHealth = %.2f"), Base->HealthStats.MaxHealth);
+
+	UE_LOG(LogTemp, Log, TEXT("Before: HealthDecelerationSpeed: Base(%.2f) + Add(%.2f) * Mul(%.2f)"),
+	       Base->HealthStats.HealthDecelerationSpeed, Add->HealthStats.HealthDecelerationSpeed,
+	       Mul->HealthStats.HealthDecelerationSpeed);
+	Base->HealthStats.HealthDecelerationSpeed = (Base->HealthStats.HealthDecelerationSpeed + Add->HealthStats.
+		HealthDecelerationSpeed) * Mul->HealthStats.HealthDecelerationSpeed;
+	UE_LOG(LogTemp, Log, TEXT("After: HealthDecelerationSpeed = %.2f"), Base->HealthStats.HealthDecelerationSpeed);
+
+	UE_LOG(LogTemp, Log, TEXT("Before: HealthDecelerationAmount: Base(%.2f) + Add(%.2f) * Mul(%.2f)"),
+	       Base->HealthStats.HealthDecelerationAmount, Add->HealthStats.HealthDecelerationAmount,
+	       Mul->HealthStats.HealthDecelerationAmount);
+	Base->HealthStats.HealthDecelerationAmount = (Base->HealthStats.HealthDecelerationAmount + Add->HealthStats.
+		HealthDecelerationAmount) * Mul->HealthStats.HealthDecelerationAmount;
+	UE_LOG(LogTemp, Log, TEXT("After: HealthDecelerationAmount = %.2f"), Base->HealthStats.HealthDecelerationAmount);
 
 	// 스태미나 관련 스탯
-	Base->StaminaStats.CurrentStamina = (Base->StaminaStats.CurrentStamina + Add->StaminaStats.CurrentStamina) * Mul->StaminaStats.CurrentStamina;
-	Base->StaminaStats.MaxStamina = (Base->StaminaStats.MaxStamina + Add->StaminaStats.MaxStamina) * Mul->StaminaStats.MaxStamina;
-	Base->StaminaStats.StaminaRecoveryRate = (Base->StaminaStats.StaminaRecoveryRate + Add->StaminaStats.StaminaRecoveryRate) * Mul->StaminaStats.StaminaRecoveryRate;
-	Base->StaminaStats.StaminaRecoveryTime = (Base->StaminaStats.StaminaRecoveryTime + Add->StaminaStats.StaminaRecoveryTime) * Mul->StaminaStats.StaminaRecoveryTime;
+	UE_LOG(LogTemp, Log, TEXT("Before: CurrentStamina: Base(%.2f) + Add(%.2f) * Mul(%.2f)"),
+	       Base->StaminaStats.CurrentStamina, Add->StaminaStats.CurrentStamina, Mul->StaminaStats.CurrentStamina);
+	Base->StaminaStats.CurrentStamina = (Base->StaminaStats.CurrentStamina + Add->StaminaStats.CurrentStamina) * Mul->
+		StaminaStats.CurrentStamina;
+	UE_LOG(LogTemp, Log, TEXT("After: CurrentStamina = %.2f"), Base->StaminaStats.CurrentStamina);
+
+	UE_LOG(LogTemp, Log, TEXT("Before: MaxStamina: Base(%.2f) + Add(%.2f) * Mul(%.2f)"),
+	       Base->StaminaStats.MaxStamina, Add->StaminaStats.MaxStamina, Mul->StaminaStats.MaxStamina);
+	Base->StaminaStats.MaxStamina = (Base->StaminaStats.MaxStamina + Add->StaminaStats.MaxStamina) * Mul->StaminaStats.
+		MaxStamina;
+	UE_LOG(LogTemp, Log, TEXT("After: MaxStamina = %.2f"), Base->StaminaStats.MaxStamina);
+
+	UE_LOG(LogTemp, Log, TEXT("Before: StaminaRecoveryRate: Base(%.2f) + Add(%.2f) * Mul(%.2f)"),
+	       Base->StaminaStats.StaminaRecoveryRate, Add->StaminaStats.StaminaRecoveryRate,
+	       Mul->StaminaStats.StaminaRecoveryRate);
+	Base->StaminaStats.StaminaRecoveryRate = (Base->StaminaStats.StaminaRecoveryRate + Add->StaminaStats.
+		StaminaRecoveryRate) * Mul->StaminaStats.StaminaRecoveryRate;
+	UE_LOG(LogTemp, Log, TEXT("After: StaminaRecoveryRate = %.2f"), Base->StaminaStats.StaminaRecoveryRate);
 
 	// 전투 관련 스탯
-	Base->CombatStats.AttackDamage = (Base->CombatStats.AttackDamage + Add->CombatStats.AttackDamage) * Mul->CombatStats.AttackDamage;
-	Base->CombatStats.InvincibilityTime = (Base->CombatStats.InvincibilityTime + Add->CombatStats.InvincibilityTime) * Mul->CombatStats.InvincibilityTime;
+	UE_LOG(LogTemp, Log, TEXT("Before: AttackDamage: Base(%.2f) + Add(%.2f) * Mul(%.2f)"),
+	       Base->CombatStats.AttackDamage, Add->CombatStats.AttackDamage, Mul->CombatStats.AttackDamage);
+	Base->CombatStats.AttackDamage = (Base->CombatStats.AttackDamage + Add->CombatStats.AttackDamage) * Mul->CombatStats.
+		AttackDamage;
+	UE_LOG(LogTemp, Log, TEXT("After: AttackDamage = %.2f"), Base->CombatStats.AttackDamage);
+
+	UE_LOG(LogTemp, Log, TEXT("Before: Defence: Base(%.2f) + Add(%.2f) * Mul(%.2f)"),
+	       Base->CombatStats.Defence, Add->CombatStats.Defence, Mul->CombatStats.Defence);
 	Base->CombatStats.Defence = (Base->CombatStats.Defence + Add->CombatStats.Defence) * Mul->CombatStats.Defence;
+	UE_LOG(LogTemp, Log, TEXT("After: Defence = %.2f"), Base->CombatStats.Defence);
 
 	// 이동 관련 스탯
-	Base->MovementStats.MovementSpeed = (Base->MovementStats.MovementSpeed + Add->MovementStats.MovementSpeed) * Mul->MovementStats.MovementSpeed;
-	Base->MovementStats.SprintSpeed = (Base->MovementStats.SprintSpeed + Add->MovementStats.SprintSpeed) * Mul->MovementStats.SprintSpeed;
-	Base->MovementStats.CrouchSpeed = (Base->MovementStats.CrouchSpeed + Add->MovementStats.CrouchSpeed) * Mul->MovementStats.CrouchSpeed;
-	Base->MovementStats.RollingDistance = (Base->MovementStats.RollingDistance + Add->MovementStats.RollingDistance) * Mul->MovementStats.RollingDistance;
-	Base->MovementStats.JumpZVelocity = (Base->MovementStats.JumpZVelocity + Add->MovementStats.JumpZVelocity) * Mul->MovementStats.JumpZVelocity;
-	Base->MovementStats.RollElapsedTime = (Base->MovementStats.RollElapsedTime + Add->MovementStats.RollElapsedTime) * Mul->MovementStats.RollElapsedTime;
+	UE_LOG(LogTemp, Log, TEXT("Before: MovementSpeed: Base(%.2f) + Add(%.2f) * Mul(%.2f)"),
+	       Base->MovementStats.MovementSpeed, Add->MovementStats.MovementSpeed, Mul->MovementStats.MovementSpeed);
+	Base->MovementStats.MovementSpeed = (Base->MovementStats.MovementSpeed + Add->MovementStats.MovementSpeed) * Mul->
+		MovementStats.MovementSpeed;
+	UE_LOG(LogTemp, Log, TEXT("After: MovementSpeed = %.2f"), Base->MovementStats.MovementSpeed);
+
+	UE_LOG(LogTemp, Log, TEXT("Before: JumpZVelocity: Base(%.2f) + Add(%.2f) * Mul(%.2f)"),
+	       Base->MovementStats.JumpZVelocity, Add->MovementStats.JumpZVelocity, Mul->MovementStats.JumpZVelocity);
+	Base->MovementStats.JumpZVelocity = (Base->MovementStats.JumpZVelocity + Add->MovementStats.JumpZVelocity) * Mul->
+		MovementStats.JumpZVelocity;
+	UE_LOG(LogTemp, Log, TEXT("After: JumpZVelocity = %.2f"), Base->MovementStats.JumpZVelocity);
 
 	// 값 보정
 	ClampStats();
@@ -238,9 +295,11 @@ void UPlayerStatComponent::ClampStats()
 
 	CurrentStats.StaminaStats.StaminaRecoveryTime = FMath::Clamp(CurrentStats.HealthStats.MaxHealth, 1.0f, 2.0f);
 	CurrentStats.StaminaStats.MaxStamina = FMath::Clamp(CurrentStats.StaminaStats.MaxStamina, 50.0f, 500.0f);
-	CurrentStats.StaminaStats.StaminaRecoveryRate = FMath::Clamp(CurrentStats.StaminaStats.StaminaRecoveryRate, 1.0f,100.0f);
+	CurrentStats.StaminaStats.StaminaRecoveryRate = FMath::Clamp(CurrentStats.StaminaStats.StaminaRecoveryRate, 1.0f,
+	                                                             100.0f);
 
-	CurrentStats.CombatStats.InvincibilityTime = FMath::Clamp(CurrentStats.StaminaStats.StaminaRecoveryRate, 0.0f,100.0f);
+	CurrentStats.CombatStats.InvincibilityTime =
+		FMath::Clamp(CurrentStats.StaminaStats.StaminaRecoveryRate, 0.0f, 100.0f);
 	CurrentStats.CombatStats.AttackDamage = FMath::Clamp(CurrentStats.CombatStats.AttackDamage, 1.0f, 100000.0f);
 	CurrentStats.CombatStats.Defence = FMath::Clamp(CurrentStats.CombatStats.Defence, 0.0f, 100.0f);
 
@@ -298,7 +357,8 @@ void UPlayerStatComponent::DecreaseHealth(float Amount)
 		return;
 	}
 
-	CurrentStats.HealthStats.CurrentHealth = FMath::Clamp(CurrentStats.HealthStats.CurrentHealth - Amount, 0.0f, CurrentStats.HealthStats.MaxHealth);
+	CurrentStats.HealthStats.CurrentHealth = FMath::Clamp(CurrentStats.HealthStats.CurrentHealth - Amount, 0.0f,
+	                                                      CurrentStats.HealthStats.MaxHealth);
 
 	OnHealthChanged.Broadcast(CurrentStats.HealthStats.CurrentHealth, CurrentStats.HealthStats.MaxHealth);
 }
@@ -313,7 +373,8 @@ void UPlayerStatComponent::IncreaseStamina(float Amount)
 		return;
 	}
 
-	CurrentStats.StaminaStats.CurrentStamina = FMath::Clamp(CurrentStats.StaminaStats.CurrentStamina + Amount, 0.0f, CurrentStats.StaminaStats.MaxStamina);
+	CurrentStats.StaminaStats.CurrentStamina = FMath::Clamp(CurrentStats.StaminaStats.CurrentStamina + Amount, 0.0f,
+	                                                        CurrentStats.StaminaStats.MaxStamina);
 
 	NotifyStaminaObservers();
 }
@@ -336,7 +397,8 @@ bool UPlayerStatComponent::DecreaseStamina(float Amount)
 		return false;
 	}
 
-	CurrentStats.StaminaStats.CurrentStamina = FMath::Clamp(CurrentStats.StaminaStats.CurrentStamina - Amount, 0.0f, CurrentStats.StaminaStats.MaxStamina);
+	CurrentStats.StaminaStats.CurrentStamina = FMath::Clamp(CurrentStats.StaminaStats.CurrentStamina - Amount, 0.0f,
+	                                                        CurrentStats.StaminaStats.MaxStamina);
 
 	NotifyStaminaObservers();
 
