@@ -17,11 +17,12 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Character/Animation/PepccineMontageComponent.h"
 #include "Character/Animation/PepccineHitReactionComponent.h"
+#include "Character/Components/BattleComponent.h"
 #include "Character/Data/ActorInfo.h"
 #include "Components/WidgetComponent.h"
 #include "Item/PepccineDropItem.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
-#include "Kismet/GameplayStatics.h"
+#include "Monster/Class/ZombieGirl.h"
 
 APepCharacter::APepCharacter()
 {
@@ -56,6 +57,7 @@ APepCharacter::APepCharacter()
 	ItemManagerComponent = CreateDefaultSubobject<UPepccineItemManagerComponent>(TEXT("ItemManagerComponent"));
 
 	HitReactionComponent = CreateDefaultSubobject<UPepccineHitReactionComponent>(TEXT("HitReactionComponent"));
+	BattleComponent = CreateDefaultSubobject<UBattleComponent>(TEXT("BattleComponent"));
 }
 
 void APepCharacter::BeginPlay()
@@ -72,29 +74,6 @@ void APepCharacter::Tick(float DeltaTime)
 
 	CheckSprinting();
 	CheckRolling(DeltaTime);
-}
-
-float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	UE_LOG(LogTemp, Warning, TEXT("=== TakeDamage() Called ==="));
-	UE_LOG(LogTemp, Warning, TEXT("Damage Amount: %f"), DamageAmount);
-
-	if (DamageCauser)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Damage Causer: %s"), *DamageCauser->GetName());
-	}
-    
-	if (EventInstigator)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Instigator Controller: %s"), *EventInstigator->GetName());
-	}
-
-	return DamageAmount;
-}
-
-void APepCharacter::Die()
-{
-	
 }
 
 // Initialize Character Status
@@ -165,6 +144,23 @@ void APepCharacter::AddObservers()
 	{
 		EnhancedRadarComponent->OnActorDetectedEnhanced.AddDynamic(this, &APepCharacter::OnActorDetectedEnhanced);
 	}
+
+	if (BattleComponent)
+	{
+		BattleComponent->OnCharacterHited.AddDynamic(this, &APepCharacter::OnPlayerHit);
+	}
+}
+
+void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult)
+{
+	if (bIsRolling) return;
+
+	PlayerStatComponent->DecreaseHealth(DamageAmount);
+	
+	FName HitBoneName = HitResult.BoneName;
+	FVector HitDirection = HitResult.ImpactNormal;
+	
+	HitReactionComponent->HitReaction(HitBoneName, HitDirection);
 }
 
 void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth)
@@ -172,6 +168,10 @@ void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth
 	if (!PrograssBarComponent)
 	{
 		return;
+	}
+	else if (NewHealth == 0)
+	{
+		Dead();
 	}
 
 	PrograssBarComponent->SetHealth(NewHealth, MaxHealth);
@@ -220,9 +220,37 @@ void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
 
 // Action
 #pragma region
+void APepCharacter::Dead()
+{
+	if (!bIsPlayerAlive) return;
+	bIsPlayerAlive = false;
+	
+	if (APepccinePlayerController* PepccinePlayerController = Cast<APepccinePlayerController>(PlayerController))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player Dead"));
+		// 플레이어 입력 차단
+		PepccinePlayerController->DisableInput(PepccinePlayerController);
+		
+		// 컨트롤러 회전 입력 차단
+		PepccinePlayerController->SetIgnoreLookInput(true);
+		PepccinePlayerController->SetIgnoreMoveInput(true);
+	}
+	
+	if (GetCharacterMovement())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Disable Movement"));
+		// 이동 멈추기
+		GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->DisableMovement();
+		GetCharacterMovement()->SetComponentTickEnabled(false);
+	}
+	
+	PepccineMontageComponent->Death();
+}
+
 void APepCharacter::Move(const FInputActionValue& Value)
 {
-	if (bIsRolling)
+	if (bIsRolling | !bIsPlayerAlive)
 	{
 		return;
 	}
@@ -257,7 +285,7 @@ void APepCharacter::OnMovementStopped()
 
 void APepCharacter::JumpStart()
 {
-	if (bIsRolling)
+	if (bIsRolling | !bIsPlayerAlive)
 	{
 		return;
 	}
@@ -276,6 +304,7 @@ void APepCharacter::JumpStop()
 
 void APepCharacter::UseItem()
 {
+	if (!bIsPlayerAlive) return;
 	UE_LOG(LogTemp, Log, TEXT("UseItem!"));
 }
 
@@ -289,7 +318,7 @@ void APepCharacter::Look(const FInputActionValue& value)
 
 void APepCharacter::StartSprint(const FInputActionValue& value)
 {
-	if (bIsRolling)
+	if (bIsRolling | !bIsPlayerAlive)
 	{
 		return;
 	}
@@ -329,7 +358,7 @@ void APepCharacter::SetCharacterSpeed(float Speed)
 
 void APepCharacter::Roll()
 {
-	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling())
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling() | !bIsPlayerAlive)
 	{
 		return;
 	}
@@ -383,7 +412,7 @@ FVector APepCharacter::GetRollDirection()
 
 void APepCharacter::Crouching()
 {
-	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent)
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive)
 	{
 		return;
 	}
@@ -404,9 +433,10 @@ void APepCharacter::Crouching()
 
 void APepCharacter::Reload()
 {
+	if (!bIsPlayerAlive) return;
 	UE_LOG(LogTemp, Log, TEXT("Reload!"));
 
-	HitReactionComponent->EnterRagdoll(5);
+	//HitReactionComponent->EnterRagdoll(5);
 
 	if (bIsReloading)
 	{
@@ -422,18 +452,18 @@ void APepCharacter::Reload()
 
 void APepCharacter::Interactive()
 {
+	if (!bIsPlayerAlive) return;
+	
 	// 아이템 인벤토리에 추가
 	if (CurrentDropItem)
 	{
 		CurrentDropItem->PickUpItem(ItemManagerComponent);
-
-		if (CurrentDropItem->IsA(UPepccinePassiveItemData::StaticClass()))
+		if (const UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 패시브 아이템
-			UPepccinePassiveItemData* DropItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData());
-			InventoryComponent->AddItem(DropItem->GetIconTexture(), DropItem->GetDisplayName(), DropItem->GetDescription());
+			InventoryComponent->AddItem(PassiveItem->GetIconTexture(), PassiveItem->GetDisplayName(), PassiveItem->GetDescription());
 
-			TArray<FPepccineCharacterStatModifier> CharacterStatModifiers = DropItem->GetCharacterStatModifiers();
+			TArray<FPepccineCharacterStatModifier> CharacterStatModifiers = PassiveItem->GetCharacterStatModifiers();
 			for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)
 			{
 				EPepccineCharacterStatName CharacterStatName = Modifier.CharacterStatName;
@@ -448,7 +478,7 @@ void APepCharacter::Interactive()
 				UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
 			}
 
-			TArray<FPepccineWeaponStatModifier> WeaponStatModifiers = DropItem->GetWeaponStatModifiers();
+			TArray<FPepccineWeaponStatModifier> WeaponStatModifiers = PassiveItem->GetWeaponStatModifiers();
 			for (const FPepccineWeaponStatModifier& Modifier : WeaponStatModifiers)
 			{
 				EPepccineWeaponItemType WeaponItemType = Modifier.WeaponItemType;
@@ -463,7 +493,7 @@ void APepCharacter::Interactive()
 				UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
 			}
 
-			TArray<FPepccineCharacterFeature> CharacterFeatures = DropItem->GetCharacterFeatures();
+			TArray<FPepccineCharacterFeature> CharacterFeatures = PassiveItem->GetCharacterFeatures();
 			for (const FPepccineCharacterFeature& Feature : CharacterFeatures)
 			{
 				switch (Feature.CharacterFeatureName)
@@ -475,26 +505,26 @@ void APepCharacter::Interactive()
 				}
 			}
 		}
-		else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
+		else if (const UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
 		{
+			if (!ItemIconComponent) return;
 			// 무기류 아이템
-			const UPepccineWeaponItemData* DropItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData());
-			// UTexture2D* MainWeaponImage, UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo)
-
-			if (DropItem->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main)
+			if (WeaponItem->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main)
 			{
-				// ItemIconComponent->UpdateMainWeaponUI();
+				ItemIconComponent->SetWeaponItem(WeaponItem->IconTexture, nullptr, WeaponItem->GetDisplayName(), WeaponItem->GetWeaponItemStats().MagazineAmmo, WeaponItem->GetWeaponItemStats().SpareAmmo, true);
 			}
-			else if (DropItem->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Sub)
+			else if (WeaponItem->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Sub)
 			{
-				// ItemIconComponent->UpdateSubWeaponUI();
+				ItemIconComponent->SetWeaponItem(nullptr, WeaponItem->IconTexture, WeaponItem->GetDisplayName(), WeaponItem->GetWeaponItemStats().MagazineAmmo, WeaponItem->GetWeaponItemStats().SpareAmmo, true);
 			}
 		}
+		/*
 		else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
 		{
 			// 액티브 아이템
 			const UPepccineWeaponItemData* DropItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData());
 		}
+		*/
 	}
 
 	// 스텟연산 (저장 구조체)
@@ -543,6 +573,8 @@ void APepCharacter::OpenInventory()
 
 void APepCharacter::SwapItem(const FInputActionValue& value)
 {
+	if (!bIsPlayerAlive) return;
+	
 	float ScrollValue = value.Get<float>();
 
 	if (ScrollValue > 0.0f)
@@ -562,10 +594,7 @@ void APepCharacter::StopFire()
 
 void APepCharacter::Fire()
 {
-	if (bIsRolling)
-	{
-		return;
-	}
+	if (bIsRolling | !bIsPlayerAlive) return;
 
 	bIsFiring = true;
 	PepccineMontageComponent->Fire();
@@ -575,10 +604,7 @@ void APepCharacter::Fire()
 
 void APepCharacter::ZoomIn()
 {
-	if (bIsRolling)
-	{
-		return;
-	}
+	if (bIsRolling | !bIsPlayerAlive) return;
 
 	bIsZooming = true;
 
@@ -638,6 +664,12 @@ void APepCharacter::TriggerCameraShake()
 			Modifier->StartShake(10.0f, 20.0f, 0.5f);
 		}
 	}
+}
+
+void APepCharacter::ShowMenu()
+{
+	if (!PlayerController) return;
+	PlayerController->ToggleExitMenu();
 }
 #pragma endregion
 
@@ -829,6 +861,17 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			ETriggerEvent::Completed,
 			this,
 			&APepCharacter::ZoomOut
+		);
+	}
+
+	// Menu: Escape
+	if (PlayerController->MenuAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->MenuAction,
+			ETriggerEvent::Started,
+			this,
+			&APepCharacter::ShowMenu
 		);
 	}
 }

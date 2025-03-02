@@ -69,7 +69,6 @@ void APepccineProjectile::OnReturnToPool()
 void APepccineProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                                 FVector NormalImpulse, const FHitResult& Hit)
 {
-	
 	if (OtherActor != nullptr && OtherActor != this)
 	{
 		//OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());

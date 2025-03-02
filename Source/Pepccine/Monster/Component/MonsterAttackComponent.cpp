@@ -16,9 +16,9 @@ void UMonsterAttackComponent::BeginPlay()
 
 void UMonsterAttackComponent::PerformAttack()
 {
-    // ¼ÒÀ¯ÀÚ¸¦ ACharacter·Î º¯È¯
+    // ì†Œìœ ìë¥¼ ACharacterë¡œ ë³€í™˜
     ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-    if (OwnerCharacter == nullptr)
+    if (!OwnerCharacter)
     {
         UE_LOG(LogTemp, Warning, TEXT("Owner is NOT an ACharacter!"));
         return;
@@ -35,29 +35,23 @@ void UMonsterAttackComponent::ApplyDamageToTarget(AActor* Target, float DamageAm
 {
     if (Target)
     {
-        // µ¥¹ÌÁö Àû¿ë
+        // ë°ë¯¸ì§€ ì ìš©
         UGameplayStatics::ApplyDamage(Target, DamageAmount, nullptr, GetOwner(), nullptr);
 
         APepCharacter* Player = Cast<APepCharacter>(Target);
         if (Player)
         {
-            // ÇÃ·¹ÀÌ¾î ÂÊ ÇÇ°İ ¹İÀÀ
+            // í”Œë ˆì´ì–´ ìª½ í”¼ê²© ë°˜ì‘
         }
     }
 }
 
-void UMonsterAttackComponent::PlayAttackMontage()
+void UMonsterAttackComponent::PlayTransitionMontage()
 {
-    if (AttackMontage && GetOwner())
+    ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+    if (AttackTransitionMontage && OwnerCharacter)
     {
-        AActor* Owner = GetOwner();
-        USkeletalMeshComponent* MeshComp = Owner->FindComponentByClass<USkeletalMeshComponent>();
-
-        if (MeshComp && MeshComp->GetAnimInstance())
-        {
-            UAnimInstance* AnimInstance = MeshComp->GetAnimInstance();
-            AnimInstance->Montage_Play(AttackMontage);
-        }
+        OwnerCharacter->PlayAnimMontage(AttackTransitionMontage);
     }
 }
 
@@ -70,67 +64,70 @@ void UMonsterAttackComponent::AttackTrace()
         return;
     }
 
-    FVector StartLocation = OwnerMonster->GetActorLocation(); 
-    FVector ForwardVector = OwnerMonster->GetActorForwardVector(); 
-    FVector EndLocation = StartLocation + (ForwardVector * 100.0f);  // °ø°İ ¹üÀ§ 
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    FVector StartLocation = OwnerMonster->GetActorLocation();
+    FVector ForwardVector = OwnerMonster->GetActorForwardVector();
+    FVector EndLocation = StartLocation + (ForwardVector * AttackRange); // AttackRange ï¿½İ¿ï¿½
 
-    // Ä¸½¶ Æ®·¹ÀÌ½º ¸Å°³º¯¼ö
-    float CapsuleRadius = 30.0f; 
-    float CapsuleHalfHeight = 100.0f; 
+    // Ä¸ï¿½ï¿½ Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    float CapsuleRadius = 30.0f;
+    float CapsuleHalfHeight = AttackRange * 0.5f; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Â°ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     FHitResult HitResult;
     FCollisionQueryParams CollisionParams;
-    CollisionParams.AddIgnoredActor(OwnerMonster); // ¸ó½ºÅÍ´Â Ãæµ¹ ¹«½Ã
+    CollisionParams.AddIgnoredActor(OwnerMonster); // ëª¬ìŠ¤í„°ëŠ” ì¶©ëŒ ë¬´ì‹œ
 
-    // Ä¸½¶ Æ®·¹ÀÌ½º ½ÇÇà
+    // ìº¡ìŠ íŠ¸ë ˆì´ìŠ¤ ì‹¤í–‰
     bool bHit = GetWorld()->SweepSingleByChannel(
         HitResult,
         StartLocation,
         EndLocation,
         FQuat::Identity,
-        ECC_Pawn, 
-        FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight), 
+        ECC_Pawn,
+        FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
         CollisionParams
     );
 
-    // Ãæµ¹ ½Ã Ã³¸®
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ Ä¸ï¿½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½ (ï¿½×»ï¿½ Ç¥ï¿½ï¿½)
+    DrawDebugCapsule(
+        GetWorld(),
+        (StartLocation + EndLocation) * 0.5f, // Ä¸ï¿½ï¿½ ï¿½ß½ï¿½ ï¿½ï¿½Ä¡
+        CapsuleHalfHeight,
+        CapsuleRadius,
+        FQuat::Identity,
+        bHit ? FColor::Green : FColor::Red, // ï¿½ï¿½Æ® ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        false,
+        1.0f,
+        0,
+        1.0f
+    );
+
+    // ï¿½æµ¹ ï¿½ï¿½ Ã³ï¿½ï¿½
     if (bHit)
     {
         FVector ImpactPoint = HitResult.ImpactPoint;
 
-        // Ãæµ¹ ÁöÁ¡¿¡ ÀÛÀº ¿øÀ» ±×·Á¼­ ½Ã°¢ÀûÀ¸·Î Ç¥½Ã (Ãæµ¹ÀÌ ÀÖÀ» ¶§¸¸)
+        // ï¿½æµ¹ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½×·ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½
         DrawDebugSphere(
             GetWorld(),
             ImpactPoint,
             CapsuleRadius,
-            12, 
-            FColor::Green,  
-            false, 
-            1.0f  
+            12,
+            FColor::Blue, // ï¿½æµ¹ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+            false,
+            1.0f
         );
 
-        // Ãæµ¹ ´ë»óÀÌ ÇÃ·¹ÀÌ¾îÀÎ °æ¿ì µ¥¹ÌÁö Àû¿ë
+        // ì¶©ëŒ ëŒ€ìƒì´ í”Œë ˆì´ì–´ì¸ ê²½ìš° ë°ë¯¸ì§€ ì ìš©
         if (APepCharacter* Player = Cast<APepCharacter>(HitResult.GetActor()))
         {
-            ApplyDamageToTarget(Player, 20.0f);  // ¿¹½Ã: 20ÀÇ µ¥¹ÌÁö Àû¿ë
+            ApplyDamageToTarget(Player, 20.0f);
+            SendHitResult(Player, 20.0f, HitResult);
         }
     }
     else
     {
-        DrawDebugCapsule(
-            GetWorld(),
-            EndLocation, 
-            CapsuleHalfHeight, 
-            CapsuleRadius,
-            FQuat::Identity,
-            FColor::Red,
-            false, 
-            1.0f,  
-            0,     
-            1.0f  
-        );
-
-        // ·Î±× Ãâ·Â
-        UE_LOG(LogTemp, Log, TEXT("No hit detected. Trace from (%s) to (%s)"), *StartLocation.ToString(), *EndLocation.ToString());
+        UE_LOG(LogTemp, Log, TEXT("No hit detected. Trace from (%s) to (%s)"),
+            *StartLocation.ToString(), *EndLocation.ToString());
     }
 }
