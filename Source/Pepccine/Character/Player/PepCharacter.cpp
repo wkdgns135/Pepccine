@@ -510,16 +510,8 @@ void APepCharacter::Interactive()
 		}
 		else if (const UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
 		{
-			if (!ItemIconComponent) return;
 			// 무기류 아이템
-			if (WeaponItem->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main)
-			{
-				ItemIconComponent->SetWeaponItem(WeaponItem->IconTexture, nullptr, WeaponItem->GetDisplayName(), WeaponItem->GetWeaponItemStats().MagazineAmmo, WeaponItem->GetWeaponItemStats().SpareAmmo, true);
-			}
-			else if (WeaponItem->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Sub)
-			{
-				ItemIconComponent->SetWeaponItem(nullptr, WeaponItem->IconTexture, WeaponItem->GetDisplayName(), WeaponItem->GetWeaponItemStats().MagazineAmmo, WeaponItem->GetWeaponItemStats().SpareAmmo, true);
-			}
+			UpdateWeaponUI();
 		}
 		/*
 		else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
@@ -547,6 +539,38 @@ void APepCharacter::Interactive()
 	{
 		
 	}
+}
+
+void APepCharacter::UpdateWeaponUI()
+{
+	if (!ItemManagerComponent || !ItemIconComponent) return;
+
+	// 주무기 정보
+	UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main);
+	FString MainWeaponName = MainWeaponData ? MainWeaponData->GetDisplayName() : FString("None");
+	int32 MainWeaponAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
+	int32 MainWeaponMaxAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineSize : 0;
+	UTexture2D* MainWeaponImage = MainWeaponData ? MainWeaponData->IconTexture : nullptr;
+
+	// 보조무기 정보
+	UPepccineWeaponItemData* SubWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub);
+	FString SubWeaponName = SubWeaponData ? SubWeaponData->GetDisplayName() : FString("None");
+	int32 SubWeaponAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
+	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineSize : 0;
+	UTexture2D* SubWeaponImage = SubWeaponData ? SubWeaponData->IconTexture : nullptr;
+
+	// 현재 장착된 무기가 주무기인지 확인
+	bool bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main;
+
+	// WeaponWidget 업데이트
+	ItemIconComponent->SetWeaponItem(
+		MainWeaponImage,
+		SubWeaponImage,
+		bIsMainWeaponEquipped ? MainWeaponName : SubWeaponName,
+		bIsMainWeaponEquipped ? MainWeaponAmmo : SubWeaponAmmo,
+		bIsMainWeaponEquipped ? MainWeaponMaxAmmo : SubWeaponMaxAmmo,
+		bIsMainWeaponEquipped
+	);
 }
 
 void APepCharacter::OpenInventory()

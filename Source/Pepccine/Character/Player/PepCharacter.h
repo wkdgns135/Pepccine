@@ -141,6 +141,9 @@ private:
 	void Interactive();
 
 	UFUNCTION()
+	void UpdateWeaponUI();
+
+	UFUNCTION()
 	void OpenInventory();
 
 	UFUNCTION()
