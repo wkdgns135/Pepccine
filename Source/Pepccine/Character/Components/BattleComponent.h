@@ -14,8 +14,8 @@ class PEPCCINE_API UBattleComponent : public UActorComponent
 public:
 	UBattleComponent();
 
-	void SendHitResult(AActor* HitTarget, float DamageAmount, FHitResult HitResult);
-	void ReceiveHitResult(float DamageAmount, AActor* DamageCauser, FHitResult HitResult);
+	void SendHitResult(AActor* HitTarget, float DamageAmount, const FHitResult& HitResult) const;
+	void ReceiveHitResult(float DamageAmount, AActor* DamageCauser, const FHitResult& HitResult) const;
 
 	UPROPERTY(BlueprintAssignable, Category = "Delegate | Battle")
 	FOnCharacterHited OnCharacterHited;

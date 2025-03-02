@@ -19,6 +19,12 @@ struct FHealthStats
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
     float HealthDecelerationAmount = 0.0f;
+    
+    void PrintStats() const
+    {
+        UE_LOG(LogTemp, Log, TEXT("Health Stats -> Current: %.2f, Max: %.2f, Deceleration Speed: %.2f, Deceleration Amount: %.2f"),
+            CurrentHealth, MaxHealth, HealthDecelerationSpeed, HealthDecelerationAmount);
+    }
 };
 
 // 스태미나 관련 스탯
@@ -38,6 +44,12 @@ struct FStaminaStats
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
     float StaminaRecoveryTime = 1.0f;
+
+    void PrintStats() const
+    {
+        UE_LOG(LogTemp, Log, TEXT("Stamina Stats -> Current: %.2f, Max: %.2f, Recovery Rate: %.2f, Recovery Time: %.2f"),
+            CurrentStamina, MaxStamina, StaminaRecoveryRate, StaminaRecoveryTime);
+    }
 };
 
 // 전투 관련 스탯
@@ -54,6 +66,12 @@ struct FCombatStats
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
     float Defence = 0.0f;
+
+    void PrintStats() const
+    {
+        UE_LOG(LogTemp, Log, TEXT("Combat Stats -> Attack Damage: %.2f, Invincibility Time: %.2f, Defence: %.2f"),
+            AttackDamage, InvincibilityTime, Defence);
+    }
 };
 
 // 이동 관련 스탯
@@ -79,6 +97,12 @@ struct FMovementStats
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float RollElapsedTime = 0.0f;
+
+    void PrintStats() const
+    {
+        UE_LOG(LogTemp, Log, TEXT("Movement Stats -> Speed: %.2f, Sprint: %.2f, Crouch: %.2f, Roll Dist: %.2f, JumpZ: %.2f, Roll Time: %.2f"),
+            MovementSpeed, SprintSpeed, CrouchSpeed, RollingDistance, JumpZVelocity, RollElapsedTime);
+    }
 };
 
 // 모든 스탯을 포함하는 구조체
@@ -98,4 +122,14 @@ struct FPlayerStats
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
     FMovementStats MovementStats;
+
+    void PrintStats() const
+    {
+        UE_LOG(LogTemp, Log, TEXT("===== Player Stats ====="));
+        HealthStats.PrintStats();
+        StaminaStats.PrintStats();
+        CombatStats.PrintStats();
+        MovementStats.PrintStats();
+        UE_LOG(LogTemp, Log, TEXT("======================="));
+    }
 };
