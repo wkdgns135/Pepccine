@@ -22,7 +22,6 @@
 #include "Components/WidgetComponent.h"
 #include "Item/PepccineDropItem.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
-#include "Kismet/GameplayStatics.h"
 #include "Monster/Class/ZombieGirl.h"
 
 APepCharacter::APepCharacter()
@@ -94,15 +93,6 @@ void APepCharacter::InitializeCharacterMovement() const
 }
 #pragma endregion
 
-float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	if (bIsRolling) return 0;
-
-	PlayerStatComponent->DecreaseHealth(DamageAmount);
-
-	return DamageAmount;
-}
-
 // Tick Method
 #pragma region
 void APepCharacter::CheckSprinting()
@@ -161,10 +151,15 @@ void APepCharacter::AddObservers()
 	}
 }
 
-void APepCharacter::OnPlayerHit(AActor* DamageCauser, const FHitResult& HitResult)
+void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult)
 {
+	if (bIsRolling) return;
+
+	PlayerStatComponent->DecreaseHealth(DamageAmount);
+	
 	FName HitBoneName = HitResult.BoneName;
 	FVector HitDirection = HitResult.ImpactNormal;
+	
 	HitReactionComponent->HitReaction(HitBoneName, HitDirection);
 }
 
