@@ -163,7 +163,6 @@ void APepCharacter::AddObservers()
 
 void APepCharacter::OnPlayerHit(AActor* DamageCauser, const FHitResult& HitResult)
 {
-	// 몬스터로 부터 데미지 받았을때
 	FName HitBoneName = HitResult.BoneName;
 	FVector HitDirection = HitResult.ImpactNormal;
 	HitReactionComponent->HitReaction(HitBoneName, HitDirection);

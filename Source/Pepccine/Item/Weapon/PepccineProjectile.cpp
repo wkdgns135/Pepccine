@@ -37,7 +37,7 @@ void APepccineProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 
 		if (OwnerCharacter)
 		{
-			if (APepccineCharacter* Enemy = Cast<APepccineCharacter>(OtherActor))
+			if (ACharacter* Enemy = Cast<ACharacter>(OtherActor))
 			{
 				UGameplayStatics::ApplyDamage(Enemy, WeaponDamage, OwnerCharacter->GetController(), this,
 				                              UDamageType::StaticClass());
