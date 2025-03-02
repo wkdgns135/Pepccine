@@ -452,7 +452,7 @@ void APepCharacter::Reload()
 
 void APepCharacter::Interactive()
 {
-	if (!bIsPlayerAlive) return;
+	if (!bIsPlayerAlive || !PlayerStatComponent) return;
 	
 	// 아이템 인벤토리에 추가
 	if (CurrentDropItem)
@@ -461,7 +461,7 @@ void APepCharacter::Interactive()
 		if (const UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 패시브 아이템
-			InventoryComponent->AddItem(PassiveItem->IconTexture, PassiveItem->GetDisplayName(), PassiveItem->GetDescription());
+			InventoryComponent->AddItem(PassiveItem->IconTexture, PassiveItem->GetDisplayName(), PassiveItem->GetDescription(), PlayerStatComponent->PrintStats());
 
 			TArray<FPepccineCharacterStatModifier> CharacterStatModifiers = PassiveItem->GetCharacterStatModifiers();
 			for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)
