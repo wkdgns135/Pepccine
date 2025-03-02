@@ -466,16 +466,34 @@ void APepCharacter::Interactive()
 			TArray<FPepccineCharacterStatModifier> CharacterStatModifiers = PassiveItem->GetCharacterStatModifiers();
 			for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)
 			{
-				EPepccineCharacterStatName CharacterStatName = Modifier.CharacterStatName;
-				EPepccineStatModifyType ModifyType = Modifier.StatModifierDefault.StatModifyType;
 				float Amount = Modifier.StatModifierDefault.StatModifyValue;
+				UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
 
+				EPepccineCharacterStatName CharacterStatName = Modifier.CharacterStatName;
 				FString StatName = UEnum::GetValueAsString(CharacterStatName);
 				UE_LOG(LogTemp, Warning, TEXT("CharacterStatName: %s"), *StatName);
 
+				EPepccineStatModifyType ModifyType = Modifier.StatModifierDefault.StatModifyType;
 				FString MT = UEnum::GetValueAsString(ModifyType);
 				UE_LOG(LogTemp, Warning, TEXT("ModifyType: %s"), *MT);
-				UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
+
+				switch (ModifyType)
+				{
+				case EPepccineStatModifyType::EPSMT_Add:
+					{
+						UE_LOG(LogTemp, Warning, TEXT("EPSMT_Add: %f"), Amount);
+						FStatModifier AddStatModifier(CharacterStatName, Amount, 1.0f);
+						PlayerStatComponent->ApplyStatModifier(AddStatModifier);
+						break;
+					}
+				case EPepccineStatModifyType::EPSMT_Multiply:
+					{
+						UE_LOG(LogTemp, Warning, TEXT("EPSMT_Multiply: %f"), Amount);
+						FStatModifier MulStatModifier(CharacterStatName, 0.0f, Amount);
+						PlayerStatComponent->ApplyStatModifier(MulStatModifier);
+						break;
+					}
+				}
 			}
 
 			TArray<FPepccineWeaponStatModifier> WeaponStatModifiers = PassiveItem->GetWeaponStatModifiers();
