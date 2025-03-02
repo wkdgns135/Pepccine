@@ -3,16 +3,14 @@
 #include "PepccineItemSaveData.h"
 #include "PepccineItemSpawner.h"
 #include "Active/PepccineActiveItemData.h"
-#include "Item/PepccineItemDataAssetBase.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Passive/PepccinePassiveItemData.h"
-#include "Passive/PepccinePassiveItemDataAsset.h"
 #include "Passive/PepccineStatModifier.h"
 #include "Resource/PepccineResourceItemData.h"
 
 UPepccineItemManagerComponent::UPepccineItemManagerComponent()
-	: ItemSpawner(nullptr), WeaponItemManager(nullptr)
+	: ItemSpawner(nullptr), WeaponItemManager(nullptr), PassiveItemManager(nullptr), ActiveItemManager(nullptr)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
@@ -23,8 +21,12 @@ void UPepccineItemManagerComponent::BeginPlay()
 
 	// 무기 아이템 매니저 생성
 	WeaponItemManager = NewObject<UPepccineWeaponItemManager>();
+	// 패시브 아이템 매니저 생성
+	PassiveItemManager = NewObject<UPepccinePassiveItemManager>();
+	// 액티브 아이템 매니저 생성
+	ActiveItemManager = NewObject<UPepccineActiveItemManager>();
 	
-	if (WeaponItemManager && ItemSpawnerClass)
+	if (WeaponItemManager && PassiveItemManager && ActiveItemManager && ItemSpawnerClass)
 	{
 		ItemSpawner = NewObject<UPepccineItemSpawner>(GetOwner(), ItemSpawnerClass);
 		if (ItemSpawner)
@@ -46,12 +48,13 @@ void UPepccineItemManagerComponent::TickComponent(float DeltaTime, enum ELevelTi
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (bIsActiveItemCooldown)
+	if (IsActiveItemCooldown())
 	{
-		ActiveItemRemainingCooldown = FMath::Max(ActiveItemRemainingCooldown - DeltaTime, 0.0f);
-		if (FMath::IsNearlyZero(ActiveItemRemainingCooldown))
+		const float ActiveItemCooldown = ActiveItemManager->GetActiveItemRemainingCooldown();
+		ActiveItemManager->SetActiveItemRemainingCooldown(FMath::Max(ActiveItemCooldown - DeltaTime, 0.0f));
+		if (FMath::IsNearlyZero(ActiveItemCooldown))
 		{
-			bIsActiveItemCooldown = false;
+			ActiveItemManager->SetIsActiveItemCooldown(false);
 		}
 	}
 }
@@ -64,7 +67,7 @@ float UPepccineItemManagerComponent::GetWeaponStatByName(const EPepccineWeaponIt
 	switch (WeaponStatName)
 	{
 	case EPepccineWeaponStatName::EPWSN_AttackMultiplier: return WeaponItemData->GetWeaponItemStats().AttackMultiplier;
-	case EPepccineWeaponStatName::EPWSN_RangeMultiplier: return WeaponItemData->GetWeaponItemStats().RangeMultiplier;
+	case EPepccineWeaponStatName::EPWSN_AttackRange: return WeaponItemData->GetWeaponItemStats().AttackRange;
 	case EPepccineWeaponStatName::EPWSN_FireRate: return WeaponItemData->GetWeaponItemStats().FireRate;
 	case EPepccineWeaponStatName::EPWSN_ZoomMultiplier: return WeaponItemData->GetWeaponItemStats().ZoomMultiplier;
 	case EPepccineWeaponStatName::EPWSN_MagazineSize: return WeaponItemData->GetWeaponItemStats().MagazineSize;
@@ -97,12 +100,12 @@ bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemDa
 	// 패시브 아이템
 	else if (const UPepccinePassiveItemData* PassiveItemData = Cast<UPepccinePassiveItemData>(DropItemData))
 	{
-		PickUpItem(PassiveItemData);
+		PassiveItemManager->PickUpItem(PassiveItemData, this);
 	}
 	// 액티브 아이템
 	else if (const UPepccineActiveItemData* ActiveItemData = Cast<UPepccineActiveItemData>(DropItemData))
 	{
-		PickUpItem(ActiveItemData);
+		ActiveItemManager->PickUpItem(ActiveItemData);
 	}
 	// 자원 아이템(탄약, 코인)
 	else if (const UPepccineResourceItemData* ResourceItemData = Cast<UPepccineResourceItemData>(DropItemData))
@@ -143,41 +146,6 @@ bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemDa
 	// 무기 스탯 재설정
 
 	return true;
-}
-
-void UPepccineItemManagerComponent::PickUpItem(const UPepccinePassiveItemData* PassiveItemData)
-{
-	// 복사해서 사용
-	UPepccinePassiveItemData* NewPassiveItemData = DuplicateObject<UPepccinePassiveItemData>(PassiveItemData, this);
-
-	// 무기 스탯
-	IncreaseStatsOperations(NewPassiveItemData->GetWeaponStatModifiers());
-
-	// 캐릭터 스탯
-	IncreaseStatsOperations(NewPassiveItemData->GetCharacterStatModifiers());
-
-	UE_LOG(LogTemp, Warning, TEXT("%s 추가"), *NewPassiveItemData->GetDisplayName());
-
-	PassiveItemDatas.Add(NewPassiveItemData->GetItemId(), NewPassiveItemData);
-}
-
-void UPepccineItemManagerComponent::PickUpItem(const UPepccineActiveItemData* ActiveItemData)
-{
-	EquippedActiveItemData = DuplicateObject<UPepccineActiveItemData>(ActiveItemData, this);
-
-	// 획득시 바로 재사용 대기시간 적용
-	ActiveItemRemainingCooldown = EquippedActiveItemData->GetCooldown();
-	bIsActiveItemCooldown = true;
-}
-
-void UPepccineItemManagerComponent::RemovePassiveItemDataById(const int32 ItemId)
-{
-	const UPepccinePassiveItemData* PassiveItemData = PassiveItemDatas[ItemId];
-
-	DecreaseStatsOperations(PassiveItemData->GetWeaponStatModifiers());
-	DecreaseStatsOperations(PassiveItemData->GetCharacterStatModifiers());
-
-	PassiveItemDatas.Remove(ItemId);
 }
 
 void UPepccineItemManagerComponent::SwapWeapon(const EPepccineWeaponItemType WeaponType) const
@@ -300,64 +268,7 @@ void UPepccineItemManagerComponent::DecreaseStatsOperations(TArray<FPepccineChar
 
 void UPepccineItemManagerComponent::UseActiveItem()
 {
-	// 장착된 액티브 아이템이 없을 경우
-	if (!EquippedActiveItemData)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("액티브 아이템이 없습니다."));
-		return;
-	}
-
-	// 현재 액티브 아이템 재사용 대기 중일 경우
-	if (bIsActiveItemCooldown)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("액티브 아이템 재사용 대기 중"));
-		return;
-	}
-
-	// 이미 해당 버프를 받고 있다면 시간만 갱신
-	if (GetAppliedPotionItemDataById(EquippedActiveItemData->GetItemId()))
-	{
-		ActiveItemRemainingCooldown = EquippedActiveItemData->GetCooldown();
-		bIsActiveItemCooldown = true;
-		return;
-	}
-
-	// 포션(버프)
-	if (const UPepccinePotionItemData* PotionItemData = Cast<UPepccinePotionItemData>(EquippedActiveItemData))
-	{
-		ActivatePotionItem(PotionItemData);
-
-		// 지속시간 이후 버프 해제
-		FTimerHandle TimerHandle;
-		FTimerDelegate TimerDelegate;
-		TimerDelegate.BindUFunction(this, FName("DeactivatePotionItem"), PotionItemData);
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, PotionItemData->GetDuration(), false);
-	}
-}
-
-void UPepccineItemManagerComponent::ActivatePotionItem(const UPepccinePotionItemData* PotionItemData)
-{
-	IncreaseStatsOperations(PotionItemData->GetWeaponStatModifiers());
-	IncreaseStatsOperations(PotionItemData->GetCharacterStatModifiers());
-}
-
-void UPepccineItemManagerComponent::DeactivatePotionItem(const UPepccinePotionItemData* PotionItemData)
-{
-	DecreaseStatsOperations(PotionItemData->GetWeaponStatModifiers());
-	DecreaseStatsOperations(PotionItemData->GetCharacterStatModifiers());
-}
-
-UPepccinePotionItemData* UPepccineItemManagerComponent::GetAppliedPotionItemDataById(const int32 Id) const
-{
-	for (UPepccinePotionItemData* PotionItemData : AppliedBuffPotionItemDatas)
-	{
-		if (PotionItemData->GetItemId() == Id)
-		{
-			return PotionItemData;
-		}
-	}
-
-	return nullptr;
+	ActiveItemManager->UseActiveItem(this);
 }
 
 bool UPepccineItemManagerComponent::UseCoin(const int32 Count)

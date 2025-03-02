@@ -17,8 +17,10 @@ class PEPCCINE_API APepccineProjectile : public APepccinePoolable
 public:
 	APepccineProjectile();
 
+	virtual void Tick(float DeltaSeconds) override;
+	
 	// 이동방향 및 속도 초기화
-	void InitProjectile(const FVector& ShootDirection, const int32 Speed) const;
+	void InitProjectile(const FVector& ShootDirection, const int32 Speed, const float InMaxDistance);
 
 	virtual void OnSpawnFromPool() override;
 	virtual void OnReturnToPool() override;
@@ -52,4 +54,10 @@ protected:
 	// 무기 공격력
 	UPROPERTY(VisibleAnywhere, Category = "Projectile")
 	float WeaponDamage = 0.0f;
+
+	// 투사체 사거리
+	float MaxDistance = 100.0f;
+	
+	// 발사 시작 위치
+	FVector StartLocation = FVector::ZeroVector;
 };

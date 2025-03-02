@@ -24,22 +24,38 @@ APepccineProjectile::APepccineProjectile()
 	ProjectileMovementComp->MaxSpeed = 3000.f;
 	ProjectileMovementComp->bRotationFollowsVelocity = true;
 	ProjectileMovementComp->bShouldBounce = true;
-
 	// InitialLifeSpan = 3.0f;
 }
 
-void APepccineProjectile::InitProjectile(const FVector& ShootDirection, const int32 Speed) const
+void APepccineProjectile::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (ProjectileMovementComp->IsActive())
+	{
+		 const float CurrentDistance = FVector::Dist(StartLocation, GetActorLocation());
+
+		// 최대 사거리까지 이동 후
+		if (CurrentDistance >= MaxDistance)
+		{
+			// 풀로 돌려보내기
+			OnReturnToPool();
+		}
+	}
+}
+
+void APepccineProjectile::InitProjectile(const FVector& ShootDirection, const int32 Speed, const float InMaxDistance)
 {
 	ProjectileMovementComp->InitialSpeed = Speed;
 	ProjectileMovementComp->MaxSpeed = Speed;
 	ProjectileMovementComp->Velocity = ShootDirection * ProjectileMovementComp->InitialSpeed;
-	ProjectileMovementComp->SetActive(true);
+	MaxDistance = InMaxDistance;
 }
 
 void APepccineProjectile::OnSpawnFromPool()
 {
 	Super::OnSpawnFromPool();
 	SetActorTickEnabled(true);
+	StartLocation = GetActorLocation();
 	ProjectileMovementComp->SetActive(true);
 }
 
@@ -60,7 +76,7 @@ void APepccineProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 
 		if (OwnerCharacter)
 		{
-			if (APepccineCharacter* Enemy = Cast<APepccineCharacter>(OtherActor))
+			if (ACharacter* Enemy = Cast<ACharacter>(OtherActor))
 			{
 				UGameplayStatics::ApplyDamage(Enemy, WeaponDamage, OwnerCharacter->GetController(), this,
 				                              UDamageType::StaticClass());

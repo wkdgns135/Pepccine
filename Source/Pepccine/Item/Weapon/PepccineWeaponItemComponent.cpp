@@ -83,9 +83,10 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage)
 						SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(OwnerCharacter, true);
 						SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(GetOwner(), true);
 					}
-
-					// TODO[명관] : 투사체 속도 조정
-					SpawnedProjectile->InitProjectile(GetFireDirection(MuzzleLocation), 5000.0f);
+					
+					SpawnedProjectile->InitProjectile(GetFireDirection(MuzzleLocation),
+					                                  EquippedWeaponData->GetWeaponItemStats().BulletSpeed,
+					                                  EquippedWeaponData->GetWeaponItemStats().AttackRange);
 
 					if (USoundBase* FireSound = EquippedWeaponData->GetFireSound())
 					{
