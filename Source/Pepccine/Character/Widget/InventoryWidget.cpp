@@ -41,6 +41,16 @@ void UInventoryWidget::NativeConstruct()
 		ItemDetailText->SetVisibility(ESlateVisibility::Hidden);
 	}
 
+	if (!PlayerStatText)
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerStatText is nullptr! Ensure it is assigned in the blueprint."));
+	}
+	else
+	{
+		PlayerStatText->SetText(FText::FromString(""));
+		PlayerStatText->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 	CurrentRow = 0;
 	CurrentColumn = 0;
 	NextItemIndex = 0;
@@ -78,12 +88,18 @@ void UInventoryWidget::SetEmptyGrid()
 	}
 }
 
-void UInventoryWidget::AddItemToInventory(UTexture2D* ItemImage, const FString& ItemName, const FString& ItemDetail)
+void UInventoryWidget::AddItemToInventory(UTexture2D* ItemImage, const FString& ItemName, const FString& ItemDetail, const FString& StatDetail)
 {
 	if (!InventoryGrid || !ItemWidgetClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("InventoryGrid or ItemWidgetClass is nullptr!"));
 		return;
+	}
+
+	if (PlayerStatText)
+	{
+		PlayerStatText->SetText(FText::FromString(*StatDetail));
+		PlayerStatText->SetVisibility(ESlateVisibility::Visible);
 	}
 
 	UInventoryItemWidget* NewItem = CreateWidget<UInventoryItemWidget>(this, ItemWidgetClass);
@@ -165,8 +181,6 @@ void UInventoryWidget::HandleItemHovered(int32 ItemIndex, bool bIsHovered)
 	{
 		if (FString* FoundDetail = ItemDetailsMap.Find(ItemIndex))
 		{
-			UE_LOG(LogTemp, Display, TEXT("Item %d is hovered: %s"), ItemIndex, **FoundDetail);
-
 			if (ItemDetailText)
 			{
 				ItemDetailText->SetText(FText::FromString(*FoundDetail));
@@ -176,8 +190,6 @@ void UInventoryWidget::HandleItemHovered(int32 ItemIndex, bool bIsHovered)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Display, TEXT("Item %d is unhovered"), ItemIndex);
-
 		if (ItemDetailText)
 		{
 			ItemDetailText->SetText(FText::FromString(""));

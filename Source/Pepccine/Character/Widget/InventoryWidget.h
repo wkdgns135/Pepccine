@@ -19,7 +19,7 @@ public:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintCallable)
-	void AddItemToInventory(UTexture2D* ItemImage, const FString& ItemName, const FString& ItemDetail);
+	void AddItemToInventory(UTexture2D* ItemImage, const FString& ItemName, const FString& ItemDetail, const FString& StatDetail);
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -33,6 +33,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ItemDetailText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* PlayerStatText;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	TSubclassOf<UInventoryItemWidget> ItemWidgetClass;

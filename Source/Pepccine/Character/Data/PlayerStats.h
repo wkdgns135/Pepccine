@@ -19,6 +19,12 @@ struct FHealthStats
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
     float HealthDecelerationAmount = 0.0f;
+    
+    FString PrintStats() const
+    {
+        return FString::Printf(TEXT("Health Stats\nCurrent: %.2f\nMax: %.2f\nDeceleration Speed: %.2f\nDeceleration Amount: %.2f\n"),
+                               CurrentHealth, MaxHealth, HealthDecelerationSpeed, HealthDecelerationAmount);
+    }
 };
 
 // 스태미나 관련 스탯
@@ -38,6 +44,12 @@ struct FStaminaStats
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
     float StaminaRecoveryTime = 1.0f;
+
+    FString PrintStats() const
+    {
+        return FString::Printf(TEXT("Stamina Stats\nCurrent: %.2f\nMax: %.2f\nRecovery Rate: %.2f\nRecovery Time: %.2f\n"),
+                               CurrentStamina, MaxStamina, StaminaRecoveryRate, StaminaRecoveryTime);
+    }
 };
 
 // 전투 관련 스탯
@@ -54,6 +66,12 @@ struct FCombatStats
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
     float Defence = 0.0f;
+
+    FString PrintStats() const
+    {
+        return FString::Printf(TEXT("Combat Stats\nAttack Damage: %.2f\nInvincibility Time: %.2f\nDefence: %.2f\n"),
+                               AttackDamage, InvincibilityTime, Defence);
+    }
 };
 
 // 이동 관련 스탯
@@ -79,6 +97,12 @@ struct FMovementStats
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float RollElapsedTime = 0.0f;
+
+    FString PrintStats() const
+    {
+        return FString::Printf(TEXT("Movement Stats\nSpeed: %.2f\nSprint: %.2f\nCrouch: %.2f\nRoll Dist: %.2f\nJumpZ: %.2f\nRoll Time: %.2f\n"),
+                               MovementSpeed, SprintSpeed, CrouchSpeed, RollingDistance, JumpZVelocity, RollElapsedTime);
+    }
 };
 
 // 모든 스탯을 포함하는 구조체
@@ -98,4 +122,13 @@ struct FPlayerStats
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
     FMovementStats MovementStats;
+
+    FString PrintStats() const
+    {
+        return FString::Printf(TEXT("===== Player Stats =====\n%s%s%s%s=======================\n"),
+                               *HealthStats.PrintStats(),
+                               *StaminaStats.PrintStats(),
+                               *CombatStats.PrintStats(),
+                               *MovementStats.PrintStats());
+    }
 };

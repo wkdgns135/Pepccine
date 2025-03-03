@@ -22,11 +22,11 @@ void UInventoryComponent::BeginPlay()
 	}
 }
 
-void UInventoryComponent::AddItem(UTexture2D* ItemImage, const FString& ItemName, const FString& ItemDetail)
+void UInventoryComponent::AddItem(UTexture2D* ItemImage, const FString& ItemName, const FString& ItemDetail, const FString& StatDetail)
 {
 	if (InventoryWidget)
 	{
-		InventoryWidget->AddItemToInventory(ItemImage, ItemName, ItemDetail);
+		InventoryWidget->AddItemToInventory(ItemImage, ItemName, ItemDetail, StatDetail);
 	}
 }
 
