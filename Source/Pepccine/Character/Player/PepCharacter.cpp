@@ -621,21 +621,20 @@ void APepCharacter::UpdateWeaponUI()
 		GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main);
 	FString MainWeaponName = MainWeaponData ? MainWeaponData->GetDisplayName() : FString("None");
 	int32 MainWeaponAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
-	int32 MainWeaponMaxAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineSize : 0;
+	int32 MainSpareAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().SpareAmmo : 0;
 	UTexture2D* MainWeaponImage = MainWeaponData ? MainWeaponData->GetIconTexture() : nullptr;
 
 	// 보조무기 정보
 	UPepccineWeaponItemData* SubWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub);
 	FString SubWeaponName = SubWeaponData ? SubWeaponData->GetDisplayName() : FString("None");
 	int32 SubWeaponAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
-	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineSize : 0;
+	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().SpareAmmo : 0;
 	UTexture2D* SubWeaponImage = SubWeaponData ? SubWeaponData->GetIconTexture() : nullptr;
 
 	// 현재 장착된 무기가 주무기인지 확인
 	bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() ==
 		EPepccineWeaponItemType::EPWIT_Main;
-
-
+	
 	// WeaponWidget 업데이트
 	ItemIconComponent->SetWeaponItem(
 		MainWeaponImage,

@@ -24,6 +24,11 @@ void UPepccineWeaponItemComponent::InitWeaponComponent(ACharacter* InOwnerCharac
 
 	OwnerCharacter = InOwnerCharacter;
 
+	if (!PoolSubSystem)
+	{
+		UE_LOG(LogTemp, Error, TEXT("PoolSubSystem이 설정되어있지 않습니다."));
+	}
+	
 	if (ProjectileClass && PoolSubSystem)
 	{
 		FActorSpawnParameters SpawnParams;
