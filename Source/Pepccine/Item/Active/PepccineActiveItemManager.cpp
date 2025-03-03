@@ -19,7 +19,7 @@ void UPepccineActiveItemManager::PickUpItem(const UPepccineActiveItemData* InAct
 	}
 }
 
-void UPepccineActiveItemManager::UseActiveItem(UPepccineItemManagerComponent* ItemManager)
+void UPepccineActiveItemManager::UseActiveItem()
 {
 	// 액티브 아이템이 없을 경우
 	if (!ActiveItemData)
@@ -46,7 +46,7 @@ void UPepccineActiveItemManager::UseActiveItem(UPepccineItemManagerComponent* It
 	// 포션(버프)
 	if (const UPepccinePotionItemData* PotionItemData = Cast<UPepccinePotionItemData>(ActiveItemData))
 	{
-		ActivatePotionItem(PotionItemData, ItemManager);
+		ActivatePotionItem(PotionItemData);
 
 		// 지속시간 이후 버프 해제
 		FTimerHandle TimerHandle;
@@ -56,13 +56,13 @@ void UPepccineActiveItemManager::UseActiveItem(UPepccineItemManagerComponent* It
 	}
 }
 
-void UPepccineActiveItemManager::ActivatePotionItem(const UPepccinePotionItemData* PotionItemData, UPepccineItemManagerComponent* ItemManager)
+void UPepccineActiveItemManager::ActivatePotionItem(const UPepccinePotionItemData* PotionItemData) const
 {
 	ItemManager->IncreaseStatsOperations(PotionItemData->GetWeaponStatModifiers());
 	ItemManager->IncreaseStatsOperations(PotionItemData->GetCharacterStatModifiers());
 }
 
-void UPepccineActiveItemManager::DeactivatePotionItem(const UPepccinePotionItemData* PotionItemData, UPepccineItemManagerComponent* ItemManager)
+void UPepccineActiveItemManager::DeactivatePotionItem(const UPepccinePotionItemData* PotionItemData) const
 {
 	ItemManager->DecreaseStatsOperations(PotionItemData->GetWeaponStatModifiers());
 	ItemManager->DecreaseStatsOperations(PotionItemData->GetCharacterStatModifiers());

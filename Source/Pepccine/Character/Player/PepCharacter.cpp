@@ -458,7 +458,7 @@ void APepCharacter::Interactive()
 	if (CurrentDropItem)
 	{
 		CurrentDropItem->PickUpItem(ItemManagerComponent);
-		if (const UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
+		if (UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 패시브 아이템
 			InventoryComponent->AddItem(PassiveItem->GetIconTexture(), PassiveItem->GetDisplayName(), PassiveItem->GetDescription());
@@ -505,17 +505,17 @@ void APepCharacter::Interactive()
 				}
 			}
 		}
-		else if (const UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
+		else if (UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			if (!ItemIconComponent) return;
 			// 무기류 아이템
 			if (WeaponItem->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main)
 			{
-				ItemIconComponent->SetWeaponItem(WeaponItem->IconTexture, nullptr, WeaponItem->GetDisplayName(), WeaponItem->GetWeaponItemStats().MagazineAmmo, WeaponItem->GetWeaponItemStats().SpareAmmo, true);
+				ItemIconComponent->SetWeaponItem(WeaponItem->GetIconTexture(), nullptr, WeaponItem->GetDisplayName(), WeaponItem->GetWeaponItemStats().MagazineAmmo, WeaponItem->GetWeaponItemStats().SpareAmmo, true);
 			}
 			else if (WeaponItem->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Sub)
 			{
-				ItemIconComponent->SetWeaponItem(nullptr, WeaponItem->IconTexture, WeaponItem->GetDisplayName(), WeaponItem->GetWeaponItemStats().MagazineAmmo, WeaponItem->GetWeaponItemStats().SpareAmmo, true);
+				ItemIconComponent->SetWeaponItem(nullptr, WeaponItem->GetIconTexture(), WeaponItem->GetDisplayName(), WeaponItem->GetWeaponItemStats().MagazineAmmo, WeaponItem->GetWeaponItemStats().SpareAmmo, true);
 			}
 		}
 		/*

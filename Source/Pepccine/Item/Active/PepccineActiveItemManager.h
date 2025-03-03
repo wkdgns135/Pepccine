@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Item/PepccineItemSubManager.h"
 #include "UObject/Object.h"
 #include "PepccineActiveItemManager.generated.h"
 
@@ -9,7 +10,7 @@ class UPepccinePotionItemData;
 class UPepccineActiveItemData;
 
 UCLASS()
-class PEPCCINE_API UPepccineActiveItemManager : public UObject
+class PEPCCINE_API UPepccineActiveItemManager : public UPepccineItemSubManager
 {
 	GENERATED_BODY()
 
@@ -17,12 +18,12 @@ public:
 	// 액티브 아이템 획득
 	void PickUpItem(const UPepccineActiveItemData* InActiveItemData);
 	// 액티브 아이템 사용
-	void UseActiveItem(UPepccineItemManagerComponent* ItemManager);
+	void UseActiveItem();
 	// 포션 사용
-	static void ActivatePotionItem(const UPepccinePotionItemData* PotionItemData, UPepccineItemManagerComponent* ItemManager);
+	void ActivatePotionItem(const UPepccinePotionItemData* PotionItemData) const;
 	// 버프 포션 효과 제거
 	UFUNCTION()
-	static void DeactivatePotionItem(const UPepccinePotionItemData* PotionItemData, UPepccineItemManagerComponent* ItemManager);
+	void DeactivatePotionItem(const UPepccinePotionItemData* PotionItemData) const;
 
 	// 아이디로 적용된 버프 포션 목록에서 찾기
 	UPepccinePotionItemData* GetAppliedPotionItemDataById(const int32 Id) const;

@@ -3,6 +3,7 @@
 #include "PepccineWeaponItemData.h"
 #include "GameFramework/Character.h"
 #include "Item/PepccineItemDataAssetBase.h"
+#include "Item/PepccineItemManagerComponent.h"
 #include "Item/PepccineItemSpawner.h"
 
 void UPepccineWeaponItemManager::SetWeaponItemComponent(ACharacter* OwnerCharacter)
@@ -62,6 +63,9 @@ void UPepccineWeaponItemManager::PickUpItem(const UPepccineWeaponItemData* Weapo
 		SubWeaponItemData = NewWeaponItemData;
 	}
 
+	// 스탯 초기 설정
+	UpdateWeaponItemStats(NewWeaponItemData->GetWeaponItemType());
+
 	// 획득한 무기 장착
 	EquipWeapon(NewWeaponItemData);
 
@@ -102,8 +106,8 @@ void UPepccineWeaponItemManager::SwapWeapon(const EPepccineWeaponItemType Weapon
 	if (GetEquippedWeaponItemData()->GetWeaponItemType() != WeaponType)
 	{
 		EquipWeapon(WeaponType == EPepccineWeaponItemType::EPWIT_Main
-						? MainWeaponItemData
-						: SubWeaponItemData);
+			            ? MainWeaponItemData
+			            : SubWeaponItemData);
 	}
 }
 
@@ -126,13 +130,102 @@ void UPepccineWeaponItemManager::ReloadWeapon() const
 			const UPepccineWeaponItemData* EquippedWeaponItemData = GetEquippedWeaponItemData();
 
 			UE_LOG(LogTemp, Warning, TEXT("%s 재장전! %.0f / %.0f"),
-				   *EquippedWeaponItemData->GetDisplayName(),
-				   EquippedWeaponItemData->GetWeaponItemStats().MagazineAmmo,
-				   EquippedWeaponItemData->GetWeaponItemStats().SpareAmmo);
+			       *EquippedWeaponItemData->GetDisplayName(),
+			       EquippedWeaponItemData->GetWeaponItemStats().MagazineAmmo,
+			       EquippedWeaponItemData->GetWeaponItemStats().SpareAmmo);
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("재장전 실패!!"));
 		}
 	}
+}
+
+void UPepccineWeaponItemManager::UpdateWeaponItemStats(EPepccineWeaponItemType WeaponItemType) const
+{
+	TArray<UPepccinePassiveItemData*> PassiveItemDatas;
+	ItemManager->GetPassiveItemDatas().GenerateValueArray(PassiveItemDatas);
+
+	UPepccineWeaponItemData* TargetWeaponItem = WeaponItemType == EPepccineWeaponItemType::EPWIT_Main
+		                                            ? MainWeaponItemData
+		                                            : SubWeaponItemData;
+
+	const UPepccineWeaponItemData* DefaultWeaponItemData = ItemManager->GetItemSpawner()->GetItemDataAsset()->
+	                                                              GetWeaponItemDataAsset()->
+	                                                              GetWeaponsItemById(TargetWeaponItem->GetItemId());
+
+	for (const UPepccinePassiveItemData* PassiveItemData : PassiveItemDatas)
+	{
+		for (const FPepccineWeaponStatModifier Modifier : PassiveItemData->GetWeaponStatModifiers())
+		{
+			switch (const EPepccineWeaponStatName StatName = Modifier.WeaponItemStatName)
+			{
+			case EPepccineWeaponStatName::EPWSN_AttackMultiplier:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->AttackMultiplier = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().AttackMultiplier);
+				break;
+			case EPepccineWeaponStatName::EPWSN_AttackRange:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->AttackRange = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().AttackRange);
+				break;
+			case EPepccineWeaponStatName::EPWSN_FireRate:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->FireRate = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().FireRate);
+				break;
+			case EPepccineWeaponStatName::EPWSN_ZoomMultiplier:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->ZoomMultiplier = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().ZoomMultiplier);
+				break;
+			case EPepccineWeaponStatName::EPWSN_MagazineSize:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->MagazineSize = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().MagazineSize);
+				break;
+			case EPepccineWeaponStatName::EPWSN_MagazineAmmo:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->MagazineAmmo = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().MagazineAmmo);
+				break;
+			case EPepccineWeaponStatName::EPWSN_SpareAmmo:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->SpareAmmo = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().SpareAmmo);
+				break;
+			case EPepccineWeaponStatName::EPWSN_BulletSpeed:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->BulletSpeed = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().BulletSpeed);
+				break;
+			case EPepccineWeaponStatName::EPWSN_ReloadSpeed:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->ReloadSpeed = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().ReloadSpeed);
+				break;
+			case EPepccineWeaponStatName::EPWSN_ProjectileCount:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->ProjectileCount = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().ProjectileCount);
+				break;
+			case EPepccineWeaponStatName::EPWSN_BulletSpread:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->BulletSpread = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().BulletSpread);
+				break;
+			case EPepccineWeaponStatName::EPWSN_Recoil:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->Recoil = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().Recoil);
+				break;
+			case EPepccineWeaponStatName::EPWSN_Weight:
+				TargetWeaponItem->GetWeaponItemStatsPointer()->Weight = CalculateTotalValueFromDefault(
+					StatName, DefaultWeaponItemData->GetWeaponItemStats().Weight);
+				break;
+			}
+		}
+	}
+}
+
+float UPepccineWeaponItemManager::CalculateTotalValueFromDefault(const EPepccineWeaponStatName WeaponItemStatName,
+                                                                 float WeaponItemStat) const
+{
+	UE_LOG(LogTemp, Warning, TEXT("이전 %s : %.2f"), *UEnum::GetValueAsString(WeaponItemStatName), WeaponItemStat);
+
+	WeaponItemStat += ItemManager->GetTotalSumByWeaponItemStatName(WeaponItemStatName);
+	WeaponItemStat *= ItemManager->GetTotalProductByWeaponItemStatName(WeaponItemStatName);
+
+	UE_LOG(LogTemp, Warning, TEXT("이후 %s : %.2f"), *UEnum::GetValueAsString(WeaponItemStatName), WeaponItemStat);
+
+	return WeaponItemStat;
 }

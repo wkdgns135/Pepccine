@@ -59,31 +59,6 @@ void UPepccineItemManagerComponent::TickComponent(float DeltaTime, enum ELevelTi
 	}
 }
 
-float UPepccineItemManagerComponent::GetWeaponStatByName(const EPepccineWeaponItemType WeaponType,
-                                                         const EPepccineWeaponStatName WeaponStatName) const
-{
-	const UPepccineWeaponItemData* WeaponItemData = WeaponItemManager->GetWeaponItemData(WeaponType);
-
-	switch (WeaponStatName)
-	{
-	case EPepccineWeaponStatName::EPWSN_AttackMultiplier: return WeaponItemData->GetWeaponItemStats().AttackMultiplier;
-	case EPepccineWeaponStatName::EPWSN_AttackRange: return WeaponItemData->GetWeaponItemStats().AttackRange;
-	case EPepccineWeaponStatName::EPWSN_FireRate: return WeaponItemData->GetWeaponItemStats().FireRate;
-	case EPepccineWeaponStatName::EPWSN_ZoomMultiplier: return WeaponItemData->GetWeaponItemStats().ZoomMultiplier;
-	case EPepccineWeaponStatName::EPWSN_MagazineSize: return WeaponItemData->GetWeaponItemStats().MagazineSize;
-	case EPepccineWeaponStatName::EPWSN_MagazineAmmo: return WeaponItemData->GetWeaponItemStats().MagazineAmmo;
-	case EPepccineWeaponStatName::EPWSN_SpareAmmo: return WeaponItemData->GetWeaponItemStats().SpareAmmo;
-	case EPepccineWeaponStatName::EPWSN_BulletSpeed: return WeaponItemData->GetWeaponItemStats().BulletSpeed;
-	case EPepccineWeaponStatName::EPWSN_ReloadSpeed: return WeaponItemData->GetWeaponItemStats().ReloadSpeed;
-	case EPepccineWeaponStatName::EPWSN_ProjectileCount: return WeaponItemData->GetWeaponItemStats().ProjectileCount;
-	case EPepccineWeaponStatName::EPWSN_BulletSpread: return WeaponItemData->GetWeaponItemStats().BulletSpread;
-	case EPepccineWeaponStatName::EPWSN_Recoil: return WeaponItemData->GetWeaponItemStats().Recoil;
-	case EPepccineWeaponStatName::EPWSN_Weight: return WeaponItemData->GetWeaponItemStats().Weight;
-	}
-
-	return 0.0f;
-}
-
 bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemData, const bool bIsPlayPickUpSound)
 {
 	if (!DropItemData)
@@ -100,7 +75,7 @@ bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemDa
 	// 패시브 아이템
 	else if (const UPepccinePassiveItemData* PassiveItemData = Cast<UPepccinePassiveItemData>(DropItemData))
 	{
-		PassiveItemManager->PickUpItem(PassiveItemData, this);
+		PassiveItemManager->PickUpItem(PassiveItemData);
 	}
 	// 액티브 아이템
 	else if (const UPepccineActiveItemData* ActiveItemData = Cast<UPepccineActiveItemData>(DropItemData))
@@ -129,20 +104,6 @@ bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemDa
 		}
 	}
 
-	// 임시 연사 속도 재설정
-	if (UPepccineWeaponItemData* MainWeaponItemData = WeaponItemManager->GetWeaponItemData(
-		EPepccineWeaponItemType::EPWIT_Main))
-	{
-		MainWeaponItemData->GetWeaponItemStatsPointer()->FireRate = GetCalculatedWeaponItemStat(
-			EPepccineWeaponItemType::EPWIT_Main, EPepccineWeaponStatName::EPWSN_FireRate);
-	}
-	if (UPepccineWeaponItemData* SubWeaponItemData = WeaponItemManager->GetWeaponItemData(
-		EPepccineWeaponItemType::EPWIT_Sub))
-	{
-		SubWeaponItemData->GetWeaponItemStatsPointer()->FireRate = GetCalculatedWeaponItemStat(
-			EPepccineWeaponItemType::EPWIT_Sub, EPepccineWeaponStatName::EPWSN_FireRate);
-	}
-
 	// 무기 스탯 재설정
 
 	return true;
@@ -161,17 +122,6 @@ void UPepccineItemManagerComponent::FireWeapon(const float WeaponDamage) const
 void UPepccineItemManagerComponent::ReloadWeapon() const
 {
 	WeaponItemManager->ReloadWeapon();
-}
-
-float UPepccineItemManagerComponent::GetCalculatedWeaponItemStat(const EPepccineWeaponItemType WeaponItemType,
-                                                                 const EPepccineWeaponStatName WeaponItemStatName)
-{
-	float Result = GetWeaponStatByName(WeaponItemType, WeaponItemStatName);
-
-	Result += GetTotalSumByWeaponItemStatName(WeaponItemStatName);
-	Result *= GetTotalProductByWeaponItemStatName(WeaponItemStatName);
-
-	return Result;
 }
 
 void UPepccineItemManagerComponent::IncreaseStatsOperations(TArray<FPepccineWeaponStatModifier> Modifiers)
@@ -266,9 +216,9 @@ void UPepccineItemManagerComponent::DecreaseStatsOperations(TArray<FPepccineChar
 	}
 }
 
-void UPepccineItemManagerComponent::UseActiveItem()
+void UPepccineItemManagerComponent::UseActiveItem() const
 {
-	ActiveItemManager->UseActiveItem(this);
+	ActiveItemManager->UseActiveItem();
 }
 
 bool UPepccineItemManagerComponent::UseCoin(const int32 Count)

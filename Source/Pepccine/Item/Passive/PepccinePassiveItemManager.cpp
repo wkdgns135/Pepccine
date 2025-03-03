@@ -2,12 +2,12 @@
 
 #include "Item/PepccineItemManagerComponent.h"
 
-void UPepccinePassiveItemManager::PickUpItem(const UPepccinePassiveItemData* PassiveItemData, UPepccineItemManagerComponent* ItemManager)
+void UPepccinePassiveItemManager::PickUpItem(const UPepccinePassiveItemData* PassiveItemData)
 {
 	// 복사해서 사용
 	if (UPepccinePassiveItemData* NewPassiveItemData = DuplicateObject<UPepccinePassiveItemData>(PassiveItemData, this))
 	{
-		AddPassiveItemData(NewPassiveItemData, ItemManager);
+		AddPassiveItemData(NewPassiveItemData);
 	}
 	else
 	{
@@ -15,7 +15,7 @@ void UPepccinePassiveItemManager::PickUpItem(const UPepccinePassiveItemData* Pas
 	}
 }
 
-void UPepccinePassiveItemManager::AddPassiveItemData(UPepccinePassiveItemData* InPassiveItemData, UPepccineItemManagerComponent* ItemManager)
+void UPepccinePassiveItemManager::AddPassiveItemData(UPepccinePassiveItemData* InPassiveItemData)
 {
 	// 무기 스탯
 	ItemManager->IncreaseStatsOperations(InPassiveItemData->GetWeaponStatModifiers());
@@ -28,7 +28,7 @@ void UPepccinePassiveItemManager::AddPassiveItemData(UPepccinePassiveItemData* I
 	PassiveItemDatas.Add(InPassiveItemData->GetItemId(), InPassiveItemData);
 }
 
-void UPepccinePassiveItemManager::RemovePassiveItemDataById(const int32 ItemId, UPepccineItemManagerComponent* ItemManager)
+void UPepccinePassiveItemManager::RemovePassiveItemDataById(const int32 ItemId)
 {
 	const UPepccinePassiveItemData* PassiveItemData = GetPassiveItemById(ItemId);
 

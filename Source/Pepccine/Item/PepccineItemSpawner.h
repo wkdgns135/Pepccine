@@ -19,7 +19,7 @@ public:
 	
 	// getter
 	UFUNCTION(BlueprintPure, category = "Item|Spawner")
-	FORCEINLINE UPepccineItemDataAssetBase* GetItemDataAsset() const { return ItemDataAsset; };
+	FORCEINLINE UPepccineItemDataAssetBase* GetItemDataAsset() const { return ItemDataAsset; }
 	
 protected:
 	// 전체 아이템 데이터 에셋

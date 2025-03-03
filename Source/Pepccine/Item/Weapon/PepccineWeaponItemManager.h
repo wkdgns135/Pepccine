@@ -3,15 +3,17 @@
 #include "CoreMinimal.h"
 #include "PepccineWeaponItemComponent.h"
 #include "PepccineWeaponStat.h"
+#include "Item/PepccineItemSubManager.h"
 #include "Item/PepccineStatName.h"
 #include "UObject/Object.h"
+
 #include "PepccineWeaponItemManager.generated.h"
 
 class UPepccineItemSpawner;
 class UPepccineWeaponItemData;
 
 UCLASS()
-class PEPCCINE_API UPepccineWeaponItemManager : public UObject
+class PEPCCINE_API UPepccineWeaponItemManager : public UPepccineItemSubManager
 {
 	GENERATED_BODY()
 
@@ -19,7 +21,7 @@ public:
 	// 캐릭터에 부착되어 있는 무기 액터 설정
 	void SetWeaponItemComponent(ACharacter* OwnerCharacter);
 	
-	// 기본 무기 초기화
+	// 기본 무기 장착
 	void EquipDefaultWeapon(const UPepccineItemSpawner* ItemSpawner);
 	// 무기 획득
 	void PickUpItem(const UPepccineWeaponItemData* WeaponItemData);
@@ -33,6 +35,12 @@ public:
 	void FireWeapon(float WeaponDamage) const;
 	// 현재 장착 중인 무기 재장전
 	void ReloadWeapon() const;
+
+	// 무기 스탯 초기 설정
+	void UpdateWeaponItemStats(EPepccineWeaponItemType WeaponItemType) const;
+	
+	// 스탯 계산
+	float CalculateTotalValueFromDefault(EPepccineWeaponStatName WeaponItemStatName, float WeaponItemStat) const;
 
 	// getter
 	

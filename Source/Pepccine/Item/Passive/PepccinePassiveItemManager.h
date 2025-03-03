@@ -2,23 +2,24 @@
 
 #include "CoreMinimal.h"
 #include "PepccinePassiveItemData.h"
+#include "Item/PepccineItemSubManager.h"
 #include "UObject/Object.h"
 #include "PepccinePassiveItemManager.generated.h"
 
 class UPepccineItemManagerComponent;
 
 UCLASS()
-class PEPCCINE_API UPepccinePassiveItemManager : public UObject
+class PEPCCINE_API UPepccinePassiveItemManager : public UPepccineItemSubManager
 {
 	GENERATED_BODY()
 
 public:
 	// 패시브 획득
-	void PickUpItem(const UPepccinePassiveItemData* PassiveItemData, UPepccineItemManagerComponent* ItemManager);
+	void PickUpItem(const UPepccinePassiveItemData* PassiveItemData);
 	// 패시브 아이템 추가
-	void AddPassiveItemData(UPepccinePassiveItemData* InPassiveItemData, UPepccineItemManagerComponent* ItemManager);
+	void AddPassiveItemData(UPepccinePassiveItemData* InPassiveItemData);
 	// 패시브 아이템 제거
-	void RemovePassiveItemDataById(const int32 ItemId, UPepccineItemManagerComponent* ItemManager);
+	void RemovePassiveItemDataById(const int32 ItemId);
 	
 	// getter
 	// 전체 패시브 데이터 가져오기

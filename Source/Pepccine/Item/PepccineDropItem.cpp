@@ -123,10 +123,6 @@ void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 				}
 				RemainingCount = (MainWeaponData->GetWeaponItemStats().SpareAmmo + ResourceItemData->GetResourceCount()) - 999;
 			}
-			// else if (ResourceItemData->GetResourceItemType() == EPepccineResourceItemType::EPRIT_CardKey)
-			// {
-			// 	RemainingCount = 99 - (ItemManagerComponent->GetCardKeyCount() + ResourceItemData->GetResourceCount());
-			// }
 			else if (ResourceItemData->GetResourceItemType() == EPepccineResourceItemType::EPRIT_Coin)
 			{
 				RemainingCount = (ItemManagerComponent->GetCoinCount() + ResourceItemData->GetResourceCount()) - 99;

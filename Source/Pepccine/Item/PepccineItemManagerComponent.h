@@ -33,8 +33,6 @@ public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
-	float GetWeaponStatByName(EPepccineWeaponItemType WeaponType, EPepccineWeaponStatName WeaponStatName) const;
-
 	// 아이템 획득
 	bool PickUpItem(UPepccineItemDataBase* DropItemData, bool bIsPlayPickUpSound = true);
 
@@ -62,11 +60,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
 	void ReloadWeapon() const;
 
-	// 무기 스탯 합연산 및 곱연산 결과 값 가져오기
-	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
-	float GetCalculatedWeaponItemStat(const EPepccineWeaponItemType WeaponItemType,
-	                                  const EPepccineWeaponStatName WeaponItemStatName);
-
 	// 무기 스탯 합연산 및 곱연산 증가
 	void IncreaseStatsOperations(TArray<FPepccineWeaponStatModifier> Modifiers);
 	// 캐릭터 스탯 합연산 및 곱연산 증가
@@ -78,7 +71,7 @@ public:
 	void DecreaseStatsOperations(TArray<FPepccineCharacterStatModifier> Modifiers);
 
 	// 액티브 아이템 사용
-	void UseActiveItem();
+	void UseActiveItem() const;
 
 	// 코인 사용
 	UFUNCTION(BlueprintCallable, Category = "Item|Resource")
@@ -105,14 +98,12 @@ public:
 	{
 		return WeaponItemManager->GetWeaponItemData(WeaponItemType);
 	}
-
 	// 장착 중인 무기 데이터 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE UPepccineWeaponItemData* GetEquippedWeaponItemData() const
 	{
 		return WeaponItemManager->GetEquippedWeaponItemData();
 	}
-
 	// 현재 장착중인 무기가 메인 무기인지 확인
 	FORCEINLINE bool IsMainWeaponEquipped() const
 	{
