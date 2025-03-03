@@ -54,6 +54,8 @@ public:
 
 	bool bIsPlayerAlive = true;
 
+	bool bIsMainWeaponEquipped = false;
+
 	// UE delegate
 	UFUNCTION()
 	void OnHealthChanged(const float NewHealth, const float MaxHealth);
@@ -63,6 +65,8 @@ public:
 	void OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult);
 	
 	void TriggerCameraShake();
+
+	bool IsMainWeapon();
 	
 	// inline
 	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }

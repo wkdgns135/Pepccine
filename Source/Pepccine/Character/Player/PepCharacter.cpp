@@ -585,18 +585,18 @@ void APepCharacter::UpdateWeaponUI()
 	UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main);
 	FString MainWeaponName = MainWeaponData ? MainWeaponData->GetDisplayName() : FString("None");
 	int32 MainWeaponAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
-	int32 MainWeaponMaxAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().SpareAmmo : 0;
+	int32 MainSpareAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().SpareAmmo : 0;
 	UTexture2D* MainWeaponImage = MainWeaponData ? MainWeaponData->IconTexture : nullptr;
 
 	// 보조무기 정보
 	UPepccineWeaponItemData* SubWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub);
 	FString SubWeaponName = SubWeaponData ? SubWeaponData->GetDisplayName() : FString("None");
 	int32 SubWeaponAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
-	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().SpareAmmo : 0;
+	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
 	UTexture2D* SubWeaponImage = SubWeaponData ? SubWeaponData->IconTexture : nullptr;
 
 	// 현재 장착된 무기가 주무기인지 확인
-	bool bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main;
+	bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main;
 
 	// WeaponWidget 업데이트
 	ItemIconComponent->SetWeaponItem(
@@ -604,7 +604,7 @@ void APepCharacter::UpdateWeaponUI()
 		SubWeaponImage,
 		bIsMainWeaponEquipped ? MainWeaponName : SubWeaponName,
 		bIsMainWeaponEquipped ? MainWeaponAmmo : SubWeaponAmmo,
-		bIsMainWeaponEquipped ? MainWeaponMaxAmmo : SubWeaponMaxAmmo,
+		bIsMainWeaponEquipped ? MainSpareAmmo : SubWeaponMaxAmmo,
 		bIsMainWeaponEquipped
 	);
 }
@@ -640,13 +640,13 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 	
 	float ScrollValue = value.Get<float>();
 
-	if (ScrollValue > 0.0f)
-	{
-		ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Main);
-	}
-	else if (ScrollValue < 0.0f)
+	if (bIsMainWeaponEquipped)
 	{
 		ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Sub);
+	}
+	else
+	{
+		ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Main);
 	}
 
 	SetWeight();
