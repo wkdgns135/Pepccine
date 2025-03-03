@@ -67,11 +67,18 @@ void ABaseMonster::UpdateHealthBar(float CurrentHealth, float MaxHealth)
 
 void ABaseMonster::OnHitReceived(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Monster hit! Damage: %f, Hit Location: %s"), DamageAmount,
-	       *HitResult.Location.ToString());
+	UE_LOG(LogTemp, Warning, TEXT("Monster hit! Damage: %f, Hit Location: %s, BoneName: %s"), DamageAmount,
+	       *HitResult.Location.ToString(), *HitResult.BoneName.ToString());
 	if (StatComponent)
 	{
-		StatComponent->DecreaseHealth(DamageAmount);
+		if (HitResult.BoneName == FName(TEXT("Head")))
+		{
+			StatComponent->DecreaseHealth(DamageAmount * 20000);
+		}
+		else
+		{
+			StatComponent->DecreaseHealth(DamageAmount);
+		}
 
 		FVector HitDirection = DamageCauser
 			                       ? (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal()
@@ -89,7 +96,6 @@ void ABaseMonster::OnHitReceived(AActor* DamageCauser, float DamageAmount, const
 		}
 	}
 }
-
 
 void ABaseMonster::Die()
 {
