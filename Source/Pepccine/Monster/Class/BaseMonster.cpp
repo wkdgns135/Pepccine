@@ -50,7 +50,7 @@ void ABaseMonster::InitializeHealthBar()
 			if (HealthInstance)
 			{
 				HealthInstance->UpdateHealthBar(1.0f);
-				// HealthBarWidgetComp->SetHiddenInGame(true);
+				HealthBarWidgetComp->SetHiddenInGame(true);
 			}
 		}
 	}
