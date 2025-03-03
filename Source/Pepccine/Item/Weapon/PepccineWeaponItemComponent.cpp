@@ -24,7 +24,7 @@ void UPepccineWeaponItemComponent::InitWeaponComponent(ACharacter* InOwnerCharac
 
 	OwnerCharacter = InOwnerCharacter;
 
-	if (ProjectileClass)
+	if (ProjectileClass && PoolSubSystem)
 	{
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;

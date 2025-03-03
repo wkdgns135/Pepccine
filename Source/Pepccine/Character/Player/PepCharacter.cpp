@@ -20,6 +20,7 @@
 #include "Character/Data/ActorInfo.h"
 #include "Item/PepccineDropItem.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
+#include "Item/Resource/PepccineResourceItemData.h"
 #include "Monster/Class/ZombieGirl.h"
 
 APepCharacter::APepCharacter()
@@ -571,6 +572,22 @@ void APepCharacter::Interactive()
 			// 무기류 아이템
 			UpdateWeaponUI();
 			SetWeight();
+		}
+		else if (UPepccineResourceItemData* DropItem = Cast<UPepccineResourceItemData>(CurrentDropItem->GetDropItemData()))
+		{
+			// 리소스 아이템
+			switch (DropItem->GetResourceItemType())
+			{
+			case EPepccineResourceItemType::EPRIT_HealingPotion:
+				{
+					int32 Amount = DropItem->GetResourceAmount();
+					const FStatModifier AddStatModifier(EPepccineCharacterStatName::EPCSN_CurrentHealth, Amount, 1.0f);
+					PlayerStatComponent->ApplyStatModifier(AddStatModifier);
+					break;
+				}
+			default:
+				break;
+			}
 		}
 
 		PepccineMontageComponent->Pick();
