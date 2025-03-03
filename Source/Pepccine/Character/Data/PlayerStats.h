@@ -22,8 +22,8 @@ struct FHealthStats
     
     FString PrintStats() const
     {
-        return FString::Printf(TEXT("Health Stats\nCurrent: %.2f\nMax: %.2f\nDeceleration Speed: %.2f\nDeceleration Amount: %.2f\n"),
-                               CurrentHealth, MaxHealth, HealthDecelerationSpeed, HealthDecelerationAmount);
+        return FString::Printf(TEXT("현재 체력: %.2f\n최대 체력: %.2f\n"),
+                               CurrentHealth, MaxHealth);
     }
 };
 
@@ -47,7 +47,7 @@ struct FStaminaStats
 
     FString PrintStats() const
     {
-        return FString::Printf(TEXT("Stamina Stats\nCurrent: %.2f\nMax: %.2f\nRecovery Rate: %.2f\nRecovery Time: %.2f\n"),
+        return FString::Printf(TEXT("현재 스테미나: %.2f\n최대 스테미나: %.2f\n스테미나 회복량: %.2f\n스테미나 회복속도: %.2f\n"),
                                CurrentStamina, MaxStamina, StaminaRecoveryRate, StaminaRecoveryTime);
     }
 };
@@ -69,8 +69,8 @@ struct FCombatStats
 
     FString PrintStats() const
     {
-        return FString::Printf(TEXT("Combat Stats\nAttack Damage: %.2f\nInvincibility Time: %.2f\nDefence: %.2f\n"),
-                               AttackDamage, InvincibilityTime, Defence);
+        return FString::Printf(TEXT("공격력: %.2f\n방어력: %.2f\n"),
+                               AttackDamage, Defence);
     }
 };
 
@@ -103,8 +103,8 @@ struct FMovementStats
 
     FString PrintStats() const
     {
-        return FString::Printf(TEXT("Movement Stats\nSpeed: %.2f\nSprint: %.2f\nCrouch: %.2f\nRoll Dist: %.2f\nJumpZ: %.2f\nRoll Time: %.2f\nStrength: %.2f\n"),
-                               MovementSpeed, SprintSpeed, CrouchSpeed, RollingDistance, JumpZVelocity, RollElapsedTime, Strength);
+        return FString::Printf(TEXT("이동속도: %.2f\n달리기 속도: %.2f\n점프력: %.2f\n힘: %.2f\n"),
+                               MovementSpeed, SprintSpeed, JumpZVelocity, Strength);
     }
 };
 
@@ -128,7 +128,7 @@ struct FPlayerStats
 
     FString PrintStats() const
     {
-        return FString::Printf(TEXT("===== Player Stats =====\n%s%s%s%s=======================\n"),
+        return FString::Printf(TEXT("%s%s%s%s\n"),
                                *HealthStats.PrintStats(),
                                *StaminaStats.PrintStats(),
                                *CombatStats.PrintStats(),
