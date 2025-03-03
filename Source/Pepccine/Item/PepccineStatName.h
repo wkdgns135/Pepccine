@@ -40,5 +40,6 @@ enum class EPepccineCharacterStatName : uint8
 	EPCSN_CrouchSpeed UMETA(DisplayName = "앉기 속도"),
 	EPCSN_RollingDistance UMETA(DisplayName = "구르기 거리"),
 	EPCSN_JumpZVelocity UMETA(DisplayName = "점프 속도"),
-	EPCSN_RollElapsedTime UMETA(DisplayName = "구르기 시간")
+	EPCSN_RollElapsedTime UMETA(DisplayName = "구르기 시간"),
+	EPCSN_Strength UMETA(DisplayName = "무게")
 };

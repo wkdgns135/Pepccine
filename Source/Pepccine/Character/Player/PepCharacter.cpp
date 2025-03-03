@@ -109,11 +109,53 @@ void APepCharacter::CheckSprinting()
 			bIsSprinting = false;
 			return;
 		}
-		SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.SprintSpeed);
+		SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.SprintSpeed - LooseWeight);
 	}
 	else
 	{
-		SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed);
+		SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed - LooseWeight);
+	}
+}
+
+void APepCharacter::SetCharacterSpeed(float Speed)
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = FMath::Clamp(Speed, 0.0f, 1000.0f);;
+	}
+}
+
+void APepCharacter::SetCharacterMovement()
+{
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		if (!MovementComponent) return;
+
+		const float WalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed - LooseWeight;
+		SetCharacterSpeed(WalkSpeed);
+
+		const float JumpZVelocity = PlayerStatComponent->GetCurrentStats().MovementStats.JumpZVelocity - LooseWeight;
+		MovementComponent->JumpZVelocity = FMath::Clamp(JumpZVelocity, 0.0f, 1000.0f);
+	}
+}
+
+void APepCharacter::SetWeight()
+{
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		if (!PlayerStatComponent) return;
+		const float WeaponWeight = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Weight;
+		const float PlayerStrength = PlayerStatComponent->GetCurrentStats().MovementStats.Strength;
+		
+		if (PlayerStrength > WeaponWeight)
+		{
+			LooseWeight = 0.0f;
+			return;
+		}
+		
+		LooseWeight = WeaponWeight - PlayerStrength;
+
+		SetCharacterMovement();
 	}
 }
 
@@ -306,6 +348,7 @@ void APepCharacter::UseItem()
 {
 	if (!bIsPlayerAlive) return;
 	UE_LOG(LogTemp, Log, TEXT("UseItem!"));
+	UpdateWeaponUI();
 }
 
 void APepCharacter::Look(const FInputActionValue& value)
@@ -348,14 +391,6 @@ void APepCharacter::StopSprint(const FInputActionValue& value)
 	SprintHoldStartTime = 0.0f;
 }
 
-void APepCharacter::SetCharacterSpeed(float Speed)
-{
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = Speed;
-	}
-}
-
 void APepCharacter::Roll()
 {
 	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling() | !bIsPlayerAlive)
@@ -385,7 +420,7 @@ void APepCharacter::EndRoll()
 
 	if (GetCharacterMovement())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
+		SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed - LooseWeight);
 	}
 }
 
@@ -422,12 +457,14 @@ void APepCharacter::Crouching()
 	if (bIsCrouching)
 	{
 		UnCrouch();
-		GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
+		float WalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed - LooseWeight;
+		SetCharacterSpeed(WalkSpeed);
 	}
 	else
 	{
 		Crouch();
-		GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.CrouchSpeed;
+		float CrouchSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.CrouchSpeed - LooseWeight;
+		SetCharacterSpeed(CrouchSpeed);
 	}
 }
 
@@ -448,11 +485,15 @@ void APepCharacter::Reload()
 		PepccineMontageComponent->Reloading();
 		bIsReloading = true;
 	}
+
+	UpdateWeaponUI();
 }
 
 void APepCharacter::Interactive()
 {
 	if (!bIsPlayerAlive || !PlayerStatComponent) return;
+
+	float ItemWeight = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Weight;
 	
 	// 아이템 인벤토리에 추가
 	if (CurrentDropItem)
@@ -512,6 +553,7 @@ void APepCharacter::Interactive()
 		{
 			// 무기류 아이템
 			UpdateWeaponUI();
+			SetWeight();
 		}
 		/*
 		else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
@@ -521,14 +563,6 @@ void APepCharacter::Interactive()
 		}
 		*/
 	}
-
-	// 스텟연산 (저장 구조체)
-	// 갖고있는 모든 패시브 아이템 적용 (캐릭터 스텟)
-	// 1. 케릭터 스탯 연산 선행
-	// 2. 무기 스탯 반영
-	// 3. PlayerStatComponent->AttackDamage 
-
-	// 갖고있는 무기 스텟 (총 스텟)
 
 	// Delay 있는 상호작용 전용
 	if (bIsInteracting)
@@ -612,6 +646,9 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 	{
 		ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Sub);
 	}
+
+	SetWeight();
+	UpdateWeaponUI();
 }
 
 void APepCharacter::StopFire()
@@ -626,6 +663,7 @@ void APepCharacter::Fire()
 	bIsFiring = true;
 	PepccineMontageComponent->Fire();
 	ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	UpdateWeaponUI();
 }
 
 void APepCharacter::ZoomIn()

@@ -98,10 +98,13 @@ struct FMovementStats
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float RollElapsedTime = 0.0f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+    float Strength = 300.0f;
+
     FString PrintStats() const
     {
-        return FString::Printf(TEXT("Movement Stats\nSpeed: %.2f\nSprint: %.2f\nCrouch: %.2f\nRoll Dist: %.2f\nJumpZ: %.2f\nRoll Time: %.2f\n"),
-                               MovementSpeed, SprintSpeed, CrouchSpeed, RollingDistance, JumpZVelocity, RollElapsedTime);
+        return FString::Printf(TEXT("Movement Stats\nSpeed: %.2f\nSprint: %.2f\nCrouch: %.2f\nRoll Dist: %.2f\nJumpZ: %.2f\nRoll Time: %.2f\nStrength: %.2f\n"),
+                               MovementSpeed, SprintSpeed, CrouchSpeed, RollingDistance, JumpZVelocity, RollElapsedTime, Strength);
     }
 };
 

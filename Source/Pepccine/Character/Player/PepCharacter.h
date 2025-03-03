@@ -168,8 +168,10 @@ private:
 	float CameraArmLength = 300.0f;
 	float SprintHoldStartTime = 0.0f;
 	float SprintHoldThreshold = 0.2f;
+	float LooseWeight = 0.0f;
 	
 	FVector RollDirection;
+	FVector GetRollDirection();
 	
 	UPROPERTY()
 	APepccineDropItem* CurrentDropItem;
@@ -184,10 +186,10 @@ private:
 	void AddObservers();
 
 	void SetCharacterSpeed(float Speed);
+	void SetCharacterMovement();
 	void CheckSprinting();
 	void CheckRolling(float DeltaTime);
-
-	FVector GetRollDirection();
+	void SetWeight();
 
 	// TEST CODE
 	void TestApplyStatModifier();
