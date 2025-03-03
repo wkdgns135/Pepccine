@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ObjectPool/PepccinePoolable.h"
 
 #include "PepccineProjectile.generated.h"
 
@@ -9,23 +10,29 @@ class USphereComponent;
 class UProjectileMovementComponent;
 
 UCLASS(Abstract)
-class PEPCCINE_API APepccineProjectile : public AActor
+class PEPCCINE_API APepccineProjectile : public APepccinePoolable
 {
 	GENERATED_BODY()
 
 public:
 	APepccineProjectile();
 
+	virtual void Tick(float DeltaSeconds) override;
+	
+	// 이동방향 및 속도 초기화
+	void InitProjectile(const FVector& ShootDirection, const int32 Speed, const float InMaxDistance);
+
+	virtual void OnSpawnFromPool() override;
+	virtual void OnReturnToPool() override;
+	
 	// 프로젝타일 충돌 이벤트
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse,
 	           const FHitResult& Hit);
 
-	void SetProjectileVelocity(const FVector& Direction) const;
-
 	// getter
 	FORCEINLINE USphereComponent* GetCollisionComp() const { return CollisionComp; }
-	FORCEINLINE UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
+	FORCEINLINE UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovementComp; }
 
 	// setter
 	FORCEINLINE void SetOwnerCharacter(ACharacter* Character) { OwnerCharacter = Character; };
@@ -38,7 +45,7 @@ protected:
 
 	// 프로젝타일 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile", meta = (AllowPrivateAccess = "true"))
-	UProjectileMovementComponent* ProjectileMovement;
+	UProjectileMovementComponent* ProjectileMovementComp;
 
 	// 무기가 부착된 캐릭터
 	UPROPERTY()
@@ -47,4 +54,10 @@ protected:
 	// 무기 공격력
 	UPROPERTY(VisibleAnywhere, Category = "Projectile")
 	float WeaponDamage = 0.0f;
+
+	// 투사체 사거리
+	float MaxDistance = 100.0f;
+	
+	// 발사 시작 위치
+	FVector StartLocation = FVector::ZeroVector;
 };

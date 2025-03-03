@@ -60,7 +60,7 @@ private:
 	
 	// 상하 이동 액션에 사용
 	// 시작 위치
-	float StartZLocation;
+	FVector StartLocation;
 	// 경과 시간
 	float CurrentTime = 0.0f;
 };

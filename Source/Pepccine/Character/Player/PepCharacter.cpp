@@ -1,6 +1,5 @@
 ﻿#include "PepCharacter.h"
 
-#include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include "EnhancedInputComponent.h"
@@ -19,9 +18,9 @@
 #include "Character/Animation/PepccineHitReactionComponent.h"
 #include "Character/Components/BattleComponent.h"
 #include "Character/Data/ActorInfo.h"
-#include "Components/WidgetComponent.h"
 #include "Item/PepccineDropItem.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
+#include "Item/Resource/PepccineResourceItemData.h"
 #include "Monster/Class/ZombieGirl.h"
 
 APepCharacter::APepCharacter()
@@ -121,7 +120,7 @@ void APepCharacter::SetCharacterSpeed(float Speed)
 {
 	if (GetCharacterMovement())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = FMath::Clamp(Speed, 0.0f, 1000.0f);;
+		GetCharacterMovement()->MaxWalkSpeed = FMath::Clamp(Speed, 0.0f, 1000.0f);
 	}
 }
 
@@ -129,7 +128,10 @@ void APepCharacter::SetCharacterMovement()
 {
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
-		if (!MovementComponent) return;
+		if (!MovementComponent)
+		{
+			return;
+		}
 
 		const float WalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed - LooseWeight;
 		SetCharacterSpeed(WalkSpeed);
@@ -141,22 +143,22 @@ void APepCharacter::SetCharacterMovement()
 
 void APepCharacter::SetWeight()
 {
-	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	if (!PlayerStatComponent)
 	{
-		if (!PlayerStatComponent) return;
-		const float WeaponWeight = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Weight;
-		const float PlayerStrength = PlayerStatComponent->GetCurrentStats().MovementStats.Strength;
-		
-		if (PlayerStrength > WeaponWeight)
-		{
-			LooseWeight = 0.0f;
-			return;
-		}
-		
-		LooseWeight = WeaponWeight - PlayerStrength;
-
-		SetCharacterMovement();
+		return;
 	}
+	const float WeaponWeight = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Weight;
+	const float PlayerStrength = PlayerStatComponent->GetCurrentStats().MovementStats.Strength;
+
+	if (PlayerStrength > WeaponWeight)
+	{
+		LooseWeight = 0.0f;
+		return;
+	}
+
+	LooseWeight = WeaponWeight - PlayerStrength;
+
+	SetCharacterMovement();
 }
 
 void APepCharacter::CheckRolling(float DeltaTime)
@@ -195,13 +197,15 @@ void APepCharacter::AddObservers()
 
 void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult)
 {
-	if (bIsRolling) return;
+	if (bIsRolling)
+	{
+		return;
+	}
 
 	PlayerStatComponent->DecreaseHealth(DamageAmount);
-	
-	FName HitBoneName = HitResult.BoneName;
+
 	FVector HitDirection = HitResult.ImpactNormal;
-	
+
 	HitReactionComponent->HitReaction("Spine", HitDirection);
 }
 
@@ -211,7 +215,7 @@ void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth
 	{
 		return;
 	}
-	else if (NewHealth == 0)
+	if (NewHealth == 0)
 	{
 		Dead();
 	}
@@ -264,20 +268,23 @@ void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
 #pragma region
 void APepCharacter::Dead()
 {
-	if (!bIsPlayerAlive) return;
+	if (!bIsPlayerAlive)
+	{
+		return;
+	}
 	bIsPlayerAlive = false;
-	
+
 	if (APepccinePlayerController* PepccinePlayerController = Cast<APepccinePlayerController>(PlayerController))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Player Dead"));
 		// 플레이어 입력 차단
 		PepccinePlayerController->DisableInput(PepccinePlayerController);
-		
+
 		// 컨트롤러 회전 입력 차단
 		PepccinePlayerController->SetIgnoreLookInput(true);
 		PepccinePlayerController->SetIgnoreMoveInput(true);
 	}
-	
+
 	if (GetCharacterMovement())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Disable Movement"));
@@ -286,7 +293,7 @@ void APepCharacter::Dead()
 		GetCharacterMovement()->DisableMovement();
 		GetCharacterMovement()->SetComponentTickEnabled(false);
 	}
-	
+
 	PepccineMontageComponent->Death();
 }
 
@@ -346,7 +353,10 @@ void APepCharacter::JumpStop()
 
 void APepCharacter::UseItem()
 {
-	if (!bIsPlayerAlive) return;
+	if (!bIsPlayerAlive)
+	{
+		return;
+	}
 	UE_LOG(LogTemp, Log, TEXT("UseItem!"));
 	UpdateWeaponUI();
 }
@@ -393,11 +403,12 @@ void APepCharacter::StopSprint(const FInputActionValue& value)
 
 void APepCharacter::Roll()
 {
-	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling() | !bIsPlayerAlive)
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling() | !
+		bIsPlayerAlive)
 	{
 		return;
 	}
-	
+
 	// 임시
 	//TriggerCameraShake();
 
@@ -470,7 +481,10 @@ void APepCharacter::Crouching()
 
 void APepCharacter::Reload()
 {
-	if (!bIsPlayerAlive) return;
+	if (!bIsPlayerAlive)
+	{
+		return;
+	}
 	UE_LOG(LogTemp, Log, TEXT("Reload!"));
 
 	//HitReactionComponent->EnterRagdoll(5);
@@ -491,18 +505,22 @@ void APepCharacter::Reload()
 
 void APepCharacter::Interactive()
 {
-	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent) return;
+	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent)
+	{
+		return;
+	}
 
 	float ItemWeight = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Weight;
-	
+
 	// 아이템 인벤토리에 추가
 	if (CurrentDropItem)
 	{
 		CurrentDropItem->PickUpItem(ItemManagerComponent);
-		if (const UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
+		if (UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 패시브 아이템
-			InventoryComponent->AddItem(PassiveItem->IconTexture, PassiveItem->GetDisplayName(), PassiveItem->GetDescription(), PlayerStatComponent->PrintStats());
+			InventoryComponent->AddItem(PassiveItem->GetIconTexture(), PassiveItem->GetDisplayName(),
+			                            PassiveItem->GetDescription(), PlayerStatComponent->PrintStats());
 
 			TArray<FPepccineCharacterStatModifier> CharacterStatModifiers = PassiveItem->GetCharacterStatModifiers();
 			for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)
@@ -549,11 +567,27 @@ void APepCharacter::Interactive()
 				}
 			}
 		}
-		else if (const UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
+		else if (UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 무기류 아이템
 			UpdateWeaponUI();
 			SetWeight();
+		}
+		else if (UPepccineResourceItemData* DropItem = Cast<UPepccineResourceItemData>(CurrentDropItem->GetDropItemData()))
+		{
+			// 리소스 아이템
+			switch (DropItem->GetResourceItemType())
+			{
+			case EPepccineResourceItemType::EPRIT_HealingPotion:
+				{
+					int32 Amount = DropItem->GetResourceAmount();
+					const FStatModifier AddStatModifier(EPepccineCharacterStatName::EPCSN_CurrentHealth, Amount, 1.0f);
+					PlayerStatComponent->ApplyStatModifier(AddStatModifier);
+					break;
+				}
+			default:
+				break;
+			}
 		}
 
 		PepccineMontageComponent->Pick();
@@ -569,34 +603,38 @@ void APepCharacter::Interactive()
 	// Delay 있는 상호작용 전용
 	if (bIsInteracting)
 	{
-		
 	}
 	else
 	{
-		
 	}
 }
 
 void APepCharacter::UpdateWeaponUI()
 {
-	if (!ItemManagerComponent || !ItemIconComponent) return;
+	if (!ItemManagerComponent || !ItemIconComponent)
+	{
+		return;
+	}
 
 	// 주무기 정보
-	UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main);
+	UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->
+		GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main);
 	FString MainWeaponName = MainWeaponData ? MainWeaponData->GetDisplayName() : FString("None");
 	int32 MainWeaponAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
-	int32 MainSpareAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().SpareAmmo : 0;
-	UTexture2D* MainWeaponImage = MainWeaponData ? MainWeaponData->IconTexture : nullptr;
+	int32 MainWeaponMaxAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineSize : 0;
+	UTexture2D* MainWeaponImage = MainWeaponData ? MainWeaponData->GetIconTexture() : nullptr;
 
 	// 보조무기 정보
 	UPepccineWeaponItemData* SubWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub);
 	FString SubWeaponName = SubWeaponData ? SubWeaponData->GetDisplayName() : FString("None");
 	int32 SubWeaponAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
-	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
-	UTexture2D* SubWeaponImage = SubWeaponData ? SubWeaponData->IconTexture : nullptr;
+	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineSize : 0;
+	UTexture2D* SubWeaponImage = SubWeaponData ? SubWeaponData->GetIconTexture() : nullptr;
 
 	// 현재 장착된 무기가 주무기인지 확인
-	bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main;
+	bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() ==
+		EPepccineWeaponItemType::EPWIT_Main;
+
 
 	// WeaponWidget 업데이트
 	ItemIconComponent->SetWeaponItem(
@@ -636,8 +674,11 @@ void APepCharacter::OpenInventory()
 
 void APepCharacter::SwapItem(const FInputActionValue& value)
 {
-	if (!bIsPlayerAlive) return;
-	
+	if (!bIsPlayerAlive)
+	{
+		return;
+	}
+
 	float ScrollValue = value.Get<float>();
 
 	if (bIsMainWeaponEquipped)
@@ -651,7 +692,7 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 
 	SetWeight();
 	UpdateWeaponUI();
-	
+
 	PepccineMontageComponent->Draw();
 }
 
@@ -662,8 +703,11 @@ void APepCharacter::StopFire()
 
 void APepCharacter::Fire()
 {
-	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent) return;
-	
+	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent)
+	{
+		return;
+	}
+
 	float CurrentAmmo = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineAmmo;
 	if (CurrentAmmo <= 0)
 	{
@@ -681,7 +725,10 @@ void APepCharacter::Fire()
 
 void APepCharacter::ZoomIn()
 {
-	if (bIsRolling | !bIsPlayerAlive) return;
+	if (bIsRolling | !bIsPlayerAlive)
+	{
+		return;
+	}
 
 	bIsZooming = true;
 
@@ -743,7 +790,10 @@ void APepCharacter::TriggerCameraShake()
 
 void APepCharacter::ShowMenu()
 {
-	if (!PlayerController) return;
+	if (!PlayerController)
+	{
+		return;
+	}
 	PlayerController->ToggleExitMenu();
 }
 #pragma endregion

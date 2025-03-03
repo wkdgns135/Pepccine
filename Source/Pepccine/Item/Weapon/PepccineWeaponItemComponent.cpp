@@ -5,13 +5,42 @@
 #include "GameFramework/Character.h"
 #include "Item/Weapon/PepccineWeaponItemData.h"
 #include "Kismet/GameplayStatics.h"
+#include "ObjectPool/PepccinePoolSubSystem.h"
 
 void UPepccineWeaponItemComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 서브 시스템 가져오기
+	PoolSubSystem = GetWorld()->GetSubsystem<UPepccinePoolSubSystem>();
 }
 
-void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage)
+void UPepccineWeaponItemComponent::InitWeaponComponent(ACharacter* InOwnerCharacter)
+{
+	if (!InOwnerCharacter)
+	{
+		return;
+	}
+
+	OwnerCharacter = InOwnerCharacter;
+
+	if (ProjectileClass && PoolSubSystem)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		// 프로젝타일을 생성한 주체 설정
+		SpawnParams.Instigator = OwnerCharacter;
+		SpawnParams.Owner = GetOwner();
+
+		PoolSubSystem->InitializePool(ProjectileClass, 10, SpawnParams);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("투사체 클래스가 설정되어있지 않습니다."));
+	}
+}
+
+void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage, const FVector& ShootDirection)
 {
 	// 현재 발사 가능 상태가 아니라면 발사 실패(연사 관련)
 	if (!bCanFire)
@@ -27,73 +56,65 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage)
 		return;
 	}
 
-	if (TSubclassOf<APepccineProjectile> Projectile = EquippedWeaponData->GetProjectileClass())
+	if (const UWorld* World = GetWorld())
 	{
-		if (UWorld* World = GetWorld())
+		const FName SoketName = GetMuzzleName();
+		if (DoesSocketExist(SoketName))
 		{
-			const FName SoketName = TEXT("Muzzle");
-			if (DoesSocketExist(SoketName))
+			APepccinePoolable* Poolable;
+			PoolSubSystem->SpawnFromPool(ProjectileClass, GetSocketLocation(SoketName), GetSocketRotation(SoketName), Poolable);
+			if (Poolable)
 			{
-				// 카메라 방향으로 바라보기
-				// RotateToCamera();
-
-				const FRotator MuzzleRotation = GetSocketRotation(SoketName);
-				const FVector MuzzleLocation = GetSocketLocation(SoketName);
-
-				FActorSpawnParameters SpawnParams;
-				SpawnParams.SpawnCollisionHandlingOverride =
-					ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-				// 프로젝타일을 생성한 주체 설정
-				SpawnParams.Instigator = OwnerCharacter;
-				SpawnParams.Owner = GetOwner();
-
 				// 투사체 생성
-				APepccineProjectile* SpawnedProjectile = World->SpawnActor<APepccineProjectile>(
-					Projectile, MuzzleLocation, MuzzleRotation, SpawnParams);
-				if (SpawnedProjectile)
+				if (APepccineProjectile* SpawnedProjectile = Cast<APepccineProjectile>(Poolable))
 				{
 					SpawnedProjectile->SetOwnerCharacter(OwnerCharacter);
 					SpawnedProjectile->SetWeaponDamage(WeaponDamage);
-					SpawnedProjectile->SetProjectileVelocity(GetFireDirection(MuzzleLocation));
 
 					if (SpawnedProjectile->GetCollisionComp())
 					{
-						SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(OwnerCharacter->GetInstigator(), true);
+						SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(
+							OwnerCharacter->GetInstigator(), true);
 						SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(OwnerCharacter, true);
 						SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(GetOwner(), true);
 					}
+					
+					SpawnedProjectile->InitProjectile(ShootDirection,
+					                                  EquippedWeaponData->GetWeaponItemStats().BulletSpeed,
+					                                  EquippedWeaponData->GetWeaponItemStats().AttackRange);
+
+					if (USoundBase* FireSound = EquippedWeaponData->GetFireSound())
+					{
+						UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwnerCharacter->GetActorLocation());
+					}
+
+					//// Try and play a firing animation if specified
+					//if (FireAnimation != nullptr)
+					//{
+					//	// Get the animation object for the arms mesh
+					//	UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
+					//	if (AnimInstance != nullptr)
+					//	{
+					//		AnimInstance->Montage_Play(FireAnimation, 1.f);
+					//	}
+					//}
+
+					UE_LOG(LogTemp, Warning, TEXT("연사 속도 : %.2f발/초"),
+					       EquippedWeaponData->GetWeaponItemStats().FireRate);
+
+					bCanFire = false;
+					// 무기 재사용 대기시간 적용
+					World->GetTimerManager().SetTimer(EquippedWeaponData->GetFireRateTimerHandle(), this,
+					                                  &UPepccineWeaponItemComponent::CanFire,
+					                                  1.0f / EquippedWeaponData->GetWeaponItemStats().FireRate, false);
+
+					EquippedWeaponData->GetWeaponItemStatsPointer()->MagazineAmmo--;
+
+					UE_LOG(LogTemp, Warning, TEXT("%s 발사! %.0f / %.0f"),
+					       *EquippedWeaponData->GetDisplayName(),
+					       EquippedWeaponData->GetWeaponItemStats().MagazineAmmo,
+					       EquippedWeaponData->GetWeaponItemStats().SpareAmmo);
 				}
-
-				if (USoundBase* FireSound = EquippedWeaponData->GetFireSound())
-				{
-					UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwnerCharacter->GetActorLocation());
-				}
-
-				//// Try and play a firing animation if specified
-				//if (FireAnimation != nullptr)
-				//{
-				//	// Get the animation object for the arms mesh
-				//	UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
-				//	if (AnimInstance != nullptr)
-				//	{
-				//		AnimInstance->Montage_Play(FireAnimation, 1.f);
-				//	}
-				//}
-
-
-				UE_LOG(LogTemp,Warning,TEXT("연사 속도 : %.2f발/초"), EquippedWeaponData->GetWeaponItemStats().FireRate);
-				
-				bCanFire = false;
-				// 무기 재사용 대기시간 적용
-				World->GetTimerManager().SetTimer(EquippedWeaponData->GetFireRateTimerHandle(), this,
-				                                  &UPepccineWeaponItemComponent::CanFire, 1.0f / EquippedWeaponData->GetWeaponItemStats().FireRate, false);
-
-				EquippedWeaponData->GetWeaponItemStatsPointer()->MagazineAmmo--;
-
-				UE_LOG(LogTemp, Warning, TEXT("%s 발사! %.0f / %.0f"),
-				       *EquippedWeaponData->GetDisplayName(),
-				       EquippedWeaponData->GetWeaponItemStats().MagazineAmmo,
-				       EquippedWeaponData->GetWeaponItemStats().SpareAmmo);
 			}
 		}
 	}
@@ -162,59 +183,6 @@ void UPepccineWeaponItemComponent::EquipWeapon(UPepccineWeaponItemData* WeaponIt
 		if (USoundBase* ReloadSound = EquippedWeaponData->GetReloadSound())
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, ReloadSound, OwnerCharacter->GetActorLocation());
-		}		
-	}
-}
-
-FVector UPepccineWeaponItemComponent::GetFireDirection(const FVector& MuzzleLocation) const
-{
-	// 화면 중심 좌표 계산
-	FVector2D ViewportSize;
-	GEngine->GameViewport->GetViewportSize(ViewportSize);
-	const FVector2D ScreenCenter(ViewportSize.X / 2, ViewportSize.Y / 2);
-
-	// 화면 중심에서 월드 방향 가져오기
-	FVector WorldLocation, WorldDirection;
-	UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(GetWorld(), 0), ScreenCenter,
-	                                         WorldLocation, WorldDirection);
-
-	// Ray 설정
-	const FVector Start = WorldLocation;
-	const FVector End = Start + (WorldDirection * 10000); // Ray 길이
-	FHitResult HitResult;
-
-	DrawDebugLine(GetWorld(), Start, End, FColor::Green, true, 2.0f);
-	
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(OwnerCharacter);
-	
-	FVector HitLocation;
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldDynamic, QueryParams))
-	{
-		HitLocation = HitResult.Location; // 충돌한 위치
-		// UE_LOG(LogTemp, Warning, TEXT("HitResult [%s]"), *HitResult.GetActor()->GetName());
-	}
-	else
-	{
-		HitLocation = End; // 충돌하지 않으면 Ray 끝점
-	}
-
-	return (HitLocation - MuzzleLocation).GetSafeNormal();
-}
-
-void UPepccineWeaponItemComponent::RotateToCamera() const
-{
-	if (!OwnerCharacter)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("캐릭터가 지정되지 않았습니다."));
-	}
-
-	if (const AController* Controller = OwnerCharacter->GetController())
-	{
-		FRotator CameraRotation = Controller->GetControlRotation();
-		CameraRotation.Pitch = 0.0f;
-		CameraRotation.Roll = 0.0f;
-
-		OwnerCharacter->SetActorRotation(CameraRotation);
+		}
 	}
 }
