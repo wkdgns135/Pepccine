@@ -11,7 +11,7 @@
 #include "Character/Data/ActorInfo.h"
 #include "Character/Interfaces/IStaminaObserver.h"
 #include "Item/PepccineDropItem.h"
-#include "Kismet/GameplayStatics.h"
+#include "Monster/Data/MonsterSkill.h"
 #include "PepCharacter.generated.h"
 
 class UInputMappingContext;
@@ -62,7 +62,7 @@ public:
 	// Observer Pattern
 	virtual void OnStaminaChanged(float NewStamina, float MaxStamina) override;
 	UFUNCTION()
-	void OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult);
+	void OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType);
 	
 	void TriggerCameraShake();
 

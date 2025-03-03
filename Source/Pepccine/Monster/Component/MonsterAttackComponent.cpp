@@ -42,6 +42,7 @@ void UMonsterAttackComponent::PlayTransitionMontage()
     }
 }
 
+// AttackTrace에 매개변수로 SkillType, AttackType(원거리, 근거리) 넣어야 합니다.
 void UMonsterAttackComponent::AttackTrace()
 {
     ACharacter* OwnerMonster = Cast<ACharacter>(GetOwner());
@@ -55,8 +56,8 @@ void UMonsterAttackComponent::AttackTrace()
     FVector ForwardVector = OwnerMonster->GetActorForwardVector();
     FVector EndLocation = StartLocation + (ForwardVector * AttackRange); // AttackRange �ݿ�
 
-    float CapsuleRadius = 30.0f;
-    float CapsuleHalfHeight = 30.0f;
+    float CapsuleRadius = 5.0f;
+    float CapsuleHalfHeight = 5.0f;
 
     FHitResult HitResult;
     FCollisionQueryParams CollisionParams;
@@ -106,7 +107,7 @@ void UMonsterAttackComponent::AttackTrace()
         if (APepCharacter* Player = Cast<APepCharacter>(HitResult.GetActor()))
         {
             UMonsterStatComponent* StatComp = OwnerMonster->FindComponentByClass<UMonsterStatComponent>();
-            SendHitResult(Player, StatComp->Attack, HitResult);
+            SendHitResult(Player, StatComp->Attack, HitResult, EMonsterSkill::None);
         }
     }
     else
