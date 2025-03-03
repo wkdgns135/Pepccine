@@ -2,13 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "BehaviorTree/BehaviorTree.h"
+#include "Monster/Widget/MonsterHealthWidget.h"
 #include "BaseMonster.generated.h"
 
-
+class UWidgetComponent;
 class UMonsterStatComponent;
 class UMonsterAttackComponent;
 class UHitReactionComponent;
+class UMonsterHealthWidget;
 
 UENUM(BlueprintType)
 enum class EMonsterType : uint8
@@ -28,6 +29,17 @@ public:
 
 	FORCEINLINE EMonsterType GetMonsterType() const { return MonsterType; }
 	FORCEINLINE UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
+	UWidgetComponent* HealthBarWidgetComp;
+	
+	UPROPERTY()
+	UMonsterHealthWidget* HealthInstance;
+	
+	void UpdateHealthBar(float CurrentHealth, float MaxHealth);
+	void InitializeHealthBar();
+
+protected:
+	virtual void BeginPlay() override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster")

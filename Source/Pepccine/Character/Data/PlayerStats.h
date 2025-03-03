@@ -20,10 +20,10 @@ struct FHealthStats
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
     float HealthDecelerationAmount = 0.0f;
     
-    void PrintStats() const
+    FString PrintStats() const
     {
-        UE_LOG(LogTemp, Log, TEXT("Health Stats -> Current: %.2f, Max: %.2f, Deceleration Speed: %.2f, Deceleration Amount: %.2f"),
-            CurrentHealth, MaxHealth, HealthDecelerationSpeed, HealthDecelerationAmount);
+        return FString::Printf(TEXT("Health Stats\nCurrent: %.2f\nMax: %.2f\nDeceleration Speed: %.2f\nDeceleration Amount: %.2f\n"),
+                               CurrentHealth, MaxHealth, HealthDecelerationSpeed, HealthDecelerationAmount);
     }
 };
 
@@ -45,10 +45,10 @@ struct FStaminaStats
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
     float StaminaRecoveryTime = 1.0f;
 
-    void PrintStats() const
+    FString PrintStats() const
     {
-        UE_LOG(LogTemp, Log, TEXT("Stamina Stats -> Current: %.2f, Max: %.2f, Recovery Rate: %.2f, Recovery Time: %.2f"),
-            CurrentStamina, MaxStamina, StaminaRecoveryRate, StaminaRecoveryTime);
+        return FString::Printf(TEXT("Stamina Stats\nCurrent: %.2f\nMax: %.2f\nRecovery Rate: %.2f\nRecovery Time: %.2f\n"),
+                               CurrentStamina, MaxStamina, StaminaRecoveryRate, StaminaRecoveryTime);
     }
 };
 
@@ -67,10 +67,10 @@ struct FCombatStats
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
     float Defence = 0.0f;
 
-    void PrintStats() const
+    FString PrintStats() const
     {
-        UE_LOG(LogTemp, Log, TEXT("Combat Stats -> Attack Damage: %.2f, Invincibility Time: %.2f, Defence: %.2f"),
-            AttackDamage, InvincibilityTime, Defence);
+        return FString::Printf(TEXT("Combat Stats\nAttack Damage: %.2f\nInvincibility Time: %.2f\nDefence: %.2f\n"),
+                               AttackDamage, InvincibilityTime, Defence);
     }
 };
 
@@ -98,10 +98,13 @@ struct FMovementStats
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float RollElapsedTime = 0.0f;
 
-    void PrintStats() const
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+    float Strength = 300.0f;
+
+    FString PrintStats() const
     {
-        UE_LOG(LogTemp, Log, TEXT("Movement Stats -> Speed: %.2f, Sprint: %.2f, Crouch: %.2f, Roll Dist: %.2f, JumpZ: %.2f, Roll Time: %.2f"),
-            MovementSpeed, SprintSpeed, CrouchSpeed, RollingDistance, JumpZVelocity, RollElapsedTime);
+        return FString::Printf(TEXT("Movement Stats\nSpeed: %.2f\nSprint: %.2f\nCrouch: %.2f\nRoll Dist: %.2f\nJumpZ: %.2f\nRoll Time: %.2f\nStrength: %.2f\n"),
+                               MovementSpeed, SprintSpeed, CrouchSpeed, RollingDistance, JumpZVelocity, RollElapsedTime, Strength);
     }
 };
 
@@ -123,13 +126,12 @@ struct FPlayerStats
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
     FMovementStats MovementStats;
 
-    void PrintStats() const
+    FString PrintStats() const
     {
-        UE_LOG(LogTemp, Log, TEXT("===== Player Stats ====="));
-        HealthStats.PrintStats();
-        StaminaStats.PrintStats();
-        CombatStats.PrintStats();
-        MovementStats.PrintStats();
-        UE_LOG(LogTemp, Log, TEXT("======================="));
+        return FString::Printf(TEXT("===== Player Stats =====\n%s%s%s%s=======================\n"),
+                               *HealthStats.PrintStats(),
+                               *StaminaStats.PrintStats(),
+                               *CombatStats.PrintStats(),
+                               *MovementStats.PrintStats());
     }
 };

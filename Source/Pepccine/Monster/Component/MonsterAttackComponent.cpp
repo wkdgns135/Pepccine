@@ -54,8 +54,8 @@ void UMonsterAttackComponent::AttackTrace()
     FVector ForwardVector = OwnerMonster->GetActorForwardVector();
     FVector EndLocation = StartLocation + (ForwardVector * AttackRange); // AttackRange �ݿ�
 
-    float CapsuleRadius = 5.0f;
-    float CapsuleHalfHeight = 5.0f;
+    float CapsuleRadius = 30.0f;
+    float CapsuleHalfHeight = 30.0f;
 
     FHitResult HitResult;
     FCollisionQueryParams CollisionParams;
@@ -73,20 +73,20 @@ void UMonsterAttackComponent::AttackTrace()
     );
 
     DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, 2.0f, 0, 5.0f);
-    /*
-        DrawDebugCapsule(
-            GetWorld(),
-            EndLocation - (ForwardVector * CapsuleRadius * 0.5),
-            CapsuleHalfHeight,
-            CapsuleRadius,
-            FQuat(FRotator(90, 0, 0)),
-            bHit ? FColor::Green : FColor::Red,
-            false,
-            1.0f,
-            0,
-            1.0f
-        );
-    */
+/*
+    DrawDebugCapsule(
+        GetWorld(),
+        EndLocation - (ForwardVector * CapsuleRadius * 0.5),
+        CapsuleHalfHeight,
+        CapsuleRadius,
+        FQuat(FRotator(90, 0, 0)),
+        bHit ? FColor::Green : FColor::Red,
+        false,
+        1.0f,
+        0,
+        1.0f
+    );
+*/
     if (bHit)
     {
         FVector ImpactPoint = HitResult.ImpactPoint;
