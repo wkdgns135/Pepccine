@@ -16,10 +16,10 @@ void UItemIconHUDComponent::BeginPlay()
 	if (WeaponWidget) WeaponWidget->AddToViewport();
 }
 
-void UItemIconHUDComponent::SetWeaponItem(UTexture2D* MainWeaponImage, UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 MaxAmmo, bool bIsMainWeapon)
+void UItemIconHUDComponent::SetWeaponItem(UTexture2D* MainWeaponImage, UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 SpareAmmo, bool bIsMainWeapon)
 {
 	if (!WeaponWidget) return;
-	WeaponWidget->UpdateWeaponUI(MainWeaponImage, SubWeaponImage, WeaponName, Ammo, MaxAmmo, bIsMainWeapon);
+	WeaponWidget->UpdateWeaponUI(MainWeaponImage, SubWeaponImage, WeaponName, Ammo, SpareAmmo, bIsMainWeapon);
 }
 
 void UItemIconHUDComponent::SetActiveItem(UTexture2D* ActiveImage, const FString& ActiveName, const FString& ActiveButton, const int32 Cooldown, const int32 MaxCooldown)

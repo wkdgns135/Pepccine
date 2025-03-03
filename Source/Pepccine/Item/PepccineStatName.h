@@ -7,7 +7,7 @@ UENUM(BlueprintType)
 enum class EPepccineWeaponStatName : uint8
 {
 	EPWSN_AttackMultiplier UMETA(DisplayName = "공격력 배율"),
-	EPWSN_RangeMultiplier UMETA(DisplayName = "사거리 배율"),
+	EPWSN_AttackRange UMETA(DisplayName = "사거리"),
 	EPWSN_FireRate UMETA(DisplayName = "연사 속도"),
 	EPWSN_ZoomMultiplier UMETA(DisplayName = "확대 배율"),
 	EPWSN_MagazineSize UMETA(DisplayName = "탄창 용량"),
@@ -29,6 +29,7 @@ enum class EPepccineCharacterStatName : uint8
 	EPCSN_MovementSpeed UMETA(DisplayName = "이동 속도"),
 	EPCSN_AttackDamage UMETA(DisplayName = "공격력"),
 	EPCSN_HealthDecelerationSpeed UMETA(DisplayName = "체력 감소 속도"),
+	EPCSN_HealthDecelerationAmount UMETA(DisplayName = "체력 감소량"),
 	EPCSN_Stamina UMETA(DisplayName = "현재 기력"),
 	EPCSN_MaxStamina UMETA(DisplayName = "최대 기력"),
 	EPCSN_StaminaRecoveryRate UMETA(DisplayName = "기력 회복 속도"),
@@ -39,5 +40,6 @@ enum class EPepccineCharacterStatName : uint8
 	EPCSN_CrouchSpeed UMETA(DisplayName = "앉기 속도"),
 	EPCSN_RollingDistance UMETA(DisplayName = "구르기 거리"),
 	EPCSN_JumpZVelocity UMETA(DisplayName = "점프 속도"),
-	EPCSN_RollElapsedTime UMETA(DisplayName = "구르기 시간")
+	EPCSN_RollElapsedTime UMETA(DisplayName = "구르기 시간"),
+	EPCSN_Strength UMETA(DisplayName = "무게")
 };

@@ -2,11 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Monster/Widget/MonsterHealthWidget.h"
 #include "BaseMonster.generated.h"
 
+class UWidgetComponent;
 class UMonsterStatComponent;
 class UMonsterAttackComponent;
 class UHitReactionComponent;
+class UMonsterHealthWidget;
 
 UCLASS()
 class PEPCCINE_API ABaseMonster : public ACharacter
@@ -16,8 +19,14 @@ class PEPCCINE_API ABaseMonster : public ACharacter
 public:
 	ABaseMonster();
 
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
+	UWidgetComponent* HealthBarWidgetComp;
+	
+	UPROPERTY()
+	UMonsterHealthWidget* HealthInstance;
+	
+	void UpdateHealthBar(float CurrentHealth, float MaxHealth);
+	void InitializeHealthBar();
 
 protected:
 	virtual void BeginPlay() override;
@@ -32,5 +41,8 @@ protected:
 	UHitReactionComponent* HitReactionComponent;
 
 private:
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void OnHitReceived(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult);
 	void Die();
 };

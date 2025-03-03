@@ -27,11 +27,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
 	UAnimMontage* AttackMontage;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
-	float AttackRange= 30.0f;
+	float AttackRange = 60.0f;
 
 	virtual void BeginPlay() override;
 
 private:
-	void ApplyDamageToTarget(AActor* Target, float DamageAmount);
 	
 };

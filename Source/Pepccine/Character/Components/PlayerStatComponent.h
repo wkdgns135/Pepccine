@@ -51,10 +51,11 @@ public:
 	float GetAttackDamage() const { return CurrentStats.CombatStats.AttackDamage; }
 
 	// inline
-	FORCEINLINE_DEBUGGABLE float getCurrentStamina() const { return CurrentStats.StaminaStats.CurrentStamina; }
-	FORCEINLINE_DEBUGGABLE float getMaxStamina() const { return CurrentStats.StaminaStats.MaxStamina; }
-	FORCEINLINE_DEBUGGABLE float getCurrentHealth() const { return CurrentStats.HealthStats.CurrentHealth; }
-	FORCEINLINE_DEBUGGABLE float getMaxHealth() const { return CurrentStats.HealthStats.MaxHealth; }
+	FORCEINLINE_DEBUGGABLE float GetCurrentStamina() const { return CurrentStats.StaminaStats.CurrentStamina; }
+	FORCEINLINE_DEBUGGABLE float GetMaxStamina() const { return CurrentStats.StaminaStats.MaxStamina; }
+	FORCEINLINE_DEBUGGABLE float GetCurrentHealth() const { return CurrentStats.HealthStats.CurrentHealth; }
+	FORCEINLINE_DEBUGGABLE float GetMaxHealth() const { return CurrentStats.HealthStats.MaxHealth; }
+	FORCEINLINE_DEBUGGABLE FString PrintStats() const { return CurrentStats.PrintStats(); }
 
 protected:
 	virtual void BeginPlay() override;

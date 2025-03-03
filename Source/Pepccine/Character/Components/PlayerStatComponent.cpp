@@ -48,10 +48,29 @@ void UPlayerStatComponent::InitializeStats()
 
 	// Modifier 총합 초기화
 	CurrentTotalAdd = FPlayerStats();
-	CurrentTotalMul = FPlayerStats();
+	CurrentTotalAdd.HealthStats.CurrentHealth = 0.0f;
+	CurrentTotalAdd.HealthStats.MaxHealth = 0.0f;
+	CurrentTotalAdd.HealthStats.HealthDecelerationSpeed = 0.0f;
+	CurrentTotalAdd.HealthStats.HealthDecelerationAmount = 0.0f;
 
-	// 곱연산 기본값을 1.0으로 설정
-	CurrentTotalMul = FPlayerStats(); // 모든 값 0으로 초기화
+	CurrentTotalAdd.StaminaStats.CurrentStamina = 0.0f;
+	CurrentTotalAdd.StaminaStats.MaxStamina = 0.0f;
+	CurrentTotalAdd.StaminaStats.StaminaRecoveryRate = 0.0f;
+	CurrentTotalAdd.StaminaStats.StaminaRecoveryTime = 0.0f;
+
+	CurrentTotalAdd.CombatStats.AttackDamage = 0.0f;
+	CurrentTotalAdd.CombatStats.InvincibilityTime = 0.0f;
+	CurrentTotalAdd.CombatStats.Defence = 0.0f;
+
+	CurrentTotalAdd.MovementStats.MovementSpeed = 0.0f;
+	CurrentTotalAdd.MovementStats.SprintSpeed = 0.0f;
+	CurrentTotalAdd.MovementStats.CrouchSpeed = 0.0f;
+	CurrentTotalAdd.MovementStats.RollingDistance = 0.0f;
+	CurrentTotalAdd.MovementStats.JumpZVelocity = 0.0f;
+	CurrentTotalAdd.MovementStats.RollElapsedTime = 0.0f;
+	CurrentTotalAdd.MovementStats.Strength = 0.0f;
+
+	CurrentTotalMul = FPlayerStats();
 	CurrentTotalMul.HealthStats.CurrentHealth = 1.0f;
 	CurrentTotalMul.HealthStats.MaxHealth = 1.0f;
 	CurrentTotalMul.HealthStats.HealthDecelerationSpeed = 1.0f;
@@ -72,6 +91,7 @@ void UPlayerStatComponent::InitializeStats()
 	CurrentTotalMul.MovementStats.RollingDistance = 1.0f;
 	CurrentTotalMul.MovementStats.JumpZVelocity = 1.0f;
 	CurrentTotalMul.MovementStats.RollElapsedTime = 1.0f;
+	CurrentTotalMul.MovementStats.Strength = 1.0f;
 }
 
 void UPlayerStatComponent::LoadAndApplyPlayerStatDataAsset()
@@ -105,41 +125,6 @@ void UPlayerStatComponent::SetPlayerStatDataAsset(UPlayerStatDataAsset* NewDataA
 	UE_LOG(LogTemp, Log, TEXT("새로운 PlayerStatDataAsset이 적용되었습니다."));
 }
 
-void UPlayerStatComponent::RecalculateStats()
-{
-	FPlayerStats* Base = &CurrentStats;
-	FPlayerStats* Add = &CurrentTotalAdd;
-	FPlayerStats* Mul = &CurrentTotalMul;
-
-	// 체력 관련 스탯
-	Base->HealthStats.CurrentHealth = (Base->HealthStats.CurrentHealth + Add->HealthStats.CurrentHealth) * Mul->HealthStats.CurrentHealth;
-	Base->HealthStats.MaxHealth = (Base->HealthStats.MaxHealth + Add->HealthStats.MaxHealth) * Mul->HealthStats.MaxHealth;
-	Base->HealthStats.HealthDecelerationSpeed = (Base->HealthStats.HealthDecelerationSpeed + Add->HealthStats.HealthDecelerationSpeed) * Mul->HealthStats.HealthDecelerationSpeed;
-	Base->HealthStats.HealthDecelerationAmount = (Base->HealthStats.HealthDecelerationAmount + Add->HealthStats.HealthDecelerationAmount) * Mul->HealthStats.HealthDecelerationAmount;
-
-	// 스태미나 관련 스탯
-	Base->StaminaStats.CurrentStamina = (Base->StaminaStats.CurrentStamina + Add->StaminaStats.CurrentStamina) * Mul->StaminaStats.CurrentStamina;
-	Base->StaminaStats.MaxStamina = (Base->StaminaStats.MaxStamina + Add->StaminaStats.MaxStamina) * Mul->StaminaStats.MaxStamina;
-	Base->StaminaStats.StaminaRecoveryRate = (Base->StaminaStats.StaminaRecoveryRate + Add->StaminaStats.StaminaRecoveryRate) * Mul->StaminaStats.StaminaRecoveryRate;
-	Base->StaminaStats.StaminaRecoveryTime = (Base->StaminaStats.StaminaRecoveryTime + Add->StaminaStats.StaminaRecoveryTime) * Mul->StaminaStats.StaminaRecoveryTime;
-
-	// 전투 관련 스탯
-	Base->CombatStats.AttackDamage = (Base->CombatStats.AttackDamage + Add->CombatStats.AttackDamage) * Mul->CombatStats.AttackDamage;
-	Base->CombatStats.InvincibilityTime = (Base->CombatStats.InvincibilityTime + Add->CombatStats.InvincibilityTime) * Mul->CombatStats.InvincibilityTime;
-	Base->CombatStats.Defence = (Base->CombatStats.Defence + Add->CombatStats.Defence) * Mul->CombatStats.Defence;
-
-	// 이동 관련 스탯
-	Base->MovementStats.MovementSpeed = (Base->MovementStats.MovementSpeed + Add->MovementStats.MovementSpeed) * Mul->MovementStats.MovementSpeed;
-	Base->MovementStats.SprintSpeed = (Base->MovementStats.SprintSpeed + Add->MovementStats.SprintSpeed) * Mul->MovementStats.SprintSpeed;
-	Base->MovementStats.CrouchSpeed = (Base->MovementStats.CrouchSpeed + Add->MovementStats.CrouchSpeed) * Mul->MovementStats.CrouchSpeed;
-	Base->MovementStats.RollingDistance = (Base->MovementStats.RollingDistance + Add->MovementStats.RollingDistance) * Mul->MovementStats.RollingDistance;
-	Base->MovementStats.JumpZVelocity = (Base->MovementStats.JumpZVelocity + Add->MovementStats.JumpZVelocity) * Mul->MovementStats.JumpZVelocity;
-	Base->MovementStats.RollElapsedTime = (Base->MovementStats.RollElapsedTime + Add->MovementStats.RollElapsedTime) * Mul->MovementStats.RollElapsedTime;
-
-	// 값 보정
-	ClampStats();
-}
-
 void UPlayerStatComponent::RemoveStatModifier(const FStatModifier& Modifier)
 {
 	ActiveModifiers.Remove(Modifier);
@@ -166,76 +151,155 @@ void UPlayerStatComponent::ApplyStatModifier(const FStatModifier& Modifier)
 	FPlayerStats* Add = &CurrentTotalAdd;
 	FPlayerStats* Mul = &CurrentTotalMul;
 
+	switch (Modifier.StatType)
+	{
 	// 체력 관련 스탯
-	Add->HealthStats.CurrentHealth += Modifier.AdditiveValue;
-	Mul->HealthStats.CurrentHealth *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_CurrentHealth:
+		Add->HealthStats.CurrentHealth += Modifier.AdditiveValue;
+		Mul->HealthStats.CurrentHealth *= Modifier.MultiplicativeValue;
+		break;
 
-	Add->HealthStats.MaxHealth += Modifier.AdditiveValue;
-	Mul->HealthStats.MaxHealth *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_MaxHealth:
+		Add->HealthStats.MaxHealth += Modifier.AdditiveValue;
+		Mul->HealthStats.MaxHealth *= Modifier.MultiplicativeValue;
+		break;
 
-	Add->HealthStats.HealthDecelerationSpeed += Modifier.AdditiveValue;
-	Mul->HealthStats.HealthDecelerationSpeed *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_HealthDecelerationSpeed:
+		Add->HealthStats.HealthDecelerationSpeed += Modifier.AdditiveValue;
+		Mul->HealthStats.HealthDecelerationSpeed *= Modifier.MultiplicativeValue;
+		break;
 
-	Add->HealthStats.HealthDecelerationAmount += Modifier.AdditiveValue;
-	Mul->HealthStats.HealthDecelerationAmount *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_HealthDecelerationAmount:
+		Add->HealthStats.HealthDecelerationAmount += Modifier.AdditiveValue;
+		Mul->HealthStats.HealthDecelerationAmount *= Modifier.MultiplicativeValue;
+		break;
 
 	// 스태미나 관련 스탯
-	Add->StaminaStats.CurrentStamina += Modifier.AdditiveValue;
-	Mul->StaminaStats.CurrentStamina *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_Stamina:
+		Add->StaminaStats.CurrentStamina += Modifier.AdditiveValue;
+		Mul->StaminaStats.CurrentStamina *= Modifier.MultiplicativeValue;
+		break;
 
-	Add->StaminaStats.MaxStamina += Modifier.AdditiveValue;
-	Mul->StaminaStats.MaxStamina *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_MaxStamina:
+		Add->StaminaStats.MaxStamina += Modifier.AdditiveValue;
+		Mul->StaminaStats.MaxStamina *= Modifier.MultiplicativeValue;
+		break;
 
-	Add->StaminaStats.StaminaRecoveryRate += Modifier.AdditiveValue;
-	Mul->StaminaStats.StaminaRecoveryRate *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_StaminaRecoveryRate:
+		Add->StaminaStats.StaminaRecoveryRate += Modifier.AdditiveValue;
+		Mul->StaminaStats.StaminaRecoveryRate *= Modifier.MultiplicativeValue;
+		break;
 
-	Add->StaminaStats.StaminaRecoveryTime += Modifier.AdditiveValue;
-	Mul->StaminaStats.StaminaRecoveryTime *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_StaminaRecoveryTime:
+		Add->StaminaStats.StaminaRecoveryTime += Modifier.AdditiveValue;
+		Mul->StaminaStats.StaminaRecoveryTime *= Modifier.MultiplicativeValue;
+		break;
 
 	// 전투 관련 스탯
-	Add->CombatStats.AttackDamage += Modifier.AdditiveValue;
-	Mul->CombatStats.AttackDamage *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_AttackDamage:
+		Add->CombatStats.AttackDamage += Modifier.AdditiveValue;
+		Mul->CombatStats.AttackDamage *= Modifier.MultiplicativeValue;
+		break;
 
-	Add->CombatStats.InvincibilityTime += Modifier.AdditiveValue;
-	Mul->CombatStats.InvincibilityTime *= Modifier.MultiplicativeValue;
-
-	Add->CombatStats.Defence += Modifier.AdditiveValue;
-	Mul->CombatStats.Defence *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_Defence:
+		Add->CombatStats.Defence += Modifier.AdditiveValue;
+		Mul->CombatStats.Defence *= Modifier.MultiplicativeValue;
+		break;
 
 	// 이동 관련 스탯
-	Add->MovementStats.MovementSpeed += Modifier.AdditiveValue;
-	Mul->MovementStats.MovementSpeed *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_MovementSpeed:
+		Add->MovementStats.MovementSpeed += Modifier.AdditiveValue;
+		Mul->MovementStats.MovementSpeed *= Modifier.MultiplicativeValue;
+		break;
 
-	Add->MovementStats.SprintSpeed += Modifier.AdditiveValue;
-	Mul->MovementStats.SprintSpeed *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_SprintSpeed:
+		Add->MovementStats.SprintSpeed += Modifier.AdditiveValue;
+		Mul->MovementStats.SprintSpeed *= Modifier.MultiplicativeValue;
+		break;
 
-	Add->MovementStats.CrouchSpeed += Modifier.AdditiveValue;
-	Mul->MovementStats.CrouchSpeed *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_CrouchSpeed:
+		Add->MovementStats.CrouchSpeed += Modifier.AdditiveValue;
+		Mul->MovementStats.CrouchSpeed *= Modifier.MultiplicativeValue;
+		break;
 
-	Add->MovementStats.RollingDistance += Modifier.AdditiveValue;
-	Mul->MovementStats.RollingDistance *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_RollingDistance:
+		Add->MovementStats.RollingDistance += Modifier.AdditiveValue;
+		Mul->MovementStats.RollingDistance *= Modifier.MultiplicativeValue;
+		break;
 
-	Add->MovementStats.JumpZVelocity += Modifier.AdditiveValue;
-	Mul->MovementStats.JumpZVelocity *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_JumpZVelocity:
+		Add->MovementStats.JumpZVelocity += Modifier.AdditiveValue;
+		Mul->MovementStats.JumpZVelocity *= Modifier.MultiplicativeValue;
+		break;
 
-	Add->MovementStats.RollElapsedTime += Modifier.AdditiveValue;
-	Mul->MovementStats.RollElapsedTime *= Modifier.MultiplicativeValue;
+	case EPepccineCharacterStatName::EPCSN_RollElapsedTime:
+		Add->MovementStats.RollElapsedTime += Modifier.AdditiveValue;
+		Mul->MovementStats.RollElapsedTime *= Modifier.MultiplicativeValue;
+		break;
+
+	case EPepccineCharacterStatName::EPCSN_Strength:
+		Add->MovementStats.Strength += Modifier.AdditiveValue;
+		Mul->MovementStats.Strength *= Modifier.MultiplicativeValue;
+		break;
+	
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("Unknown StatType: %d"), static_cast<int32>(Modifier.StatType));
+		break;
+	}
 
 	// 스탯 재계산
 	RecalculateStats();
 }
 
+void UPlayerStatComponent::RecalculateStats()
+{
+	FPlayerStats* Base = &CurrentStats;
+	FPlayerStats* Add = &CurrentTotalAdd;
+	FPlayerStats* Mul = &CurrentTotalMul;
+
+	// 체력 관련 스탯
+	Base->HealthStats.CurrentHealth = (Base->HealthStats.CurrentHealth + Add->HealthStats.CurrentHealth) * Mul->HealthStats.CurrentHealth;
+	Base->HealthStats.MaxHealth = (Base->HealthStats.MaxHealth + Add->HealthStats.MaxHealth) * Mul->HealthStats.MaxHealth;
+	Base->HealthStats.HealthDecelerationSpeed = (Base->HealthStats.HealthDecelerationSpeed + Add->HealthStats.HealthDecelerationSpeed) * Mul->HealthStats.HealthDecelerationSpeed;
+	Base->HealthStats.HealthDecelerationAmount = (Base->HealthStats.HealthDecelerationAmount + Add->HealthStats.HealthDecelerationAmount) * Mul->HealthStats.HealthDecelerationAmount;
+
+	// 스태미나 관련 스탯
+	Base->StaminaStats.CurrentStamina = (Base->StaminaStats.CurrentStamina + Add->StaminaStats.CurrentStamina) * Mul->StaminaStats.CurrentStamina;
+	Base->StaminaStats.MaxStamina = (Base->StaminaStats.MaxStamina + Add->StaminaStats.MaxStamina) * Mul->StaminaStats.MaxStamina;
+	Base->StaminaStats.StaminaRecoveryRate = (Base->StaminaStats.StaminaRecoveryRate + Add->StaminaStats.StaminaRecoveryRate) * Mul->StaminaStats.StaminaRecoveryRate;
+	Base->StaminaStats.StaminaRecoveryTime = (Base->StaminaStats.StaminaRecoveryTime + Add->StaminaStats.StaminaRecoveryTime) * Mul->StaminaStats.StaminaRecoveryTime;
+
+	// 전투 관련 스탯
+	Base->CombatStats.AttackDamage = (Base->CombatStats.AttackDamage + Add->CombatStats.AttackDamage) * Mul->CombatStats.AttackDamage;
+	Base->CombatStats.Defence = (Base->CombatStats.Defence + Add->CombatStats.Defence) * Mul->CombatStats.Defence;
+	Base->CombatStats.InvincibilityTime = (Base->CombatStats.InvincibilityTime + Add->CombatStats.InvincibilityTime) * Mul->CombatStats.InvincibilityTime;
+
+	// 이동 관련 스탯
+	Base->MovementStats.MovementSpeed = (Base->MovementStats.MovementSpeed + Add->MovementStats.MovementSpeed) * Mul->MovementStats.MovementSpeed;
+	Base->MovementStats.SprintSpeed = (Base->MovementStats.SprintSpeed + Add->MovementStats.SprintSpeed) * Mul->MovementStats.SprintSpeed;
+	Base->MovementStats.CrouchSpeed = (Base->MovementStats.CrouchSpeed + Add->MovementStats.CrouchSpeed) * Mul->MovementStats.CrouchSpeed;
+	Base->MovementStats.RollingDistance = (Base->MovementStats.RollingDistance + Add->MovementStats.RollingDistance) * Mul->MovementStats.RollingDistance;
+	Base->MovementStats.JumpZVelocity = (Base->MovementStats.JumpZVelocity + Add->MovementStats.JumpZVelocity) * Mul->MovementStats.JumpZVelocity;
+	Base->MovementStats.RollElapsedTime = (Base->MovementStats.RollElapsedTime + Add->MovementStats.RollElapsedTime) * Mul->MovementStats.RollElapsedTime;
+	Base->MovementStats.Strength = (Base->MovementStats.Strength + Add->MovementStats.Strength) * Mul->MovementStats.Strength;
+	
+	// 값 보정
+	ClampStats();
+}
+
 void UPlayerStatComponent::ClampStats()
 {
 	CurrentStats.HealthStats.MaxHealth = FMath::Clamp(CurrentStats.HealthStats.MaxHealth, 50.0f, 1000.0f);
-	CurrentStats.HealthStats.HealthDecelerationAmount = FMath::Clamp(CurrentStats.HealthStats.MaxHealth, 0.0f, 20.0f);
-	CurrentStats.HealthStats.HealthDecelerationSpeed = FMath::Clamp(CurrentStats.HealthStats.MaxHealth, 0.0f, 1.0f);
+	CurrentStats.HealthStats.HealthDecelerationAmount = FMath::Clamp(CurrentStats.HealthStats.HealthDecelerationAmount, 0.0f, 20.0f);
+	CurrentStats.HealthStats.HealthDecelerationSpeed = FMath::Clamp(CurrentStats.HealthStats.HealthDecelerationSpeed, 0.0f, 1.0f);
 
-	CurrentStats.StaminaStats.StaminaRecoveryTime = FMath::Clamp(CurrentStats.HealthStats.MaxHealth, 1.0f, 2.0f);
+	CurrentStats.StaminaStats.StaminaRecoveryTime = FMath::Clamp(CurrentStats.StaminaStats.StaminaRecoveryTime, 1.0f, 2.0f);
 	CurrentStats.StaminaStats.MaxStamina = FMath::Clamp(CurrentStats.StaminaStats.MaxStamina, 50.0f, 500.0f);
-	CurrentStats.StaminaStats.StaminaRecoveryRate = FMath::Clamp(CurrentStats.StaminaStats.StaminaRecoveryRate, 1.0f,100.0f);
+	CurrentStats.StaminaStats.StaminaRecoveryRate = FMath::Clamp(CurrentStats.StaminaStats.StaminaRecoveryRate, 1.0f,
+	                                                             100.0f);
 
-	CurrentStats.CombatStats.InvincibilityTime = FMath::Clamp(CurrentStats.StaminaStats.StaminaRecoveryRate, 0.0f,100.0f);
+	CurrentStats.CombatStats.InvincibilityTime =
+		FMath::Clamp(CurrentStats.CombatStats.InvincibilityTime, 0.0f, 100.0f);
 	CurrentStats.CombatStats.AttackDamage = FMath::Clamp(CurrentStats.CombatStats.AttackDamage, 1.0f, 100000.0f);
 	CurrentStats.CombatStats.Defence = FMath::Clamp(CurrentStats.CombatStats.Defence, 0.0f, 100.0f);
 
@@ -245,6 +309,7 @@ void UPlayerStatComponent::ClampStats()
 	CurrentStats.MovementStats.RollingDistance = FMath::Clamp(CurrentStats.MovementStats.RollingDistance, 100.0f, 400.0f);
 	CurrentStats.MovementStats.JumpZVelocity = FMath::Clamp(CurrentStats.MovementStats.JumpZVelocity, 200.0f, 1500.0f);
 	CurrentStats.MovementStats.RollElapsedTime = FMath::Clamp(CurrentStats.MovementStats.RollElapsedTime, 0.0f, 2.0f);
+	CurrentStats.MovementStats.Strength = FMath::Clamp(CurrentStats.MovementStats.Strength, 0.0f, 1000.0f);
 }
 #pragma endregion
 
@@ -293,7 +358,10 @@ void UPlayerStatComponent::DecreaseHealth(float Amount)
 		return;
 	}
 
-	CurrentStats.HealthStats.CurrentHealth = FMath::Clamp(CurrentStats.HealthStats.CurrentHealth - Amount, 0.0f, CurrentStats.HealthStats.MaxHealth);
+	UE_LOG(LogTemp, Warning, TEXT("Player Stat Decrease [%f]"), Amount);
+
+	CurrentStats.HealthStats.CurrentHealth = FMath::Clamp(CurrentStats.HealthStats.CurrentHealth - Amount, 0.0f,
+	                                                      CurrentStats.HealthStats.MaxHealth);
 
 	OnHealthChanged.Broadcast(CurrentStats.HealthStats.CurrentHealth, CurrentStats.HealthStats.MaxHealth);
 }
@@ -308,7 +376,8 @@ void UPlayerStatComponent::IncreaseStamina(float Amount)
 		return;
 	}
 
-	CurrentStats.StaminaStats.CurrentStamina = FMath::Clamp(CurrentStats.StaminaStats.CurrentStamina + Amount, 0.0f, CurrentStats.StaminaStats.MaxStamina);
+	CurrentStats.StaminaStats.CurrentStamina = FMath::Clamp(CurrentStats.StaminaStats.CurrentStamina + Amount, 0.0f,
+	                                                        CurrentStats.StaminaStats.MaxStamina);
 
 	NotifyStaminaObservers();
 }
@@ -331,7 +400,8 @@ bool UPlayerStatComponent::DecreaseStamina(float Amount)
 		return false;
 	}
 
-	CurrentStats.StaminaStats.CurrentStamina = FMath::Clamp(CurrentStats.StaminaStats.CurrentStamina - Amount, 0.0f, CurrentStats.StaminaStats.MaxStamina);
+	CurrentStats.StaminaStats.CurrentStamina = FMath::Clamp(CurrentStats.StaminaStats.CurrentStamina - Amount, 0.0f,
+	                                                        CurrentStats.StaminaStats.MaxStamina);
 
 	NotifyStaminaObservers();
 

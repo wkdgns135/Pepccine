@@ -16,12 +16,16 @@ UCollisionRadarComponent::UCollisionRadarComponent()
 
   DetectionZone = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionZone"));
   DetectionZone->InitSphereRadius(DetectionRadius);
-  DetectionZone->SetCollisionProfileName(TEXT("OverlapAll"));
 }
 
 void UCollisionRadarComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+  if (DetectionZone)
+  {
+    DetectionZone->SetCollisionProfileName(TEXT("OverlapAll"));
+  }
 
   if (!bIsUseRadar) return;
   if (!DetectionZone) return;

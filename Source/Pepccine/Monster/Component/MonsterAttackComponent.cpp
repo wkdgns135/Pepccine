@@ -1,4 +1,5 @@
 #include "Monster/Component/MonsterAttackComponent.h"
+#include "Monster/Component/MonsterStatComponent.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/Player/PepCharacter.h" 
@@ -31,20 +32,6 @@ void UMonsterAttackComponent::PerformAttack()
     }
 }
 
-void UMonsterAttackComponent::ApplyDamageToTarget(AActor* Target, float DamageAmount)
-{
-    if (Target)
-    {
-        // 데미지 적용
-        UGameplayStatics::ApplyDamage(Target, DamageAmount, nullptr, GetOwner(), nullptr);
-
-        APepCharacter* Player = Cast<APepCharacter>(Target);
-        if (Player)
-        {
-            // 플레이어 쪽 피격 반응
-        }
-    }
-}
 
 void UMonsterAttackComponent::PlayTransitionMontage()
 {
@@ -64,14 +51,12 @@ void UMonsterAttackComponent::AttackTrace()
         return;
     }
 
-    // ���� ���� ����
     FVector StartLocation = OwnerMonster->GetActorLocation();
     FVector ForwardVector = OwnerMonster->GetActorForwardVector();
     FVector EndLocation = StartLocation + (ForwardVector * AttackRange); // AttackRange �ݿ�
 
-    // ĸ�� ũ�� ����
     float CapsuleRadius = 30.0f;
-    float CapsuleHalfHeight = AttackRange * 0.5f; // ���� ������ �°� ����
+    float CapsuleHalfHeight = 30.0f;
 
     FHitResult HitResult;
     FCollisionQueryParams CollisionParams;
@@ -83,37 +68,36 @@ void UMonsterAttackComponent::AttackTrace()
         StartLocation,
         EndLocation,
         FQuat::Identity,
-        ECC_Pawn,
+        ECC_GameTraceChannel1,
         FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
         CollisionParams
     );
 
-    // ����� ĸ�� �׸��� (�׻� ǥ��)
+    DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, 2.0f, 0, 5.0f);
+/*
     DrawDebugCapsule(
         GetWorld(),
-        (StartLocation + EndLocation) * 0.5f, // ĸ�� �߽� ��ġ
+        EndLocation - (ForwardVector * CapsuleRadius * 0.5),
         CapsuleHalfHeight,
         CapsuleRadius,
-        FQuat::Identity,
-        bHit ? FColor::Green : FColor::Red, // ��Ʈ ���ο� ���� ���� ����
+        FQuat(FRotator(90, 0, 0)),
+        bHit ? FColor::Green : FColor::Red,
         false,
         1.0f,
         0,
         1.0f
     );
-
-    // �浹 �� ó��
+*/
     if (bHit)
     {
         FVector ImpactPoint = HitResult.ImpactPoint;
 
-        // �浹 ������ ���� ���� �׷��� �ð������� ǥ��
         DrawDebugSphere(
             GetWorld(),
             ImpactPoint,
             CapsuleRadius,
             12,
-            FColor::Blue, // �浹 ���� ����
+            FColor::Blue,
             false,
             1.0f
         );
@@ -121,8 +105,8 @@ void UMonsterAttackComponent::AttackTrace()
         // 충돌 대상이 플레이어인 경우 데미지 적용
         if (APepCharacter* Player = Cast<APepCharacter>(HitResult.GetActor()))
         {
-            ApplyDamageToTarget(Player, 20.0f);
-            SendHitResult(Player, 20.0f, HitResult);
+            UMonsterStatComponent* StatComp = OwnerMonster->FindComponentByClass<UMonsterStatComponent>();
+            SendHitResult(Player, StatComp->Attack, HitResult);
         }
     }
     else

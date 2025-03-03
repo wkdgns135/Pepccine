@@ -46,6 +46,6 @@ void UPepccineAnimInstance::NativeUpdateAnimation(float dt)
 		bIsSprint = Owner->bIsSprinting;
 		float Pitch = Owner->GetControlRotation().Pitch;
 		(Pitch > 90) ? ControllerPitch = Pitch - 360 : ControllerPitch = Pitch;
-		//bIsMainWeapon = Owner->IsMainWeapon();
+		bIsMainWeapon = Owner->bIsMainWeaponEquipped;
 	}
 }

@@ -1,6 +1,5 @@
 ﻿#include "PepCharacter.h"
 
-#include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include "EnhancedInputComponent.h"
@@ -19,9 +18,9 @@
 #include "Character/Animation/PepccineHitReactionComponent.h"
 #include "Character/Components/BattleComponent.h"
 #include "Character/Data/ActorInfo.h"
-#include "Components/WidgetComponent.h"
 #include "Item/PepccineDropItem.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
+#include "Item/Resource/PepccineResourceItemData.h"
 #include "Monster/Class/ZombieGirl.h"
 
 APepCharacter::APepCharacter()
@@ -109,12 +108,57 @@ void APepCharacter::CheckSprinting()
 			bIsSprinting = false;
 			return;
 		}
-		SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.SprintSpeed);
+		SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.SprintSpeed - LooseWeight);
 	}
 	else
 	{
-		SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed);
+		SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed - LooseWeight);
 	}
+}
+
+void APepCharacter::SetCharacterSpeed(float Speed)
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = FMath::Clamp(Speed, 0.0f, 1000.0f);
+	}
+}
+
+void APepCharacter::SetCharacterMovement()
+{
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		if (!MovementComponent)
+		{
+			return;
+		}
+
+		const float WalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed - LooseWeight;
+		SetCharacterSpeed(WalkSpeed);
+
+		const float JumpZVelocity = PlayerStatComponent->GetCurrentStats().MovementStats.JumpZVelocity - LooseWeight;
+		MovementComponent->JumpZVelocity = FMath::Clamp(JumpZVelocity, 0.0f, 1000.0f);
+	}
+}
+
+void APepCharacter::SetWeight()
+{
+	if (!PlayerStatComponent)
+	{
+		return;
+	}
+	const float WeaponWeight = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Weight;
+	const float PlayerStrength = PlayerStatComponent->GetCurrentStats().MovementStats.Strength;
+
+	if (PlayerStrength > WeaponWeight)
+	{
+		LooseWeight = 0.0f;
+		return;
+	}
+
+	LooseWeight = WeaponWeight - PlayerStrength;
+
+	SetCharacterMovement();
 }
 
 void APepCharacter::CheckRolling(float DeltaTime)
@@ -153,14 +197,16 @@ void APepCharacter::AddObservers()
 
 void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult)
 {
-	if (bIsRolling) return;
+	if (bIsRolling)
+	{
+		return;
+	}
 
 	PlayerStatComponent->DecreaseHealth(DamageAmount);
-	
-	FName HitBoneName = HitResult.BoneName;
+
 	FVector HitDirection = HitResult.ImpactNormal;
-	
-	HitReactionComponent->HitReaction(HitBoneName, HitDirection);
+
+	HitReactionComponent->HitReaction("Spine", HitDirection);
 }
 
 void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth)
@@ -169,7 +215,7 @@ void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth
 	{
 		return;
 	}
-	else if (NewHealth == 0)
+	if (NewHealth == 0)
 	{
 		Dead();
 	}
@@ -222,20 +268,23 @@ void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
 #pragma region
 void APepCharacter::Dead()
 {
-	if (!bIsPlayerAlive) return;
+	if (!bIsPlayerAlive)
+	{
+		return;
+	}
 	bIsPlayerAlive = false;
-	
+
 	if (APepccinePlayerController* PepccinePlayerController = Cast<APepccinePlayerController>(PlayerController))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Player Dead"));
 		// 플레이어 입력 차단
 		PepccinePlayerController->DisableInput(PepccinePlayerController);
-		
+
 		// 컨트롤러 회전 입력 차단
 		PepccinePlayerController->SetIgnoreLookInput(true);
 		PepccinePlayerController->SetIgnoreMoveInput(true);
 	}
-	
+
 	if (GetCharacterMovement())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Disable Movement"));
@@ -244,7 +293,7 @@ void APepCharacter::Dead()
 		GetCharacterMovement()->DisableMovement();
 		GetCharacterMovement()->SetComponentTickEnabled(false);
 	}
-	
+
 	PepccineMontageComponent->Death();
 }
 
@@ -304,8 +353,12 @@ void APepCharacter::JumpStop()
 
 void APepCharacter::UseItem()
 {
-	if (!bIsPlayerAlive) return;
+	if (!bIsPlayerAlive)
+	{
+		return;
+	}
 	UE_LOG(LogTemp, Log, TEXT("UseItem!"));
+	UpdateWeaponUI();
 }
 
 void APepCharacter::Look(const FInputActionValue& value)
@@ -348,21 +401,14 @@ void APepCharacter::StopSprint(const FInputActionValue& value)
 	SprintHoldStartTime = 0.0f;
 }
 
-void APepCharacter::SetCharacterSpeed(float Speed)
-{
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = Speed;
-	}
-}
-
 void APepCharacter::Roll()
 {
-	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling() | !bIsPlayerAlive)
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling() | !
+		bIsPlayerAlive)
 	{
 		return;
 	}
-	
+
 	// 임시
 	//TriggerCameraShake();
 
@@ -385,7 +431,7 @@ void APepCharacter::EndRoll()
 
 	if (GetCharacterMovement())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
+		SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed - LooseWeight);
 	}
 }
 
@@ -422,18 +468,23 @@ void APepCharacter::Crouching()
 	if (bIsCrouching)
 	{
 		UnCrouch();
-		GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
+		float WalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed - LooseWeight;
+		SetCharacterSpeed(WalkSpeed);
 	}
 	else
 	{
 		Crouch();
-		GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.CrouchSpeed;
+		float CrouchSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.CrouchSpeed - LooseWeight;
+		SetCharacterSpeed(CrouchSpeed);
 	}
 }
 
 void APepCharacter::Reload()
 {
-	if (!bIsPlayerAlive) return;
+	if (!bIsPlayerAlive)
+	{
+		return;
+	}
 	UE_LOG(LogTemp, Log, TEXT("Reload!"));
 
 	//HitReactionComponent->EnterRagdoll(5);
@@ -448,49 +499,60 @@ void APepCharacter::Reload()
 		PepccineMontageComponent->Reloading();
 		bIsReloading = true;
 	}
+
+	UpdateWeaponUI();
 }
 
 void APepCharacter::Interactive()
 {
-	if (!bIsPlayerAlive) return;
-	
+	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent)
+	{
+		return;
+	}
+
+	float ItemWeight = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Weight;
+
 	// 아이템 인벤토리에 추가
 	if (CurrentDropItem)
 	{
 		CurrentDropItem->PickUpItem(ItemManagerComponent);
-		if (const UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
+		if (UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 패시브 아이템
-			InventoryComponent->AddItem(PassiveItem->IconTexture, PassiveItem->GetDisplayName(), PassiveItem->GetDescription());
+			InventoryComponent->AddItem(PassiveItem->GetIconTexture(), PassiveItem->GetDisplayName(),
+			                            PassiveItem->GetDescription(), PlayerStatComponent->PrintStats());
 
 			TArray<FPepccineCharacterStatModifier> CharacterStatModifiers = PassiveItem->GetCharacterStatModifiers();
 			for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)
 			{
+				float Amount = Modifier.StatModifierDefault.StatModifyValue;
+				//UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
+
 				EPepccineCharacterStatName CharacterStatName = Modifier.CharacterStatName;
-				EPepccineStatModifyType ModifyType = Modifier.StatModifierDefault.StatModifyType;
-				float Amount = Modifier.StatModifierDefault.StatModifyValue;
-
 				FString StatName = UEnum::GetValueAsString(CharacterStatName);
-				UE_LOG(LogTemp, Warning, TEXT("CharacterStatName: %s"), *StatName);
+				//UE_LOG(LogTemp, Warning, TEXT("CharacterStatName: %s"), *StatName);
 
+				EPepccineStatModifyType ModifyType = Modifier.StatModifierDefault.StatModifyType;
 				FString MT = UEnum::GetValueAsString(ModifyType);
-				UE_LOG(LogTemp, Warning, TEXT("ModifyType: %s"), *MT);
-				UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
-			}
+				//UE_LOG(LogTemp, Warning, TEXT("ModifyType: %s"), *MT);
 
-			TArray<FPepccineWeaponStatModifier> WeaponStatModifiers = PassiveItem->GetWeaponStatModifiers();
-			for (const FPepccineWeaponStatModifier& Modifier : WeaponStatModifiers)
-			{
-				EPepccineWeaponItemType WeaponItemType = Modifier.WeaponItemType;
-				EPepccineWeaponStatName WeaponItemStatName = Modifier.WeaponItemStatName;
-				float Amount = Modifier.StatModifierDefault.StatModifyValue;
-
-				FString WeaponType = UEnum::GetValueAsString(WeaponItemType);
-				UE_LOG(LogTemp, Warning, TEXT("WeaponItemType: %s"), *WeaponType);
-
-				FString WeaponStatName = UEnum::GetValueAsString(WeaponItemStatName);
-				UE_LOG(LogTemp, Warning, TEXT("WeaponItemStatName: %s"), *WeaponStatName);
-				UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
+				switch (ModifyType)
+				{
+				case EPepccineStatModifyType::EPSMT_Add:
+					{
+						//UE_LOG(LogTemp, Warning, TEXT("EPSMT_Add: %f"), Amount);
+						FStatModifier AddStatModifier(CharacterStatName, Amount, 1.0f);
+						PlayerStatComponent->ApplyStatModifier(AddStatModifier);
+						break;
+					}
+				case EPepccineStatModifyType::EPSMT_Multiply:
+					{
+						//UE_LOG(LogTemp, Warning, TEXT("EPSMT_Multiply: %f"), Amount);
+						FStatModifier MulStatModifier(CharacterStatName, 0.0f, Amount);
+						PlayerStatComponent->ApplyStatModifier(MulStatModifier);
+						break;
+					}
+				}
 			}
 
 			TArray<FPepccineCharacterFeature> CharacterFeatures = PassiveItem->GetCharacterFeatures();
@@ -505,19 +567,30 @@ void APepCharacter::Interactive()
 				}
 			}
 		}
-		else if (const UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
+		else if (UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
 		{
-			if (!ItemIconComponent) return;
 			// 무기류 아이템
-			if (WeaponItem->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main)
+			UpdateWeaponUI();
+			SetWeight();
+		}
+		else if (UPepccineResourceItemData* DropItem = Cast<UPepccineResourceItemData>(CurrentDropItem->GetDropItemData()))
+		{
+			// 리소스 아이템
+			switch (DropItem->GetResourceItemType())
 			{
-				ItemIconComponent->SetWeaponItem(WeaponItem->IconTexture, nullptr, WeaponItem->GetDisplayName(), WeaponItem->GetWeaponItemStats().MagazineAmmo, WeaponItem->GetWeaponItemStats().SpareAmmo, true);
-			}
-			else if (WeaponItem->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Sub)
-			{
-				ItemIconComponent->SetWeaponItem(nullptr, WeaponItem->IconTexture, WeaponItem->GetDisplayName(), WeaponItem->GetWeaponItemStats().MagazineAmmo, WeaponItem->GetWeaponItemStats().SpareAmmo, true);
+			case EPepccineResourceItemType::EPRIT_HealingPotion:
+				{
+					int32 Amount = DropItem->GetResourceAmount();
+					const FStatModifier AddStatModifier(EPepccineCharacterStatName::EPCSN_CurrentHealth, Amount, 1.0f);
+					PlayerStatComponent->ApplyStatModifier(AddStatModifier);
+					break;
+				}
+			default:
+				break;
 			}
 		}
+
+		PepccineMontageComponent->Pick();
 		/*
 		else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
 		{
@@ -527,23 +600,50 @@ void APepCharacter::Interactive()
 		*/
 	}
 
-	// 스텟연산 (저장 구조체)
-	// 갖고있는 모든 패시브 아이템 적용 (캐릭터 스텟)
-	// 1. 케릭터 스탯 연산 선행
-	// 2. 무기 스탯 반영
-	// 3. PlayerStatComponent->AttackDamage 
-
-	// 갖고있는 무기 스텟 (총 스텟)
-
 	// Delay 있는 상호작용 전용
 	if (bIsInteracting)
 	{
-		
 	}
 	else
 	{
-		
 	}
+}
+
+void APepCharacter::UpdateWeaponUI()
+{
+	if (!ItemManagerComponent || !ItemIconComponent)
+	{
+		return;
+	}
+
+	// 주무기 정보
+	UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->
+		GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main);
+	FString MainWeaponName = MainWeaponData ? MainWeaponData->GetDisplayName() : FString("None");
+	int32 MainWeaponAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
+	int32 MainSpareAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().SpareAmmo : 0;
+	UTexture2D* MainWeaponImage = MainWeaponData ? MainWeaponData->GetIconTexture() : nullptr;
+
+	// 보조무기 정보
+	UPepccineWeaponItemData* SubWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub);
+	FString SubWeaponName = SubWeaponData ? SubWeaponData->GetDisplayName() : FString("None");
+	int32 SubWeaponAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
+	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().SpareAmmo : 0;
+	UTexture2D* SubWeaponImage = SubWeaponData ? SubWeaponData->GetIconTexture() : nullptr;
+
+	// 현재 장착된 무기가 주무기인지 확인
+	bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() ==
+		EPepccineWeaponItemType::EPWIT_Main;
+	
+	// WeaponWidget 업데이트
+	ItemIconComponent->SetWeaponItem(
+		MainWeaponImage,
+		SubWeaponImage,
+		bIsMainWeaponEquipped ? MainWeaponName : SubWeaponName,
+		bIsMainWeaponEquipped ? MainWeaponAmmo : SubWeaponAmmo,
+		bIsMainWeaponEquipped ? MainSpareAmmo : SubWeaponMaxAmmo,
+		bIsMainWeaponEquipped
+	);
 }
 
 void APepCharacter::OpenInventory()
@@ -573,18 +673,26 @@ void APepCharacter::OpenInventory()
 
 void APepCharacter::SwapItem(const FInputActionValue& value)
 {
-	if (!bIsPlayerAlive) return;
-	
+	if (!bIsPlayerAlive)
+	{
+		return;
+	}
+
 	float ScrollValue = value.Get<float>();
 
-	if (ScrollValue > 0.0f)
-	{
-		ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Main);
-	}
-	else if (ScrollValue < 0.0f)
+	if (bIsMainWeaponEquipped)
 	{
 		ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Sub);
 	}
+	else
+	{
+		ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Main);
+	}
+
+	SetWeight();
+	UpdateWeaponUI();
+
+	PepccineMontageComponent->Draw();
 }
 
 void APepCharacter::StopFire()
@@ -594,17 +702,32 @@ void APepCharacter::StopFire()
 
 void APepCharacter::Fire()
 {
-	if (bIsRolling | !bIsPlayerAlive) return;
+	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent)
+	{
+		return;
+	}
+
+	float CurrentAmmo = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineAmmo;
+	if (CurrentAmmo <= 0)
+	{
+		PepccineMontageComponent->Attack();
+	}
+	else
+	{
+		PepccineMontageComponent->Fire();
+		ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	}
 
 	bIsFiring = true;
-	PepccineMontageComponent->Fire();
-	// 무기 데미지
-	ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	UpdateWeaponUI();
 }
 
 void APepCharacter::ZoomIn()
 {
-	if (bIsRolling | !bIsPlayerAlive) return;
+	if (bIsRolling | !bIsPlayerAlive)
+	{
+		return;
+	}
 
 	bIsZooming = true;
 
@@ -619,8 +742,6 @@ void APepCharacter::ZoomIn()
 
 void APepCharacter::ZoomOut()
 {
-	UE_LOG(LogTemp, Log, TEXT("ZoomOut!"));
-
 	bIsZooming = false;
 
 	ToggleCameraView();
@@ -668,7 +789,10 @@ void APepCharacter::TriggerCameraShake()
 
 void APepCharacter::ShowMenu()
 {
-	if (!PlayerController) return;
+	if (!PlayerController)
+	{
+		return;
+	}
 	PlayerController->ToggleExitMenu();
 }
 #pragma endregion
