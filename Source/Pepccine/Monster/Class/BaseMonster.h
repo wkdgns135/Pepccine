@@ -8,6 +8,14 @@ class UMonsterStatComponent;
 class UMonsterAttackComponent;
 class UHitReactionComponent;
 
+UENUM(BlueprintType)
+enum class EMonsterType : uint8
+{
+	None        UMETA(DisplayName = "None"),
+	CloseRange  UMETA(DisplayName = "CloseRange"),
+	LongRange   UMETA(DisplayName = "LongRange"),
+};
+
 UCLASS()
 class PEPCCINE_API ABaseMonster : public ACharacter
 {
@@ -17,16 +25,16 @@ public:
 	ABaseMonster();
 
 protected:
-	virtual void BeginPlay() override;
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster")
+	EMonsterType MonsterType;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UMonsterAttackComponent* AttackComponent;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UMonsterStatComponent* StatComponent;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UHitReactionComponent* HitReactionComponent;
+
+	virtual void BeginPlay() override;
 
 private:
 

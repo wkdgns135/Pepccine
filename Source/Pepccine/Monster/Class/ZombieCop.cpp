@@ -6,4 +6,6 @@ AZombieCop::AZombieCop()
 {
 	AIControllerClass = ANormalMonsterAIC::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	MonsterType = EMonsterType::LongRange;
 }
