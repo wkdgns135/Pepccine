@@ -491,7 +491,7 @@ void APepCharacter::Reload()
 
 void APepCharacter::Interactive()
 {
-	if (!bIsPlayerAlive || !PlayerStatComponent) return;
+	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent) return;
 
 	float ItemWeight = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Weight;
 	
@@ -555,6 +555,8 @@ void APepCharacter::Interactive()
 			UpdateWeaponUI();
 			SetWeight();
 		}
+
+		PepccineMontageComponent->Pick();
 		/*
 		else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
 		{
@@ -583,14 +585,14 @@ void APepCharacter::UpdateWeaponUI()
 	UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main);
 	FString MainWeaponName = MainWeaponData ? MainWeaponData->GetDisplayName() : FString("None");
 	int32 MainWeaponAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
-	int32 MainWeaponMaxAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineSize : 0;
+	int32 MainWeaponMaxAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().SpareAmmo : 0;
 	UTexture2D* MainWeaponImage = MainWeaponData ? MainWeaponData->IconTexture : nullptr;
 
 	// 보조무기 정보
 	UPepccineWeaponItemData* SubWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub);
 	FString SubWeaponName = SubWeaponData ? SubWeaponData->GetDisplayName() : FString("None");
 	int32 SubWeaponAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
-	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineSize : 0;
+	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().SpareAmmo : 0;
 	UTexture2D* SubWeaponImage = SubWeaponData ? SubWeaponData->IconTexture : nullptr;
 
 	// 현재 장착된 무기가 주무기인지 확인
@@ -649,6 +651,8 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 
 	SetWeight();
 	UpdateWeaponUI();
+	
+	PepccineMontageComponent->Draw();
 }
 
 void APepCharacter::StopFire()
@@ -658,11 +662,20 @@ void APepCharacter::StopFire()
 
 void APepCharacter::Fire()
 {
-	if (bIsRolling | !bIsPlayerAlive) return;
+	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent) return;
+	
+	float CurrentAmmo = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineAmmo;
+	if (CurrentAmmo <= 0)
+	{
+		PepccineMontageComponent->Attack();
+	}
+	else
+	{
+		PepccineMontageComponent->Fire();
+		ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	}
 
 	bIsFiring = true;
-	PepccineMontageComponent->Fire();
-	ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 	UpdateWeaponUI();
 }
 
@@ -683,8 +696,6 @@ void APepCharacter::ZoomIn()
 
 void APepCharacter::ZoomOut()
 {
-	UE_LOG(LogTemp, Log, TEXT("ZoomOut!"));
-
 	bIsZooming = false;
 
 	ToggleCameraView();
