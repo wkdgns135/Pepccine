@@ -2,11 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Monster/Widget/MonsterHealthWidget.h"
 #include "BaseMonster.generated.h"
 
+class UWidgetComponent;
 class UMonsterStatComponent;
 class UMonsterAttackComponent;
 class UHitReactionComponent;
+class UMonsterHealthWidget;
 
 UCLASS()
 class PEPCCINE_API ABaseMonster : public ACharacter
@@ -15,6 +18,15 @@ class PEPCCINE_API ABaseMonster : public ACharacter
 
 public:
 	ABaseMonster();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
+	UWidgetComponent* HealthBarWidgetComp;
+	
+	UPROPERTY()
+	UMonsterHealthWidget* HealthInstance;
+	
+	void UpdateHealthBar(float CurrentHealth, float MaxHealth);
+	void InitializeHealthBar();
 
 protected:
 	virtual void BeginPlay() override;

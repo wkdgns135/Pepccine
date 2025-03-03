@@ -35,5 +35,4 @@ protected:
     float Defense = 5.0f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
     float Speed = 300.0f;
-
 };
