@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "PepccineItemSpawner.h"
+#include "PepccineItemSpawnerSubSystem.h"
 #include "PepccineStatName.h"
 #include "Active/PepccineActiveItemData.h"
 #include "Active/PepccineActiveItemManager.h"
@@ -18,7 +18,6 @@ class UPepccinePassiveItemManager;
 class UPepccineActiveItemData;
 struct FPepccineItemSaveData;
 class UPepccinePassiveItemData;
-class UPepccineItemSpawner;
 class UPepccineItemDataAssetBase;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -78,12 +77,8 @@ public:
 	bool UseCoin(int32 Count);
 
 	// getter
-
-	// 아이템 스포너 가져오기
-	UFUNCTION(BlueprintCallable, Category = "Item|Spawner")
-	UPepccineItemSpawner* GetItemSpawner() const { return ItemSpawner; };
-
-	// inline getter
+	// 발사 방향 가져오기
+	FVector GetShootDirection() const;
 
 	// 무기 컴포넌트 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
@@ -114,6 +109,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Item|Passive")
 	FORCEINLINE TMap<int32, UPepccinePassiveItemData*> GetPassiveItemDatas() const
 	{
+		if (PassiveItemManager == nullptr)
+		{
+			return TMap<int32, UPepccinePassiveItemData*>();
+		}
+		
 		return PassiveItemManager->GetPassiveItemDatas();
 	}
 
@@ -177,14 +177,6 @@ public:
 	FORCEINLINE int32 GetCoinCount() const { return CoinCount; }
 
 private:
-	// 아이템 스포너 클래스
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UPepccineItemSpawner> ItemSpawnerClass;
-
-	// 임시 아이템 스포너
-	UPROPERTY()
-	UPepccineItemSpawner* ItemSpawner;
-
 	// 무기 아이템 매니저
 	UPROPERTY(VisibleInstanceOnly, Category = "Item|Manager")
 	UPepccineWeaponItemManager* WeaponItemManager;
@@ -210,4 +202,7 @@ private:
 	// 코인
 	UPROPERTY(VisibleInstanceOnly, Category = "Item|Resource", meta = (DisplayName = "코인 수"))
 	int32 CoinCount = 0;
+
+	UPROPERTY()
+	UPepccineItemSpawnerSubSystem* SpawnerSubSystem;
 };

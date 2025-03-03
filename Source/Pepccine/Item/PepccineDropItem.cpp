@@ -121,17 +121,17 @@ void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 					UE_LOG(LogTemp, Warning, TEXT("주 무기가 없습니다."));
 					return;
 				}
-				RemainingCount = (MainWeaponData->GetWeaponItemStats().SpareAmmo + ResourceItemData->GetResourceCount()) - 999;
+				RemainingCount = (MainWeaponData->GetWeaponItemStats().SpareAmmo + ResourceItemData->GetResourceAmount()) - 999;
 			}
 			else if (ResourceItemData->GetResourceItemType() == EPepccineResourceItemType::EPRIT_Coin)
 			{
-				RemainingCount = (ItemManagerComponent->GetCoinCount() + ResourceItemData->GetResourceCount()) - 99;
+				RemainingCount = (ItemManagerComponent->GetCoinCount() + ResourceItemData->GetResourceAmount()) - 99;
 			}
 
 			if (RemainingCount > 0)
 			{
 				IsDestroy = false;
-				ResourceItemData->SetResourceCount(ResourceItemData->GetResourceCount() - RemainingCount);
+				ResourceItemData->SetResourceAmount(ResourceItemData->GetResourceAmount() - RemainingCount);
 			}
 		}
 

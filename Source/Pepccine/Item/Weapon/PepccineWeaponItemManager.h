@@ -9,7 +9,7 @@
 
 #include "PepccineWeaponItemManager.generated.h"
 
-class UPepccineItemSpawner;
+class UPepccineItemSpawnerSubSystem;
 class UPepccineWeaponItemData;
 
 UCLASS()
@@ -22,7 +22,7 @@ public:
 	void SetWeaponItemComponent(ACharacter* OwnerCharacter);
 	
 	// 기본 무기 장착
-	void EquipDefaultWeapon(const UPepccineItemSpawner* ItemSpawner);
+	void EquipDefaultWeapon(const UPepccineWeaponItemData* WeaponItemData);
 	// 무기 획득
 	void PickUpItem(const UPepccineWeaponItemData* WeaponItemData);
 	// 무기 장착
@@ -32,7 +32,7 @@ public:
 	// 무기 교체
 	void SwapWeapon(EPepccineWeaponItemType WeaponType) const;
 	// 현재 장착 중인 무기 발사
-	void FireWeapon(float WeaponDamage) const;
+	void FireWeapon(float WeaponDamage, const FVector& ShootDirection) const;
 	// 현재 장착 중인 무기 재장전
 	void ReloadWeapon() const;
 

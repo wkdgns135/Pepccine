@@ -40,7 +40,7 @@ void UPepccineWeaponItemComponent::InitWeaponComponent(ACharacter* InOwnerCharac
 	}
 }
 
-void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage)
+void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage, const FVector& ShootDirection)
 {
 	// 현재 발사 가능 상태가 아니라면 발사 실패(연사 관련)
 	if (!bCanFire)
@@ -58,16 +58,11 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage)
 
 	if (const UWorld* World = GetWorld())
 	{
-		const FName SoketName = TEXT("Muzzle");
+		const FName SoketName = GetMuzzleName();
 		if (DoesSocketExist(SoketName))
 		{
-			// 머즐 위치
-			const FVector MuzzleLocation = GetSocketLocation(SoketName);
-			// 머즐 회전
-			const FRotator MuzzleRotation = GetSocketRotation(SoketName);
-
 			APepccinePoolable* Poolable;
-			PoolSubSystem->SpawnFromPool(ProjectileClass, MuzzleLocation, MuzzleRotation, Poolable);
+			PoolSubSystem->SpawnFromPool(ProjectileClass, GetSocketLocation(SoketName), GetSocketRotation(SoketName), Poolable);
 			if (Poolable)
 			{
 				// 투사체 생성
@@ -84,7 +79,7 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage)
 						SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(GetOwner(), true);
 					}
 					
-					SpawnedProjectile->InitProjectile(GetFireDirection(MuzzleLocation),
+					SpawnedProjectile->InitProjectile(ShootDirection,
 					                                  EquippedWeaponData->GetWeaponItemStats().BulletSpeed,
 					                                  EquippedWeaponData->GetWeaponItemStats().AttackRange);
 
@@ -190,42 +185,4 @@ void UPepccineWeaponItemComponent::EquipWeapon(UPepccineWeaponItemData* WeaponIt
 			UGameplayStatics::PlaySoundAtLocation(this, ReloadSound, OwnerCharacter->GetActorLocation());
 		}
 	}
-}
-
-FVector UPepccineWeaponItemComponent::GetFireDirection(const FVector& MuzzleLocation) const
-{
-	// 화면 중심 좌표 계산
-	FVector2D ViewportSize;
-	GEngine->GameViewport->GetViewportSize(ViewportSize);
-	const FVector2D ScreenCenter(ViewportSize.X / 2, ViewportSize.Y / 2);
-
-	// 화면 중심에서 월드 방향 가져오기
-	FVector WorldLocation, WorldDirection;
-	UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(GetWorld(), 0), ScreenCenter,
-	                                         WorldLocation, WorldDirection);
-
-	// Ray 설정
-	const FVector Start = WorldLocation;
-	const FVector End = Start + (WorldDirection * 10000); // Ray 길이
-	FHitResult HitResult;
-
-	DrawDebugLine(GetWorld(), Start, End, FColor::Green, true, 2.0f);
-
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(OwnerCharacter);
-
-	FVector HitLocation;
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldDynamic, QueryParams))
-	{
-		// 충돌한 위치
-		HitLocation = HitResult.Location;
-		UE_LOG(LogTemp, Warning, TEXT("Camera Ray Hit! : %s"), *HitResult.GetActor()->GetName());
-	}
-	else
-	{
-		// 충돌하지 않으면 Ray 끝점
-		HitLocation = End;
-	}
-
-	return (HitLocation - MuzzleLocation).GetSafeNormal();
 }

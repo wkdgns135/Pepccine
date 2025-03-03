@@ -68,7 +68,7 @@ struct FPepccineWeaponStat
 	float Recoil;
 	// 무게
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats",
-		meta = (DisplayName = "무게", ClampMin = "1.0", ClampMax = "10.0"))
+		meta = (DisplayName = "무게", ClampMin = "0.1", ClampMax = "1000.0"))
 	float Weight;
 
 	FPepccineWeaponStat(): AttackMultiplier(1.0f), AttackRange(10.0f), FireRate(1.0f),

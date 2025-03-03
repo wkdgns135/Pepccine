@@ -4,7 +4,7 @@
 #include "GameFramework/Character.h"
 #include "Item/PepccineItemDataAssetBase.h"
 #include "Item/PepccineItemManagerComponent.h"
-#include "Item/PepccineItemSpawner.h"
+#include "Item/PepccineItemSpawnerSubSystem.h"
 
 void UPepccineWeaponItemManager::SetWeaponItemComponent(ACharacter* OwnerCharacter)
 {
@@ -29,23 +29,9 @@ void UPepccineWeaponItemManager::SetWeaponItemComponent(ACharacter* OwnerCharact
 	}
 }
 
-void UPepccineWeaponItemManager::EquipDefaultWeapon(const UPepccineItemSpawner* ItemSpawner)
+void UPepccineWeaponItemManager::EquipDefaultWeapon(const UPepccineWeaponItemData* WeaponItemData)
 {
-	if (ItemSpawner)
-	{
-		if (const UPepccineItemDataAssetBase* ItemDataAsset = ItemSpawner->GetItemDataAsset())
-		{
-			if (ItemDataAsset->GetWeaponItemDataAsset()->GetWeaponItemDatas().Num() > 0)
-			{
-				// 기본 무기는 0번 인덱스
-				if (const UPepccineWeaponItemData* WeaponItemData = ItemDataAsset->GetWeaponItemDataAsset()->
-					GetWeaponItemDatas()[0])
-				{
-					PickUpItem(WeaponItemData);
-				}
-			}
-		}
-	}
+	PickUpItem(WeaponItemData);
 }
 
 void UPepccineWeaponItemManager::PickUpItem(const UPepccineWeaponItemData* WeaponItemData)
@@ -111,12 +97,12 @@ void UPepccineWeaponItemManager::SwapWeapon(const EPepccineWeaponItemType Weapon
 	}
 }
 
-void UPepccineWeaponItemManager::FireWeapon(const float WeaponDamage) const
+void UPepccineWeaponItemManager::FireWeapon(const float WeaponDamage, const FVector& ShootDirection) const
 {
 	// 무기 컴포넌트가 있고 장착된 무기가 있을 경우만 발사
 	if (WeaponItemComp && GetEquippedWeaponItemData())
 	{
-		WeaponItemComp->Fire(WeaponDamage);
+		WeaponItemComp->Fire(WeaponDamage, ShootDirection);
 	}
 }
 
@@ -150,9 +136,11 @@ void UPepccineWeaponItemManager::UpdateWeaponItemStats(EPepccineWeaponItemType W
 		                                            ? MainWeaponItemData
 		                                            : SubWeaponItemData;
 
-	const UPepccineWeaponItemData* DefaultWeaponItemData = ItemManager->GetItemSpawner()->GetItemDataAsset()->
-	                                                              GetWeaponItemDataAsset()->
-	                                                              GetWeaponsItemById(TargetWeaponItem->GetItemId());
+	const UPepccineWeaponItemData* DefaultWeaponItemData = GetWorld()->
+	                                                       GetSubsystem<UPepccineItemSpawnerSubSystem>()->
+	                                                       GetItemDataAsset()->
+	                                                       GetWeaponItemDataAsset()->
+	                                                       GetWeaponsItemById(TargetWeaponItem->GetItemId());
 
 	for (const UPepccinePassiveItemData* PassiveItemData : PassiveItemDatas)
 	{

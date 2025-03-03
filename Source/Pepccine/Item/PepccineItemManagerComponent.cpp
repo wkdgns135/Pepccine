@@ -1,7 +1,8 @@
 ﻿#include "Item/PepccineItemManagerComponent.h"
 
+#include "PepccineItemDataAssetBase.h"
 #include "PepccineItemSaveData.h"
-#include "PepccineItemSpawner.h"
+#include "PepccineItemSpawnerSubSystem.h"
 #include "Active/PepccineActiveItemData.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
@@ -10,7 +11,7 @@
 #include "Resource/PepccineResourceItemData.h"
 
 UPepccineItemManagerComponent::UPepccineItemManagerComponent()
-	: ItemSpawner(nullptr), WeaponItemManager(nullptr), PassiveItemManager(nullptr), ActiveItemManager(nullptr)
+	: WeaponItemManager(nullptr), PassiveItemManager(nullptr), ActiveItemManager(nullptr), SpawnerSubSystem(nullptr)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
@@ -20,24 +21,30 @@ void UPepccineItemManagerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// 무기 아이템 매니저 생성
-	WeaponItemManager = NewObject<UPepccineWeaponItemManager>();
+	WeaponItemManager = NewObject<UPepccineWeaponItemManager>(this);
+	WeaponItemManager->InitializeManager(this);
 	// 패시브 아이템 매니저 생성
-	PassiveItemManager = NewObject<UPepccinePassiveItemManager>();
+	PassiveItemManager = NewObject<UPepccinePassiveItemManager>(this);
+	PassiveItemManager->InitializeManager(this);
 	// 액티브 아이템 매니저 생성
-	ActiveItemManager = NewObject<UPepccineActiveItemManager>();
-	
-	if (WeaponItemManager && PassiveItemManager && ActiveItemManager && ItemSpawnerClass)
-	{
-		ItemSpawner = NewObject<UPepccineItemSpawner>(GetOwner(), ItemSpawnerClass);
-		if (ItemSpawner)
-		{
-			if (ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner()))
-			{
-				// 무기 컴포넌트 등록
-				WeaponItemManager->SetWeaponItemComponent(OwnerCharacter);
+	ActiveItemManager = NewObject<UPepccineActiveItemManager>(this);
+	ActiveItemManager->InitializeManager(this);
 
+	SpawnerSubSystem = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
+
+	if (WeaponItemManager && PassiveItemManager && ActiveItemManager && SpawnerSubSystem)
+	{
+		if (ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner()))
+		{
+			// 무기 컴포넌트 등록
+			WeaponItemManager->SetWeaponItemComponent(OwnerCharacter);
+
+			if (const UPepccineWeaponItemData* WeaponItemData = SpawnerSubSystem->GetItemDataAsset()
+				->GetWeaponItemDataAsset()
+				->GetWeaponsItemById(0))
+			{
 				// 기본 무기 장착
-				WeaponItemManager->EquipDefaultWeapon(ItemSpawner);
+				WeaponItemManager->EquipDefaultWeapon(WeaponItemData);
 			}
 		}
 	}
@@ -88,11 +95,11 @@ bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemDa
 		if (ResourceItemData->GetResourceItemType() == EPepccineResourceItemType::EPRIT_AmmoBox)
 		{
 			WeaponItemManager->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main)->GetWeaponItemStatsPointer()->
-			                   SpareAmmo += ResourceItemData->GetResourceCount();
+			                   SpareAmmo += ResourceItemData->GetResourceAmount();
 		}
 		else if (ResourceItemData->GetResourceItemType() == EPepccineResourceItemType::EPRIT_Coin)
 		{
-			CoinCount += ResourceItemData->GetResourceCount();
+			CoinCount += ResourceItemData->GetResourceAmount();
 		}
 	}
 
@@ -103,9 +110,7 @@ bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemDa
 			UGameplayStatics::PlaySoundAtLocation(this, PickUpSound, GetOwner()->GetActorLocation());
 		}
 	}
-
-	// 무기 스탯 재설정
-
+	
 	return true;
 }
 
@@ -116,7 +121,7 @@ void UPepccineItemManagerComponent::SwapWeapon(const EPepccineWeaponItemType Wea
 
 void UPepccineItemManagerComponent::FireWeapon(const float WeaponDamage) const
 {
-	WeaponItemManager->FireWeapon(WeaponDamage);
+	WeaponItemManager->FireWeapon(WeaponDamage, GetShootDirection());
 }
 
 void UPepccineItemManagerComponent::ReloadWeapon() const
@@ -232,6 +237,55 @@ bool UPepccineItemManagerComponent::UseCoin(const int32 Count)
 	CoinCount -= Count;
 
 	return true;
+}
+
+FVector UPepccineItemManagerComponent::GetShootDirection() const
+{
+	// 머즐 이름
+	const FName MuzzleName = GetWeaponItemComp()->GetMuzzleName();
+	if (!GetWeaponItemComp()->DoesSocketExist(MuzzleName))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("일치하는 소캣 \"%s\" 이(가) 없습니다."), *MuzzleName.ToString());
+		return FVector::ZeroVector;
+	}
+
+	// 머즐 위치
+	const FVector MuzzleLocation = GetWeaponItemComp()->GetMuzzleLocation(MuzzleName);
+
+	// 화면 중심 좌표 계산
+	FVector2D ViewportSize;
+	GEngine->GameViewport->GetViewportSize(ViewportSize);
+	const FVector2D ScreenCenter(ViewportSize.X / 2, ViewportSize.Y / 2);
+
+	// 화면 중심에서 월드 방향 가져오기
+	FVector WorldLocation, WorldDirection;
+	UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(GetWorld(), 0), ScreenCenter,
+	                                         WorldLocation, WorldDirection);
+
+	// Ray 설정
+	const FVector Start = WorldLocation;
+	const FVector End = Start + (WorldDirection * 10000); // Ray 길이
+	FHitResult HitResult;
+
+	DrawDebugLine(GetWorld(), Start, End, FColor::Green, true, 2.0f);
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(GetOwner());
+
+	FVector HitLocation;
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldDynamic, QueryParams))
+	{
+		// 충돌한 위치
+		HitLocation = HitResult.Location;
+		UE_LOG(LogTemp, Warning, TEXT("Camera Ray Hit! : %s"), *HitResult.GetActor()->GetName());
+	}
+	else
+	{
+		// 충돌하지 않으면 Ray 끝점
+		HitLocation = End;
+	}
+
+	return (HitLocation - MuzzleLocation).GetSafeNormal();
 }
 
 

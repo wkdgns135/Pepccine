@@ -8,7 +8,7 @@
 
 class UPepccineItemManagerComponent;
 
-UCLASS()
+UCLASS(BlueprintType)
 class PEPCCINE_API UPepccinePassiveItemManager : public UPepccineItemSubManager
 {
 	GENERATED_BODY()
