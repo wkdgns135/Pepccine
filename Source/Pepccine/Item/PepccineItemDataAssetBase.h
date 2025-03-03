@@ -20,48 +20,40 @@ public:
 
 	// 무기 데이터 에셋
 	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE UPepccineWeaponItemDataAsset* GetWeaponItemDataAsset() const { return WeaponItemDataAsset; };
-
+	FORCEINLINE UPepccineWeaponItemDataAsset* GetWeaponItemDataAsset() const { return WeaponItemDataAsset; }
 	// 패시브 데이터 에셋
 	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE UPepccinePassiveItemDataAsset* GetPassiveItemDataAsset() const { return PassiveItemDataAsset; };
-
+	FORCEINLINE UPepccinePassiveItemDataAsset* GetPassiveItemDataAsset() const { return PassiveItemDataAsset; }
 	// 액티브 데이터 에셋
 	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE UPepccineActiveItemDataAsset* GetActiveItemDataAsset() const { return ActiveItemDataAsset; };
-
+	FORCEINLINE UPepccineActiveItemDataAsset* GetActiveItemDataAsset() const { return ActiveItemDataAsset; }
+	// 체력 포션
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE UPepccineResourceItemData* GetHealingPotion() const { return HealingPotion; }
 	// 탄약통
 	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE UPepccineResourceItemData* GetAmmoBoxItem() const { return AmmoBoxItem; };
-
-	// // 열쇠
-	// UFUNCTION(BlueprintPure, Category = "Item")
-	// FORCEINLINE UPepccineResourceItemData* GetKeyItem() const { return KeyItem; };
-
+	FORCEINLINE UPepccineResourceItemData* GetAmmoBoxItem() const { return AmmoBoxItem; }
 	// 코인
 	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE UPepccineResourceItemData* GetCoinItem() const { return CoinItem; };
+	FORCEINLINE UPepccineResourceItemData* GetCoinItem() const { return CoinItem; }
 
 protected:
 
 	// 무기 데이터 에셋
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "무기 아이템 데이터 에셋"))
 	UPepccineWeaponItemDataAsset* WeaponItemDataAsset;
-
 	// 패시브 데이터 에셋
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "패시브 아이템 데이터 에셋"))
 	UPepccinePassiveItemDataAsset* PassiveItemDataAsset;
-
 	// 액티브 데이터 에셋
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "액티브 아이템 데이터 에셋"))
 	UPepccineActiveItemDataAsset* ActiveItemDataAsset;
-
+	// 체력 포션
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "체력 포션"))
+	UPepccineResourceItemData* HealingPotion;
 	// 탄약통
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "탄약통"))
 	UPepccineResourceItemData* AmmoBoxItem;
-	// // 열쇠
-	// UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "열쇠"))
-	// UPepccineResourceItemData* KeyItem;
 	// 코인
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "코인"))
 	UPepccineResourceItemData* CoinItem;

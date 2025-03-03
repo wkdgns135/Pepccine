@@ -499,10 +499,10 @@ void APepCharacter::Interactive()
 	if (CurrentDropItem)
 	{
 		CurrentDropItem->PickUpItem(ItemManagerComponent);
-		if (const UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
+		if (UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 패시브 아이템
-			InventoryComponent->AddItem(PassiveItem->IconTexture, PassiveItem->GetDisplayName(), PassiveItem->GetDescription(), PlayerStatComponent->PrintStats());
+			InventoryComponent->AddItem(PassiveItem->GetIconTexture(), PassiveItem->GetDisplayName(), PassiveItem->GetDescription(), PlayerStatComponent->PrintStats());
 
 			TArray<FPepccineCharacterStatModifier> CharacterStatModifiers = PassiveItem->GetCharacterStatModifiers();
 			for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)
@@ -549,7 +549,7 @@ void APepCharacter::Interactive()
 				}
 			}
 		}
-		else if (const UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
+		else if (UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 무기류 아이템
 			UpdateWeaponUI();
@@ -585,15 +585,15 @@ void APepCharacter::UpdateWeaponUI()
 	UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main);
 	FString MainWeaponName = MainWeaponData ? MainWeaponData->GetDisplayName() : FString("None");
 	int32 MainWeaponAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
-	int32 MainWeaponMaxAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().SpareAmmo : 0;
-	UTexture2D* MainWeaponImage = MainWeaponData ? MainWeaponData->IconTexture : nullptr;
+	int32 MainWeaponMaxAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineSize : 0;
+	UTexture2D* MainWeaponImage = MainWeaponData ? MainWeaponData->GetIconTexture() : nullptr;
 
 	// 보조무기 정보
 	UPepccineWeaponItemData* SubWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub);
 	FString SubWeaponName = SubWeaponData ? SubWeaponData->GetDisplayName() : FString("None");
 	int32 SubWeaponAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
-	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().SpareAmmo : 0;
-	UTexture2D* SubWeaponImage = SubWeaponData ? SubWeaponData->IconTexture : nullptr;
+	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineSize : 0;
+	UTexture2D* SubWeaponImage = SubWeaponData ? SubWeaponData->GetIconTexture() : nullptr;
 
 	// 현재 장착된 무기가 주무기인지 확인
 	bool bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main;
