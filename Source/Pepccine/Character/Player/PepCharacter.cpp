@@ -233,6 +233,7 @@ void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
 
 		CurrentDropItem = DropItem;
 	}
+	
 	//UE_LOG(LogTemp, Warning, TEXT("Number of DectedActor: %d"), DetectedActors.DetectedActors.Num());
 	//UE_LOG(LogTemp, Warning, TEXT("Detected Actors: [%s]"), *MinDistActor->Actor->GetName());
 	//UE_LOG(LogTemp, Warning, TEXT("Detected Actors Loc: [%f]"), MinDistActor->Distance);
@@ -306,10 +307,26 @@ void APepCharacter::OnMovementStopped()
 
 void APepCharacter::JumpStart()
 {
-	if (bIsRolling | !bIsPlayerAlive) return;
-	Super::Jump();
+	if (bIsRolling | !bIsPlayerAlive | !EnhancedRadarComponent | GetCharacterMovement()->IsFalling()) return;
 
-	Jump();
+	if (PlayerStatComponent->DecreaseStaminaByPercentage(5))
+	{
+		if (EnhancedRadarComponent->IsAbleToClimb())
+		{
+			bIsClimbing = true;
+			UE_LOG(LogTemp, Log, TEXT("Climb!"));
+			FVector ClimbDirection = GetActorForwardVector() * 200.f;
+			FVector ClimbUp = FVector(0.f, 0.f, 600.f);
+
+			LaunchCharacter(ClimbDirection + ClimbUp, true, true);
+			bIsClimbing = false;
+		}
+		else
+		{
+			Super::Jump();
+			Jump();
+		}
+	}
 }
 
 void APepCharacter::JumpStop()
@@ -371,7 +388,7 @@ void APepCharacter::Roll()
 	bIsRolling = true;
 	RollDirection = GetRollDirection();
 
-	if (!PlayerStatComponent->DecreaseStaminaByPercentage(30))
+	if (!PlayerStatComponent->DecreaseStaminaByPercentage(20))
 	{
 		bIsRolling = false;
 		return;

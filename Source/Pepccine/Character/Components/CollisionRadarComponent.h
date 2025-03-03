@@ -27,6 +27,10 @@ public:
   UPROPERTY(EditAnywhere, Category = "Radar")
   bool bIsUseRadar = false;
 
+	UPROPERTY(EditAnywhere, Category = "Radar")
+	bool bIsUseSweep = false;
+
+	FORCEINLINE_DEBUGGABLE bool IsAbleToClimb() const { return bIsAbleToClimb; } 
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -44,12 +48,16 @@ private:
   UPROPERTY(EditAnywhere, Category = "Debug")
   bool bShowDebug = true;
 
+	bool bIsAbleToClimb = false;
+
+	UPROPERTY()
   TArray<AActor*> NearbyActors;
 
   bool IsInFieldOfView(AActor* TargetActor) const;
   void DetectActors();
   void DrawDebugVisualization();
   void AddDetectZone();
+	bool CanClimbOverObstacle() const;
 
   UFUNCTION()
   void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,

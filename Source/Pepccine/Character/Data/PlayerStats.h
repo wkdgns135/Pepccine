@@ -22,7 +22,7 @@ struct FHealthStats
     
     FString PrintStats() const
     {
-        return FString::Printf(TEXT("현재 체력: %.2f\n최대 체력: %.2f\n"),
+        return FString::Printf(TEXT("현재 체력: %.0f\n최대 체력: %.0f\n"),
                                CurrentHealth, MaxHealth);
     }
 };
@@ -47,7 +47,7 @@ struct FStaminaStats
 
     FString PrintStats() const
     {
-        return FString::Printf(TEXT("현재 스테미나: %.2f\n최대 스테미나: %.2f\n스테미나 회복량: %.2f\n스테미나 회복속도: %.2f\n"),
+        return FString::Printf(TEXT("현재 스테미나: %.0f\n최대 스테미나: %.0f\n스테미나 회복량: %.0f\n스테미나 회복속도: %.0f\n"),
                                CurrentStamina, MaxStamina, StaminaRecoveryRate, StaminaRecoveryTime);
     }
 };
@@ -69,7 +69,7 @@ struct FCombatStats
 
     FString PrintStats() const
     {
-        return FString::Printf(TEXT("공격력: %.2f\n방어력: %.2f\n"),
+        return FString::Printf(TEXT("공격력: %.0f\n방어력: %.0f\n"),
                                AttackDamage, Defence);
     }
 };
@@ -103,7 +103,7 @@ struct FMovementStats
 
     FString PrintStats() const
     {
-        return FString::Printf(TEXT("이동속도: %.2f\n달리기 속도: %.2f\n점프력: %.2f\n힘: %.2f\n"),
+        return FString::Printf(TEXT("이동속도: %.0f\n달리기 속도: %.0f\n점프력: %.0f\n최대무게: %.0f\n"),
                                MovementSpeed, SprintSpeed, JumpZVelocity, Strength);
     }
 };
