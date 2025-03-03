@@ -24,11 +24,11 @@ struct FPepccineWeaponStat
 	float AttackMultiplier;
 	// 사거리(단위 m)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats",
-		meta = (DisplayName = "사거리", ClampMin = "10.0", ClampMax = "50.0"))
+		meta = (DisplayName = "사거리", ClampMin = "10.0", ClampMax = "1000.0"))
 	float AttackRange;
 	// 연사 속도
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats",
-		meta = (DisplayName = "연사 속도", ClampMin = "0.1", ClampMax = "10.0"))
+		meta = (DisplayName = "연사 속도", ClampMin = "0.1", ClampMax = "100.0"))
 	float FireRate;
 	// 확대 배율
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats",

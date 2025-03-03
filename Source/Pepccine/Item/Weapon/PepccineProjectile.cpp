@@ -1,6 +1,7 @@
 ﻿#include "Item/Weapon/PepccineProjectile.h"
 
 #include "PepccineCharacter.h"
+#include "Character/Components/BattleComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -71,14 +72,14 @@ void APepccineProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 {
 	if (OtherActor != nullptr && OtherActor != this)
 	{
-		//OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-
 		if (OwnerCharacter)
 		{
 			if (ACharacter* Enemy = Cast<ACharacter>(OtherActor))
 			{
-				UGameplayStatics::ApplyDamage(Enemy, WeaponDamage, OwnerCharacter->GetController(), this,
-				                              UDamageType::StaticClass());
+				if (const UBattleComponent* BattleComp = OwnerCharacter->GetComponentByClass<UBattleComponent>())
+				{
+					BattleComp->SendHitResult(Enemy, WeaponDamage, Hit);
+				}
 			}
 		}
 
