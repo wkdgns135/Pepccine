@@ -257,8 +257,8 @@ void APepCharacter::Dead()
 		PepccinePlayerController->SetIgnoreMoveInput(true);
 
 		// 게임오버 UI 노출
-		PepccinePlayerController->ShowGameOver(true);
 		ShowMenu();
+		PepccinePlayerController->ShowGameOver(true);
 	}
 
 	if (GetCharacterMovement())
