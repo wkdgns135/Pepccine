@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Monster/Widget/MonsterHealthWidget.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "BaseMonster.generated.h"
 
 class UWidgetComponent;
@@ -29,6 +30,7 @@ public:
 
 	FORCEINLINE EMonsterType GetMonsterType() const { return MonsterType; }
 	FORCEINLINE UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
 	UWidgetComponent* HealthBarWidgetComp;
 	
@@ -38,8 +40,6 @@ public:
 	void UpdateHealthBar(float CurrentHealth, float MaxHealth);
 	void InitializeHealthBar();
 
-protected:
-	virtual void BeginPlay() override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster")
