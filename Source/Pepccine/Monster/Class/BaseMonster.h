@@ -2,7 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "BaseMonster.generated.h"
+
 
 class UMonsterStatComponent;
 class UMonsterAttackComponent;
@@ -24,6 +26,9 @@ class PEPCCINE_API ABaseMonster : public ACharacter
 public:
 	ABaseMonster();
 
+	FORCEINLINE EMonsterType GetMonsterType() const { return MonsterType; }
+	FORCEINLINE UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster")
 	EMonsterType MonsterType;
@@ -33,6 +38,9 @@ protected:
 	UMonsterStatComponent* StatComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UHitReactionComponent* HitReactionComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+	UBehaviorTree* BehaviorTree;
 
 	virtual void BeginPlay() override;
 

@@ -1,6 +1,7 @@
 #include "Monster/AI/Controller/NormalMonsterAIC.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
+#include "Monster/Class/BaseMonster.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -22,7 +23,9 @@ void ANormalMonsterAIC::BeginPlay()
 
 void ANormalMonsterAIC::InitializeBehaviorTree(APawn* InPawn)
 {
-    if (BehaviorTree)
+    ABaseMonster* BaseMonster = Cast<ABaseMonster>(InPawn);
+    UBehaviorTree* BehaviorTree = BaseMonster->GetBehaviorTree();
+    if (BaseMonster && BehaviorTree)
     {
         if (UseBlackboard(BehaviorTree->BlackboardAsset, BlackboardComponent))
         {
