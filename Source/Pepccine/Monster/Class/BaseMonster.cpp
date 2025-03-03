@@ -19,7 +19,7 @@ ABaseMonster::ABaseMonster()
 	HealthBarWidgetComp->SetDrawSize(FVector2D(77.0f, 7.0f));
 	HealthBarWidgetComp->SetRelativeLocation(FVector(0, 0, 100.0f));
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> HealthWidgetClass(TEXT("/Game/Pepccine/Monster/WBP_NormalMonsterHP"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> HealthWidgetClass(TEXT("/Game/Pepccine/Monster/BP_MonsterHealthWidget"));
 	if (HealthWidgetClass.Succeeded())
 	{
 		HealthBarWidgetComp->SetWidgetClass(HealthWidgetClass.Class);
@@ -49,8 +49,9 @@ void ABaseMonster::InitializeHealthBar()
 			HealthInstance = Cast<UMonsterHealthWidget>(Widget);
 			if (HealthInstance)
 			{
-				HealthInstance->UpdateHealthBar(1.0f);
-				// HealthBarWidgetComp->SetHiddenInGame(true);
+				UE_LOG(LogTemp, Warning, TEXT("HealthInstance"));
+				HealthInstance->UpdateHealthBar(0.5f);
+				HealthBarWidgetComp->SetHiddenInGame(true);
 			}
 		}
 	}
