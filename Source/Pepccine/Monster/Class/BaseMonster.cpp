@@ -65,7 +65,7 @@ void ABaseMonster::UpdateHealthBar(float CurrentHealth, float MaxHealth)
 	}
 }
 
-void ABaseMonster::OnHitReceived(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult)
+void ABaseMonster::OnHitReceived(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Monster hit! Damage: %f, Hit Location: %s, BoneName: %s"), DamageAmount,
 	       *HitResult.Location.ToString(), *HitResult.BoneName.ToString());

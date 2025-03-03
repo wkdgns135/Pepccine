@@ -60,6 +60,8 @@ public:
 
   UFUNCTION()
   void ToggleExitMenu();
+
+  void ShowGameOver(bool IsVisible);
 protected:
   virtual void BeginPlay() override;
   virtual void SetupInputComponent() override;

@@ -1,5 +1,6 @@
 ﻿#include "PepCharacter.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include "EnhancedInputComponent.h"
@@ -195,7 +196,7 @@ void APepCharacter::AddObservers()
 	}
 }
 
-void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult)
+void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType)
 {
 	if (bIsRolling)
 	{
@@ -283,6 +284,10 @@ void APepCharacter::Dead()
 		// 컨트롤러 회전 입력 차단
 		PepccinePlayerController->SetIgnoreLookInput(true);
 		PepccinePlayerController->SetIgnoreMoveInput(true);
+
+		// 게임오버 UI 노출
+		PepccinePlayerController->ShowGameOver(true);
+		ShowMenu();
 	}
 
 	if (GetCharacterMovement())
@@ -489,18 +494,13 @@ void APepCharacter::Reload()
 
 	//HitReactionComponent->EnterRagdoll(5);
 
-	if (bIsReloading)
-	{
-		bIsReloading = false;
-	}
-	else
-	{
-		ItemManagerComponent->ReloadWeapon();
-		PepccineMontageComponent->Reloading();
-		bIsReloading = true;
-	}
+	bIsReloading = true;
 
+	ItemManagerComponent->ReloadWeapon();
+	PepccineMontageComponent->Reloading();
 	UpdateWeaponUI();
+
+	bIsReloading = false;
 }
 
 void APepCharacter::Interactive()
@@ -702,7 +702,7 @@ void APepCharacter::StopFire()
 
 void APepCharacter::Fire()
 {
-	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent)
+	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent || bIsReloading)
 	{
 		return;
 	}
