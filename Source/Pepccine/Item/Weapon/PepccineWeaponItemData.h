@@ -16,11 +16,12 @@ class PEPCCINE_API UPepccineWeaponItemData : public UPepccineItemDataBase
 
 public:
 	// getter
+	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE EPepccineWeaponItemType GetWeaponItemType() const { return WeaponItemType; };
 	FORCEINLINE TObjectPtr<USkeletalMesh> GetEquippedMesh() const { return EquippedMesh; };
-	FORCEINLINE TSubclassOf<APepccineProjectile> GetProjectileClass() const { return ProjectileClass; };
-	
-	UFUNCTION(BlueprintPure, category = "Item|Weapon")
+	FORCEINLINE FTimerHandle& GetFireRateTimerHandle() { return FireRateTimerHandle; };
+
+	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE FPepccineWeaponStat GetWeaponItemStats() const { return WeaponStats; };
 	FORCEINLINE FPepccineWeaponStat* GetWeaponItemStatsPointer() { return &WeaponStats; };
 	FORCEINLINE TObjectPtr<USoundBase> GetFireSound() const { return FireSound; };
@@ -39,10 +40,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Weapon", meta = (DisplayName = "장착 메시"))
 	TObjectPtr<USkeletalMesh> EquippedMesh;
 
-	// 투사체(프로젝타일) 클래스
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Weapon", meta = (DisplayName = "투사체 클래스"))
-	TSubclassOf<APepccineProjectile> ProjectileClass;
-	
 	// 무기 발사 소리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Weapon", meta = (DisplayName = "무기 발사 소리"))
 	TObjectPtr<USoundBase> FireSound;
@@ -54,6 +51,9 @@ protected:
 	// 무기 스탯
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info|Weapon", meta = (DisplayName = "무기 스탯"))
 	FPepccineWeaponStat WeaponStats;
+
+	// 무기 재사용 대기시간 핸들러
+	FTimerHandle FireRateTimerHandle;
 
 	// 무기 발사 애니메이션 몽타주
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)

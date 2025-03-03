@@ -3,7 +3,11 @@
 
 #include "Character/Widget/HealthWidget.h"
 
-void UHealthWidget::UpdateHealthVolumne(const float Health, const float MaxHealth)
+void UHealthWidget::UpdateHealthVolume(const float Health, const float MaxHealth)
 {
-	HealthPrograssBar->SetPercent(1);
+	if (!HealthPrograssBar || MaxHealth <= 0.0f) return;
+
+	const float HealthPercent = Health / MaxHealth;
+
+	HealthPrograssBar->SetPercent(HealthPercent);
 }

@@ -1,117 +1,132 @@
+﻿#include "PepCharacter.h"
 
-#include "PepCharacter.h"
-#include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Camera/CameraComponent.h"
-#include "CrosshairHUDComponent.h"
-#include "PrograssBarHUDComponent.h"
 
-#include "RadorComponent.h"
-#include "CollisionRadarComponent.h"
+#include "EnhancedInputComponent.h"
+#include "Item/PepccineItemManagerComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Character/Components/CrosshairHUDComponent.h"
+#include "Character/Components/PrograssBarHUDComponent.h"
+#include "Character/Components/ItemIconHUDComponent.h"
+#include "Character/Components/CollisionRadarComponent.h"
+#include "Character/Components/InventoryComponent.h"
+
+#include "Character/Controller/PepccineCameraModifier.h"
 
 #include "GameFramework/SpringArmComponent.h"
 #include "Character/Animation/PepccineMontageComponent.h"
+#include "Character/Animation/PepccineHitReactionComponent.h"
+#include "Character/Components/BattleComponent.h"
+#include "Character/Data/ActorInfo.h"
+#include "Components/WidgetComponent.h"
+#include "Item/PepccineDropItem.h"
+#include "Item/Passive/PepccinePassiveItemData.h"
+#include "Monster/Class/ZombieGirl.h"
 
 APepCharacter::APepCharacter()
 {
-  PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;
 
-  SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-  SpringArmComp->SetupAttachment(RootComponent);
-  SpringArmComp->TargetArmLength = CameraArmLength;
-  SpringArmComp->bUsePawnControlRotation = true;
+	SpringArmCompThird = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmThird"));
+	SpringArmCompThird->SetupAttachment(RootComponent);
+	SpringArmCompThird->TargetArmLength = CameraArmLength;
+	SpringArmCompThird->bUsePawnControlRotation = true;
 
-  ThirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
-  ThirdPersonCamera->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
-  ThirdPersonCamera->bUsePawnControlRotation = false;
+	ThirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
+	ThirdPersonCamera->SetupAttachment(SpringArmCompThird, USpringArmComponent::SocketName);
+	ThirdPersonCamera->bUsePawnControlRotation = false;
 
-  FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-  FirstPersonCamera->SetupAttachment(RootComponent);
-  FirstPersonCamera->bUsePawnControlRotation = true;
+	SpringArmCompFirst = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmFirst"));
+	SpringArmCompFirst->SetupAttachment(RootComponent);
+	SpringArmCompFirst->TargetArmLength = CameraArmLength;
+	SpringArmCompFirst->bUsePawnControlRotation = true;
 
-  PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
+	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	FirstPersonCamera->SetupAttachment(SpringArmCompFirst);
+	FirstPersonCamera->bUsePawnControlRotation = false;
 
-  CrosshairComponent = CreateDefaultSubobject<UCrosshairHUDComponent>(TEXT("CrosshairHUDComponent"));
-  PrograssBarComponent = CreateDefaultSubobject<UPrograssBarHUDComponent>(TEXT("PrograssBarComponent"));
+	PlayerStatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStatComponent"));
+	CrosshairComponent = CreateDefaultSubobject<UCrosshairHUDComponent>(TEXT("CrosshairHUDComponent"));
+	PrograssBarComponent = CreateDefaultSubobject<UPrograssBarHUDComponent>(TEXT("PrograssBarComponent"));
+	ItemIconComponent = CreateDefaultSubobject<UItemIconHUDComponent>(TEXT("ItemIconComponent"));
 
-  //RadarComponent = CreateDefaultSubobject<URadorComponent>(TEXT("RadarComponent"));
-  //RadarComponent->DetectionClass = AActor::StaticClass();
+	EnhancedRadarComponent = CreateDefaultSubobject<UCollisionRadarComponent>(TEXT("EnhancedRadarComponent"));
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	PepccineMontageComponent = CreateDefaultSubobject<UPepccineMontageComponent>(TEXT("MontageComponent"));
+	ItemManagerComponent = CreateDefaultSubobject<UPepccineItemManagerComponent>(TEXT("ItemManagerComponent"));
 
-  EnhancedRadarComponent = CreateDefaultSubobject<UCollisionRadarComponent>(TEXT("EnhancedRadarComponent"));
-
-  PepccineMontageComponent = CreateDefaultSubobject<UPepccineMontageComponent>(TEXT("MontageComponent"));
+	HitReactionComponent = CreateDefaultSubobject<UPepccineHitReactionComponent>(TEXT("HitReactionComponent"));
+	BattleComponent = CreateDefaultSubobject<UBattleComponent>(TEXT("BattleComponent"));
 }
 
 void APepCharacter::BeginPlay()
 {
-  Super::BeginPlay();
+	Super::BeginPlay();
 
-  InitializeCharacterMovement();
-  AddObservers();
+	InitializeCharacterMovement();
+	AddObservers();
+}
+
+void APepCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	CheckSprinting();
+	CheckRolling(DeltaTime);
 }
 
 // Initialize Character Status
 #pragma region
-void APepCharacter::InitializeCharacterMovement()
+void APepCharacter::InitializeCharacterMovement() const
 {
-  if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
-  {
-    if (!PlayerStatComponent) return;
-    MovementComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
-    MovementComponent->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
-    MovementComponent->JumpZVelocity = PlayerStatComponent->JumpZVelocity;
-  }
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		if (!PlayerStatComponent)
+		{
+			return;
+		}
+		MovementComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
+		MovementComponent->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
+		MovementComponent->JumpZVelocity = PlayerStatComponent->GetCurrentStats().MovementStats.JumpZVelocity;
+	}
 }
 #pragma endregion
-
-void APepCharacter::Tick(float DeltaTime)
-{
-  Super::Tick(DeltaTime);
-
-  CheckSprinting();
-  CheckRolling(DeltaTime);
-}
-
-// Delegate
-float APepCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-  OnHealthChanged.Broadcast(0.1f);
-
-  // OnHealthChanged.AddDynamic(this, &AMyCharacter::OnHealthChangedFunction);
-
-  return 0.0f;
-}
 
 // Tick Method
 #pragma region
 void APepCharacter::CheckSprinting()
 {
-  if (!PlayerStatComponent) return;
+	if (!PlayerStatComponent)
+	{
+		return;
+	}
 
-  if (bIsSprinting) {
-    if (!PlayerStatComponent->DecreaseStamina(0.25))
-    {
-      bIsSprinting = false;
-      return;
-    }
-    SetCharacterSpeed(PlayerStatComponent->SprintSpeed);
-  }
-  else {
-    SetCharacterSpeed(PlayerStatComponent->MovementSpeed);
-  }
+	if (bIsSprinting)
+	{
+		if (!PlayerStatComponent->DecreaseStamina(0.25))
+		{
+			bIsSprinting = false;
+			return;
+		}
+		SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.SprintSpeed);
+	}
+	else
+	{
+		SetCharacterSpeed(PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed);
+	}
 }
 
 void APepCharacter::CheckRolling(float DeltaTime)
 {
-  if (bIsRolling && PlayerStatComponent)
-  {
-    float RollTime = PlayerStatComponent->RollElapsedTime;
-    RollTime += DeltaTime;
+	if (bIsRolling && PlayerStatComponent)
+	{
+		float RollTime = PlayerStatComponent->GetCurrentStats().MovementStats.RollElapsedTime;
+		RollTime += DeltaTime;
 
-    float RollSpeed = PlayerStatComponent->RollingDistance;
-    AddMovementInput(RollDirection, RollSpeed * DeltaTime);
-  }
+		float RollSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.RollingDistance;
+		AddMovementInput(RollDirection, RollSpeed * DeltaTime);
+	}
 }
 #pragma endregion
 
@@ -119,329 +134,568 @@ void APepCharacter::CheckRolling(float DeltaTime)
 #pragma region
 void APepCharacter::AddObservers()
 {
-  if (PlayerStatComponent)
-  {
-    PlayerStatComponent->AddStaminaObserver(this);
-  }
+	if (PlayerStatComponent)
+	{
+		PlayerStatComponent->AddStaminaObserver(this);
+		PlayerStatComponent->OnHealthChanged.AddDynamic(this, &APepCharacter::OnHealthChanged);
+	}
 
-  /*
-  if (RadarComponent)
-  {
-    RadarComponent->OnActorDetected.AddDynamic(this, &APepCharacter::OnActorDetected);
-  }
-  */
+	if (EnhancedRadarComponent)
+	{
+		EnhancedRadarComponent->OnActorDetectedEnhanced.AddDynamic(this, &APepCharacter::OnActorDetectedEnhanced);
+	}
 
-  if (EnhancedRadarComponent)
-  {
-    EnhancedRadarComponent->OnActorDetectedEnhanced.AddDynamic(this, &APepCharacter::OnActorDetectedEnhanced);
-  }
+	if (BattleComponent)
+	{
+		BattleComponent->OnCharacterHited.AddDynamic(this, &APepCharacter::OnPlayerHit);
+	}
+}
+
+void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult)
+{
+	if (bIsRolling) return;
+
+	PlayerStatComponent->DecreaseHealth(DamageAmount);
+	
+	FName HitBoneName = HitResult.BoneName;
+	FVector HitDirection = HitResult.ImpactNormal;
+	
+	HitReactionComponent->HitReaction("Spine", HitDirection);
+}
+
+void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth)
+{
+	if (!PrograssBarComponent)
+	{
+		return;
+	}
+	else if (NewHealth == 0)
+	{
+		Dead();
+	}
+
+	PrograssBarComponent->SetHealth(NewHealth, MaxHealth);
 }
 
 void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
 {
-  if (!PrograssBarComponent) return;
-  //UE_LOG(LogTemp, Warning, TEXT("Stamina Updated: %f / %f"), NewStamina, MaxStamina);
-  PrograssBarComponent->SetStamina(NewStamina, MaxStamina);
+	if (!PrograssBarComponent)
+	{
+		return;
+	}
+	//UE_LOG(LogTemp, Warning, TEXT("Stamina Updated: %f / %f"), NewStamina, MaxStamina);
+	PrograssBarComponent->SetStamina(NewStamina, MaxStamina);
 }
 
-void APepCharacter::OnActorDetected(const AActor* DetectedActor)
+void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
 {
-  if (DetectedActor)
-  {
-    UE_LOG(LogTemp, Warning, TEXT("OnActorDetected: %s"), *DetectedActor->GetName());
-  }
-}
+	if (DetectedActors.DetectedActors.Num() == 0)
+	{
+		return;
+	}
 
-void APepCharacter::OnActorDetectedEnhanced(const FDetectedActorList& DetectedActors)
-{
-  if (DetectedActors.DetectedActors.Num() == 0) return;
+	const FDetectedActorInfo* MinDistActor = Algo::MinElement(DetectedActors.DetectedActors,
+	                                                          [](const FDetectedActorInfo& InfoA,
+	                                                             const FDetectedActorInfo& InfoB)
+	                                                          {
+		                                                          return InfoA.Distance < InfoB.Distance;
+	                                                          });
 
-  UE_LOG(LogTemp, Warning, TEXT("Number of dectedActor: %d"), DetectedActors.DetectedActors.Num());
+	if (APepccineDropItem* DropItem = Cast<APepccineDropItem>(MinDistActor->Actor))
+	{
+		DropItem->ShowInteractWidget(true);
 
+		if (CurrentDropItem && CurrentDropItem != DropItem)
+		{
+			CurrentDropItem->ShowInteractWidget(false);
+		}
 
-  for (AActor* DetectedActor : DetectedActors.DetectedActors)
-  {
-    if (DetectedActor)
-    {
-      UE_LOG(LogTemp, Warning, TEXT("Detected Actors: %s"), *DetectedActor->GetName());
-    }
-  }
+		CurrentDropItem = DropItem;
+	}
+	//UE_LOG(LogTemp, Warning, TEXT("Number of DectedActor: %d"), DetectedActors.DetectedActors.Num());
+	//UE_LOG(LogTemp, Warning, TEXT("Detected Actors: [%s]"), *MinDistActor->Actor->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("Detected Actors Loc: [%f]"), MinDistActor->Distance);
 }
 #pragma endregion
 
-// TODO: �з� ����ȭ �ʿ�
 // Action
 #pragma region
+void APepCharacter::Dead()
+{
+	if (!bIsPlayerAlive) return;
+	bIsPlayerAlive = false;
+	
+	if (APepccinePlayerController* PepccinePlayerController = Cast<APepccinePlayerController>(PlayerController))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player Dead"));
+		// 플레이어 입력 차단
+		PepccinePlayerController->DisableInput(PepccinePlayerController);
+		
+		// 컨트롤러 회전 입력 차단
+		PepccinePlayerController->SetIgnoreLookInput(true);
+		PepccinePlayerController->SetIgnoreMoveInput(true);
+	}
+	
+	if (GetCharacterMovement())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Disable Movement"));
+		// 이동 멈추기
+		GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->DisableMovement();
+		GetCharacterMovement()->SetComponentTickEnabled(false);
+	}
+	
+	PepccineMontageComponent->Death();
+}
+
 void APepCharacter::Move(const FInputActionValue& Value)
 {
-  if (bIsRolling) return;
+	if (bIsRolling | !bIsPlayerAlive)
+	{
+		return;
+	}
 
-  FVector2D MoveInput = Value.Get<FVector2D>();
+	FVector2D MoveInput = Value.Get<FVector2D>();
 
-  //UE_LOG(LogTemp, Log, TEXT("MovementVector: [%s]"), *MoveInput.ToString());
+	//UE_LOG(LogTemp, Log, TEXT("MovementVector: [%s]"), *MoveInput.ToString());
 
-  bool bWasMoving = bIsMoving;
-  bIsMoving = !FMath::IsNearlyZero(MoveInput.X) || !FMath::IsNearlyZero(MoveInput.Y); // 1, 1, 1, 0
+	bool bWasMoving = bIsMoving;
+	bIsMoving = !FMath::IsNearlyZero(MoveInput.X) || !FMath::IsNearlyZero(MoveInput.Y); // 1, 1, 1, 0
 
-  if (bWasMoving && !bIsMoving)
-  {
-    OnMovementStopped();
-  }
+	if (bWasMoving && !bIsMoving)
+	{
+		OnMovementStopped();
+	}
 
-  if (!FMath::IsNearlyZero(MoveInput.X))
-  {
-    AddMovementInput(GetActorForwardVector(), MoveInput.X);
-  }
+	if (!FMath::IsNearlyZero(MoveInput.X))
+	{
+		AddMovementInput(GetActorForwardVector(), MoveInput.X);
+	}
 
-  if (!FMath::IsNearlyZero(MoveInput.Y))
-  {
-    AddMovementInput(GetActorRightVector(), MoveInput.Y);
-  }
+	if (!FMath::IsNearlyZero(MoveInput.Y))
+	{
+		AddMovementInput(GetActorRightVector(), MoveInput.Y);
+	}
 }
 
 void APepCharacter::OnMovementStopped()
 {
-  UE_LOG(LogTemp, Log, TEXT("Movement Stopped!"));
+	UE_LOG(LogTemp, Log, TEXT("Movement Stopped!"));
 }
 
 void APepCharacter::JumpStart()
 {
-  if (bIsRolling) return;
+	if (bIsRolling | !bIsPlayerAlive)
+	{
+		return;
+	}
 
-  Super::Jump();
+	Super::Jump();
 
-  UE_LOG(LogTemp, Log, TEXT("JumpStart!"));
-  bIsJumping = true;
-  Jump();
+	Jump();
 }
 
 void APepCharacter::JumpStop()
 {
-  Super::StopJumping();
-  bIsJumping = false;
-  StopJumping();
-  UE_LOG(LogTemp, Log, TEXT("JumpStop!"));
+	Super::StopJumping();
+
+	StopJumping();
 }
 
 void APepCharacter::UseItem()
 {
-  UE_LOG(LogTemp, Log, TEXT("UseItem!"));
+	if (!bIsPlayerAlive) return;
+	UE_LOG(LogTemp, Log, TEXT("UseItem!"));
 }
 
 void APepCharacter::Look(const FInputActionValue& value)
 {
-  FVector2D LookInput = value.Get<FVector2D>();
+	FVector2D LookInput = value.Get<FVector2D>();
 
-  //UE_LOG(LogTemp, Log, TEXT("LookInput[%s]"), *LookInput.ToString());
-
-  AddControllerYawInput(LookInput.X);
-  AddControllerPitchInput(LookInput.Y);
+	AddControllerYawInput(LookInput.X);
+	AddControllerPitchInput(LookInput.Y);
 }
 
 void APepCharacter::StartSprint(const FInputActionValue& value)
 {
-  if (bIsRolling) return;
+	if (bIsRolling | !bIsPlayerAlive)
+	{
+		return;
+	}
 
-  if (bIsRollable)
-  {
-    SprintHoldStartTime = GetWorld()->GetTimeSeconds();
-  }
+	if (bIsRollable)
+	{
+		SprintHoldStartTime = GetWorld()->GetTimeSeconds();
+	}
 
-  if (!bIsSprintable) return;
-  bIsSprinting = true;
+	if (!bIsSprintable)
+	{
+		return;
+	}
+	bIsSprinting = true;
 }
 
 void APepCharacter::StopSprint(const FInputActionValue& value)
 {
-  float HoldTime = GetWorld()->GetTimeSeconds() - SprintHoldStartTime;
-  bIsSprinting = false;
+	float HoldTime = GetWorld()->GetTimeSeconds() - SprintHoldStartTime;
+	bIsSprinting = false;
 
-  if (HoldTime <= SprintHoldThreshold)
-  {
-    Roll();
-  }
+	if (HoldTime <= SprintHoldThreshold)
+	{
+		Roll();
+	}
 
-  SprintHoldStartTime = 0.0f; // �ʱ�ȭ
+	SprintHoldStartTime = 0.0f;
 }
 
 void APepCharacter::SetCharacterSpeed(float Speed)
 {
-  if (GetCharacterMovement())
-  {
-    GetCharacterMovement()->MaxWalkSpeed = Speed;
-  }
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = Speed;
+	}
 }
 
 void APepCharacter::Roll()
 {
-  if (!GetCharacterMovement() || bIsRolling || bIsJumping || !PlayerStatComponent) return;
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling() | !bIsPlayerAlive)
+	{
+		return;
+	}
+	
+	// 임시
+	//TriggerCameraShake();
 
-  bIsRolling = true;
-  PlayerStatComponent->RollElapsedTime = 0.0f;
-  RollDirection = GetActorForwardVector();
+	bIsRolling = true;
+	RollDirection = GetRollDirection();
 
-  if (!PlayerStatComponent->DecreaseStaminaByPercentage(30))
-  {
-    bIsRolling = false;
-    return;
-  }
+	if (!PlayerStatComponent->DecreaseStaminaByPercentage(30))
+	{
+		bIsRolling = false;
+		return;
+	}
 
-  PepccineMontageComponent->Roll(0);
-  GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 1.0f, false);
+	PepccineMontageComponent->Roll(GetRollDirection(), GetActorRotation());
+	GetWorldTimerManager().SetTimer(RollTimerHandle, this, &APepCharacter::EndRoll, 0.5f, false);
 }
 
 void APepCharacter::EndRoll()
 {
-  bIsRolling = false;
+	bIsRolling = false;
 
-  // [�ӽ�] �� Ȱ���ÿ� �ش�κ� ������ ���ؼ� ������
-  if (GetCharacterMovement())
-  {
-    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
-  }
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
+	}
 }
 
 FVector APepCharacter::GetRollDirection()
 {
-  if (!PlayerStatComponent) return FVector::ZeroVector;
+	if (!PlayerStatComponent)
+	{
+		return FVector::ZeroVector;
+	}
 
-  FVector Velocity = GetCharacterMovement()->Velocity;
+	FVector Velocity = GetCharacterMovement()->Velocity;
 
-  if (!Velocity.IsNearlyZero())
-  {
-    RollDirection = Velocity.GetSafeNormal() * PlayerStatComponent->RollingDistance;
-  }
-  else
-  {
-    RollDirection = GetActorForwardVector() * PlayerStatComponent->RollingDistance;
-  }
+	if (!Velocity.IsNearlyZero())
+	{
+		RollDirection = Velocity.GetSafeNormal() * PlayerStatComponent->GetCurrentStats().MovementStats.RollingDistance;
+	}
+	else
+	{
+		RollDirection = GetActorForwardVector() * PlayerStatComponent->GetCurrentStats().MovementStats.RollingDistance;
+	}
 
-  return RollDirection;
+	return RollDirection;
 }
 
 void APepCharacter::Crouching()
 {
-  if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent)
-    return;
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive)
+	{
+		return;
+	}
 
-  bIsCrouching = GetCharacterMovement()->IsCrouching();
+	bIsCrouching = GetCharacterMovement()->IsCrouching();
 
-  if (bIsCrouching)
-  {
-    UnCrouch();
-    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->MovementSpeed;
-  }
-  else
-  {
-    Crouch();
-    GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->CrouchSpeed;
-  }
+	if (bIsCrouching)
+	{
+		UnCrouch();
+		GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
+	}
+	else
+	{
+		Crouch();
+		GetCharacterMovement()->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.CrouchSpeed;
+	}
 }
 
 void APepCharacter::Reload()
 {
-  UE_LOG(LogTemp, Log, TEXT("Reload!"));
+	if (!bIsPlayerAlive) return;
+	UE_LOG(LogTemp, Log, TEXT("Reload!"));
 
-  PepccineMontageComponent->Reloading();
+	//HitReactionComponent->EnterRagdoll(5);
 
-  if (bIsReloading)
-  {
-    
-  }
-  else
-  {
-
-  }
+	if (bIsReloading)
+	{
+		bIsReloading = false;
+	}
+	else
+	{
+		ItemManagerComponent->ReloadWeapon();
+		PepccineMontageComponent->Reloading();
+		bIsReloading = true;
+	}
 }
 
 void APepCharacter::Interactive()
 {
-  UE_LOG(LogTemp, Log, TEXT("Interactive!"));
+	if (!bIsPlayerAlive || !PlayerStatComponent) return;
+	
+	// 아이템 인벤토리에 추가
+	if (CurrentDropItem)
+	{
+		CurrentDropItem->PickUpItem(ItemManagerComponent);
+		if (UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
+		{
+			// 패시브 아이템
+			InventoryComponent->AddItem(PassiveItem->GetIconTexture(), PassiveItem->GetDisplayName(), PassiveItem->GetDescription(), PlayerStatComponent->PrintStats());
 
-  if (bIsInteracting)
-  {
+			TArray<FPepccineCharacterStatModifier> CharacterStatModifiers = PassiveItem->GetCharacterStatModifiers();
+			for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)
+			{
+				float Amount = Modifier.StatModifierDefault.StatModifyValue;
+				//UE_LOG(LogTemp, Warning, TEXT("Amount: %f"), Amount);
 
-  }
-  else
-  {
+				EPepccineCharacterStatName CharacterStatName = Modifier.CharacterStatName;
+				FString StatName = UEnum::GetValueAsString(CharacterStatName);
+				//UE_LOG(LogTemp, Warning, TEXT("CharacterStatName: %s"), *StatName);
 
-  }
+				EPepccineStatModifyType ModifyType = Modifier.StatModifierDefault.StatModifyType;
+				FString MT = UEnum::GetValueAsString(ModifyType);
+				//UE_LOG(LogTemp, Warning, TEXT("ModifyType: %s"), *MT);
+
+				switch (ModifyType)
+				{
+				case EPepccineStatModifyType::EPSMT_Add:
+					{
+						//UE_LOG(LogTemp, Warning, TEXT("EPSMT_Add: %f"), Amount);
+						FStatModifier AddStatModifier(CharacterStatName, Amount, 1.0f);
+						PlayerStatComponent->ApplyStatModifier(AddStatModifier);
+						break;
+					}
+				case EPepccineStatModifyType::EPSMT_Multiply:
+					{
+						//UE_LOG(LogTemp, Warning, TEXT("EPSMT_Multiply: %f"), Amount);
+						FStatModifier MulStatModifier(CharacterStatName, 0.0f, Amount);
+						PlayerStatComponent->ApplyStatModifier(MulStatModifier);
+						break;
+					}
+				}
+			}
+
+			TArray<FPepccineCharacterFeature> CharacterFeatures = PassiveItem->GetCharacterFeatures();
+			for (const FPepccineCharacterFeature& Feature : CharacterFeatures)
+			{
+				switch (Feature.CharacterFeatureName)
+				{
+				case EPepccineCharacterFeatureName::EPCFN_Roll:
+					break;
+				case EPepccineCharacterFeatureName::EPCFN_Sprint:
+					break;
+				}
+			}
+		}
+		else if (UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
+		{
+			// 무기류 아이템
+			UpdateWeaponUI();
+		}
+		/*
+		else if (CurrentDropItem->IsA(UPepccineWeaponItemData::StaticClass()))
+		{
+			// 액티브 아이템
+			const UPepccineWeaponItemData* DropItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData());
+		}
+		*/
+	}
+
+	// 스텟연산 (저장 구조체)
+	// 갖고있는 모든 패시브 아이템 적용 (캐릭터 스텟)
+	// 1. 케릭터 스탯 연산 선행
+	// 2. 무기 스탯 반영
+	// 3. PlayerStatComponent->AttackDamage 
+
+	// 갖고있는 무기 스텟 (총 스텟)
+
+	// Delay 있는 상호작용 전용
+	if (bIsInteracting)
+	{
+		
+	}
+	else
+	{
+		
+	}
+}
+
+void APepCharacter::UpdateWeaponUI()
+{
+	if (!ItemManagerComponent || !ItemIconComponent) return;
+
+	// 주무기 정보
+	UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main);
+	FString MainWeaponName = MainWeaponData ? MainWeaponData->GetDisplayName() : FString("None");
+	int32 MainWeaponAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
+	int32 MainWeaponMaxAmmo = MainWeaponData ? MainWeaponData->GetWeaponItemStats().MagazineSize : 0;
+	UTexture2D* MainWeaponImage = MainWeaponData ? MainWeaponData->GetIconTexture() : nullptr;
+
+	// 보조무기 정보
+	UPepccineWeaponItemData* SubWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub);
+	FString SubWeaponName = SubWeaponData ? SubWeaponData->GetDisplayName() : FString("None");
+	int32 SubWeaponAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineAmmo : 0;
+	int32 SubWeaponMaxAmmo = SubWeaponData ? SubWeaponData->GetWeaponItemStats().MagazineSize : 0;
+	UTexture2D* SubWeaponImage = SubWeaponData ? SubWeaponData->GetIconTexture() : nullptr;
+
+	// 현재 장착된 무기가 주무기인지 확인
+	bool bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main;
+
+	// WeaponWidget 업데이트
+	ItemIconComponent->SetWeaponItem(
+		MainWeaponImage,
+		SubWeaponImage,
+		bIsMainWeaponEquipped ? MainWeaponName : SubWeaponName,
+		bIsMainWeaponEquipped ? MainWeaponAmmo : SubWeaponAmmo,
+		bIsMainWeaponEquipped ? MainWeaponMaxAmmo : SubWeaponMaxAmmo,
+		bIsMainWeaponEquipped
+	);
 }
 
 void APepCharacter::OpenInventory()
 {
-  UE_LOG(LogTemp, Log, TEXT("OpenInventory!"));
+	if (bIsRolling || !InventoryComponent)
+	{
+		return;
+	}
 
-  if (bIsRolling) return;
+	bIsInventoryOpened = !bIsInventoryOpened;
+	InventoryComponent->ToggleInventory();
 
-  // HUD
-  if (bIsInventoryOpened)
-  {
-
-  }
-  else
-  {
-
-  }
+	if (PlayerController)
+	{
+		if (bIsInventoryOpened)
+		{
+			PlayerController->bShowMouseCursor = true;
+			PlayerController->SetInputMode(FInputModeGameAndUI());
+		}
+		else
+		{
+			PlayerController->bShowMouseCursor = false;
+			PlayerController->SetInputMode(FInputModeGameOnly());
+		}
+	}
 }
 
 void APepCharacter::SwapItem(const FInputActionValue& value)
 {
-  float ScrollValue = value.Get<float>();
+	if (!bIsPlayerAlive) return;
+	
+	float ScrollValue = value.Get<float>();
 
-  if (ScrollValue > 0.0f)
-  {
-    UE_LOG(LogTemp, Log, TEXT("Swapping Forward [%f]"), ScrollValue);
-  }
-  else if (ScrollValue < 0.0f)
-  {
-    UE_LOG(LogTemp, Log, TEXT("Swapping Backward [%f]"), ScrollValue);
-  }
+	if (ScrollValue > 0.0f)
+	{
+		ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Main);
+	}
+	else if (ScrollValue < 0.0f)
+	{
+		ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Sub);
+	}
+}
+
+void APepCharacter::StopFire()
+{
+	bIsFiring = false;
 }
 
 void APepCharacter::Fire()
 {
-  UE_LOG(LogTemp, Log, TEXT("Fire!"));
+	if (bIsRolling | !bIsPlayerAlive) return;
 
-  if (bIsRolling) return;
-
-  PepccineMontageComponent->Fire();
+	bIsFiring = true;
+	PepccineMontageComponent->Fire();
+	ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 }
 
 void APepCharacter::ZoomIn()
 {
-  UE_LOG(LogTemp, Log, TEXT("ZoomIn!"));
+	if (bIsRolling | !bIsPlayerAlive) return;
 
-  if (bIsRolling) return;
+	bIsZooming = true;
 
-  bIsZooming = true;
-  
-  ToggleCameraView();
+	ToggleCameraView();
 
-  if (!CrosshairComponent) return;
-  CrosshairComponent->ShowCrosshair();
+	if (!CrosshairComponent)
+	{
+		return;
+	}
+	CrosshairComponent->ShowCrosshair();
 }
 
 void APepCharacter::ZoomOut()
 {
-  UE_LOG(LogTemp, Log, TEXT("ZoomOut!"));
+	UE_LOG(LogTemp, Log, TEXT("ZoomOut!"));
 
-  bIsZooming = false;
-  
-  ToggleCameraView();
+	bIsZooming = false;
 
-  if (!CrosshairComponent) return;
-  CrosshairComponent->HideCrosshair();
+	ToggleCameraView();
+
+	if (!CrosshairComponent)
+	{
+		return;
+	}
+	CrosshairComponent->HideCrosshair();
 }
 
 void APepCharacter::ToggleCameraView()
 {
-  if (!PlayerController) return;
+	if (!PlayerController)
+	{
+		return;
+	}
 
-  bIsFirstPersonView = !bIsFirstPersonView;
+	bIsFirstPersonView = !bIsFirstPersonView;
 
-  FirstPersonCamera->SetActive(bIsFirstPersonView);
-  ThirdPersonCamera->SetActive(!bIsFirstPersonView);
+	FirstPersonCamera->SetActive(bIsFirstPersonView);
+	ThirdPersonCamera->SetActive(!bIsFirstPersonView);
+}
+
+void APepCharacter::TriggerCameraShake()
+{
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (PC && PC->PlayerCameraManager)
+	{
+		UPepccineCameraModifier* Modifier
+			= Cast<UPepccineCameraModifier>(
+				PC->PlayerCameraManager->FindCameraModifierByClass(UPepccineCameraModifier::StaticClass()));
+		if (!Modifier)
+		{
+			Modifier = Cast<UPepccineCameraModifier>(
+				PC->PlayerCameraManager->AddNewCameraModifier(UPepccineCameraModifier::StaticClass()));
+		}
+
+		if (Modifier)
+		{
+			Modifier->StartShake(10.0f, 20.0f, 0.5f);
+		}
+	}
+}
+
+void APepCharacter::ShowMenu()
+{
+	if (!PlayerController) return;
+	PlayerController->ToggleExitMenu();
 }
 #pragma endregion
 
@@ -449,176 +703,257 @@ void APepCharacter::ToggleCameraView()
 #pragma region
 void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-  Super::SetupPlayerInputComponent(PlayerInputComponent);
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-  UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-  if (!EnhancedInput) return;
+	UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	if (!EnhancedInput)
+	{
+		return;
+	}
 
-  PlayerController = Cast<APepccinePlayerController>(GetController());
-  if (!PlayerController) return;
+	PlayerController = Cast<APepccinePlayerController>(GetController());
+	if (!PlayerController)
+	{
+		return;
+	}
 
-  // MoveAction: W A S D
-  if (PlayerController->MoveAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->MoveAction,
-      ETriggerEvent::Triggered,
-      this,
-      &APepCharacter::Move
-    );
-  }
+	// MoveAction: W A S D
+	if (PlayerController->MoveAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->MoveAction,
+			ETriggerEvent::Triggered,
+			this,
+			&APepCharacter::Move
+		);
+	}
 
-  // LookAction: Mouse2D
-  if (PlayerController->LookAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->LookAction,
-      ETriggerEvent::Triggered,
-      this,
-      &APepCharacter::Look
-    );
-  }
+	// LookAction: Mouse2D
+	if (PlayerController->LookAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->LookAction,
+			ETriggerEvent::Triggered,
+			this,
+			&APepCharacter::Look
+		);
+	}
 
-  // Sprint: Shift
-  if (PlayerController->SprintAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->SprintAction,
-      ETriggerEvent::Started,
-      this,
-      &APepCharacter::StartSprint
-    );
-  }
+	// Sprint: Shift
+	if (PlayerController->SprintAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->SprintAction,
+			ETriggerEvent::Started,
+			this,
+			&APepCharacter::StartSprint
+		);
+	}
 
-  if (PlayerController->SprintAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->SprintAction,
-      ETriggerEvent::Completed,
-      this,
-      &APepCharacter::StopSprint
-    );
-  }
+	if (PlayerController->SprintAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->SprintAction,
+			ETriggerEvent::Completed,
+			this,
+			&APepCharacter::StopSprint
+		);
+	}
 
-  // Jump: Space
-  if (PlayerController->JumpAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->JumpAction,
-      ETriggerEvent::Started,
-      this,
-      &APepCharacter::JumpStart
-    );
-  }
+	// Jump: Space
+	if (PlayerController->JumpAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->JumpAction,
+			ETriggerEvent::Started,
+			this,
+			&APepCharacter::JumpStart
+		);
+	}
 
-  if (PlayerController->JumpAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->JumpAction,
-      ETriggerEvent::Completed,
-      this,
-      &APepCharacter::JumpStop
-    );
-  }
+	if (PlayerController->JumpAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->JumpAction,
+			ETriggerEvent::Completed,
+			this,
+			&APepCharacter::JumpStop
+		);
+	}
 
-  // UseItem: Q
-  if (PlayerController->ItemUseAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->ItemUseAction,
-      ETriggerEvent::Triggered,
-      this,
-      &APepCharacter::UseItem
-    );
-  }
+	// UseItem: Q
+	if (PlayerController->ItemUseAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->ItemUseAction,
+			ETriggerEvent::Triggered,
+			this,
+			&APepCharacter::UseItem
+		);
+	}
 
-  // Crouch: Ctrl
-  if (PlayerController->CrouchAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->CrouchAction,
-      ETriggerEvent::Started,
-      this,
-      &APepCharacter::Crouching
-    );
-  }
+	// Crouch: Ctrl
+	if (PlayerController->CrouchAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->CrouchAction,
+			ETriggerEvent::Started,
+			this,
+			&APepCharacter::Crouching
+		);
+	}
 
-  // Reload: R
-  if (PlayerController->ReloadingAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->ReloadingAction,
-      ETriggerEvent::Triggered,
-      this,
-      &APepCharacter::Reload
-    );
-  }
+	// Reload: R
+	if (PlayerController->ReloadingAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->ReloadingAction,
+			ETriggerEvent::Started,
+			this,
+			&APepCharacter::Reload
+		);
+	}
 
-  // Interactive: E
-  if (PlayerController->InteractiveAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->InteractiveAction,
-      ETriggerEvent::Triggered,
-      this,
-      &APepCharacter::Interactive
-    );
-  }
+	// Interactive: E
+	if (PlayerController->InteractiveAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->InteractiveAction,
+			ETriggerEvent::Started,
+			this,
+			&APepCharacter::Interactive
+		);
+	}
 
-  // Inventory: Tab
-  if (PlayerController->InventoryAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->InventoryAction,
-      ETriggerEvent::Triggered,
-      this,
-      &APepCharacter::OpenInventory
-    );
-  }
+	// Inventory: Tab
+	if (PlayerController->InventoryAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->InventoryAction,
+			ETriggerEvent::Started,
+			this,
+			&APepCharacter::OpenInventory
+		);
+	}
 
-  // Swap: Mouse Wheel
-  if (PlayerController->SwapAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->SwapAction,
-      ETriggerEvent::Triggered,
-      this,
-      &APepCharacter::SwapItem
-    );
-  }
+	// Swap: Mouse Wheel
+	if (PlayerController->SwapAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->SwapAction,
+			ETriggerEvent::Triggered,
+			this,
+			&APepCharacter::SwapItem
+		);
+	}
 
-  // Fire: Mouse Left
-  if (PlayerController->FireAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->FireAction,
-      ETriggerEvent::Started,
-      this,
-      &APepCharacter::Fire
-    );
-  }
+	// Fire: Mouse Left
+	if (PlayerController->FireAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->FireAction,
+			ETriggerEvent::Triggered,
+			this,
+			&APepCharacter::Fire
+		);
+	}
 
-  // Zoom: Mouse Right
-  if (PlayerController->ZoomAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->ZoomAction,
-      ETriggerEvent::Started,
-      this,
-      &APepCharacter::ZoomIn
-    );
-  }
+	if (PlayerController->FireAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->FireAction,
+			ETriggerEvent::Completed,
+			this,
+			&APepCharacter::StopFire
+		);
+	}
 
-  // Zoom: Mouse Right
-  if (PlayerController->ZoomAction)
-  {
-    EnhancedInput->BindAction(
-      PlayerController->ZoomAction,
-      ETriggerEvent::Completed,
-      this,
-      &APepCharacter::ZoomOut
-    );
-  }
+	// Zoom: Mouse Right
+	if (PlayerController->ZoomAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->ZoomAction,
+			ETriggerEvent::Started,
+			this,
+			&APepCharacter::ZoomIn
+		);
+	}
+
+	// Zoom: Mouse Right
+	if (PlayerController->ZoomAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->ZoomAction,
+			ETriggerEvent::Completed,
+			this,
+			&APepCharacter::ZoomOut
+		);
+	}
+
+	// Menu: Escape
+	if (PlayerController->MenuAction)
+	{
+		EnhancedInput->BindAction(
+			PlayerController->MenuAction,
+			ETriggerEvent::Started,
+			this,
+			&APepCharacter::ShowMenu
+		);
+	}
+}
+#pragma endregion
+
+// Test Code
+#pragma region
+void APepCharacter::TestApplyStatModifier()
+{
+	if (!PlayerStatComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerStatComponent가 없습니다!"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("== 1. 스탯 적용 =="));
+	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	UE_LOG(LogTemp, Log, TEXT("적용 예정: 10.0f, 1.2f"));
+
+	FStatModifier AttackModifier(EPepccineCharacterStatName::EPCSN_AttackDamage, 10.0f, 1.2f);
+	PlayerStatComponent->ApplyStatModifier(AttackModifier);
+
+	UE_LOG(LogTemp, Log, TEXT("== 2. 스탯 적용 =="));
+	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	UE_LOG(LogTemp, Log, TEXT("적용 예정: 50.0f, 1.1f"));
+
+	FStatModifier AttackModifierA(EPepccineCharacterStatName::EPCSN_AttackDamage, 50.0f, 1.1f);
+	PlayerStatComponent->ApplyStatModifier(AttackModifierA);
+
+	UE_LOG(LogTemp, Log, TEXT("== 3. 스탯 적용 =="));
+	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 }
 
+void APepCharacter::TestRemoveStatModifier()
+{
+	if (!PlayerStatComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerStatComponent가 없습니다!"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("== 1. 스탯 제거 =="));
+	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	UE_LOG(LogTemp, Log, TEXT("적용 예정: 10.0f, 1.2f"));
+
+	FStatModifier AttackModifier(EPepccineCharacterStatName::EPCSN_AttackDamage, 50.0f, 1.1f);
+	PlayerStatComponent->RemoveStatModifier(AttackModifier);
+
+	UE_LOG(LogTemp, Log, TEXT("== 2. 스탯 제거 =="));
+	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+	UE_LOG(LogTemp, Log, TEXT("적용 예정: 50.0f, 1.1f"));
+
+	FStatModifier AttackModifierA(EPepccineCharacterStatName::EPCSN_AttackDamage, 10.0f, 1.2f);
+	PlayerStatComponent->RemoveStatModifier(AttackModifierA);
+
+	UE_LOG(LogTemp, Log, TEXT("== 3. 스탯 제거 =="));
+	UE_LOG(LogTemp, Log, TEXT("현재 공격력: %f"), PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+}
 #pragma endregion

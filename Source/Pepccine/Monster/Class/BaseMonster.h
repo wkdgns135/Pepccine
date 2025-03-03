@@ -4,7 +4,9 @@
 #include "GameFramework/Character.h"
 #include "BaseMonster.generated.h"
 
-class UCapsuleComponent;
+class UMonsterStatComponent;
+class UMonsterAttackComponent;
+class UHitReactionComponent;
 
 UCLASS()
 class PEPCCINE_API ABaseMonster : public ACharacter
@@ -14,16 +16,21 @@ class PEPCCINE_API ABaseMonster : public ACharacter
 public:
 	ABaseMonster();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster")
-	FName MonsterType;
-
 protected:
 	virtual void BeginPlay() override;
-public:	
-	
-	void OnDeath();
-	void OnHit();
 
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UMonsterAttackComponent* AttackComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UMonsterStatComponent* StatComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UHitReactionComponent* HitReactionComponent;
+
+private:
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void OnHitReceived(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult);
+	void Die();
 };

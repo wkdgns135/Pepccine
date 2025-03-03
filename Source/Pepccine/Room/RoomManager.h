@@ -6,26 +6,72 @@
 #include "UObject/Object.h"
 #include "RoomManager.generated.h"
 
-/**
- * 
- */
-UCLASS()
+class ULevelStreamingDynamic;
+enum class EDoorDirection : uint8;
+class UFloorRoomData;
+
+UENUM()
+enum class ERoomType : uint8
+{
+	ENone,
+	EDefault,
+	EStart,
+	EBoss,
+	EItem,
+	EShop,
+};
+
+USTRUCT()
+struct FRoomData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	TSoftObjectPtr<UWorld> RoomLevel = nullptr;
+	UPROPERTY()
+	bool bIsCleared = false;
+	UPROPERTY()
+	bool bIsLocked = false;
+	UPROPERTY()
+	ERoomType RoomType = ERoomType::ENone;
+	UPROPERTY()
+	FIntPoint RoomPoint;
+	UPROPERTY()
+	ULevelStreamingDynamic *StreamingLevel = nullptr;
+};
+
+UCLASS(DefaultToInstanced, EditInlineNew)
 class PEPCCINE_API URoomManager : public UObject
 {
 	GENERATED_BODY()
 
 private:
-	TArray<TArray<TPair<int, bool>>> Map; // {{Type, bIsClear}}
-	FIntPoint CurrentRoom;
-	int CurrentFloor;
+	UPROPERTY(EditAnywhere, Category = "Room")
+	TArray<UFloorRoomData*> FloorRoomData;
+	
+	TArray<TArray<FRoomData*>> Map;
+	FRoomData *CurrentRoom;
+	FRoomData *PreviousRoom;
+	int CurrentFloorIndex;
+
+public:
+	void GenerateMap(const TArray<TArray<int>>& Grid);
+	void StartFloor();
+	void ChangeRoom(FRoomData* RoomData);
+	bool GetCheckRoom(const FIntPoint Point) const;
+	void NextFloor();
+	
+private:
+	FRoomData* NewRoom(const ERoomType RoomType);
+	void PrintFloor() const;
 	
 public:
-	FORCEINLINE void SetMap(const TArray<TArray<TPair<int, bool>>>& InputMap){Map = InputMap;}
-	FORCEINLINE TArray<TArray<TPair<int, bool>>>& GetMap(){return Map;}
-	FORCEINLINE void SetCurrentRoom(const FIntPoint& InputPoint){CurrentRoom = InputPoint;}
-	FORCEINLINE FIntPoint& GetCurrentRoomPoint(){return CurrentRoom;}
-	FORCEINLINE bool GetCurrentRoomIsClear(){return Map[CurrentRoom.Y][CurrentRoom.X].Value;}
-	FORCEINLINE void SetCurrentRoomIsClear(const bool bInputIsClear){Map[CurrentRoom.Y][CurrentRoom.X].Value = bInputIsClear;}
-	FORCEINLINE void SetCurrentFloor(const int InputFloor){CurrentFloor = InputFloor;}
-	FORCEINLINE int GetCurrentFloor() const {return CurrentFloor;}
+	FORCEINLINE TArray<TArray<FRoomData*>>& GetMap(){return Map;}
+	FORCEINLINE FIntPoint GetCurrentRoomPoint() const {return CurrentRoom ? CurrentRoom->RoomPoint : FIntPoint();}
+	FORCEINLINE int GetCurrentFloorIndex() const {return CurrentFloorIndex + 1;}
+	FORCEINLINE FRoomData* GetCurrentRoomData() const {return CurrentRoom;}
+	FORCEINLINE FRoomData* GetPointRoomData(const FIntPoint& Point){return GetCheckRoom(Point) ? Map[Point.Y][Point.X] : NewRoom(ERoomType::ENone);}
+	FORCEINLINE FRoomData* GetPreviousRoomData() const {return PreviousRoom;}
+	FORCEINLINE UFloorRoomData* GetCurrentFloorRoomData() const {return FloorRoomData[CurrentFloorIndex];}
 };

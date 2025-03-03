@@ -1,28 +1,36 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Character/Components/BattleComponent.h"
 #include "MonsterAttackComponent.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PEPCCINE_API UMonsterAttackComponent : public UActorComponent
+class PEPCCINE_API UMonsterAttackComponent : public UBattleComponent
 {
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	UMonsterAttackComponent();
+	
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void PerformAttack();
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void AttackTrace();
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void PlayTransitionMontage();
 
 protected:
-	// Called when the game starts
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
+	UAnimMontage* AttackTransitionMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
+	UAnimMontage* AttackMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
+	float AttackRange= 30.0f;
+
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
+private:
+	
 };

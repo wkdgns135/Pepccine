@@ -1,4 +1,6 @@
 #include "Room/RoomGenerator.h"
+
+#include "FloorRoomData.h"
 #include "PepccineGameInstance.h"
 #include "RoomManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -62,6 +64,7 @@ ARoomGenerator::ARoomGenerator()
 void ARoomGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+	GetParameters();
 	if (!GenerateEndPoints())
 	{
 		return;
@@ -81,7 +84,14 @@ void ARoomGenerator::BeginPlay()
 
 void ARoomGenerator::GetParameters()
 {
-	// Implementation here
+	if (const URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
+	{
+		if (const UFloorRoomData *FloorRoomData = RoomManager->GetCurrentFloorRoomData())
+		{
+			EndPointCount = FloorRoomData->EndPointCount;
+			MapSize = FloorRoomData->MapSize;
+		}
+	}
 }
 
 
@@ -159,8 +169,8 @@ void ARoomGenerator::InitializeGrid()
 		Grid[Room.Y][Room.X] = 1;
 	}
 }
-void ARoomGenerator::MarkEndRooms()
 
+void ARoomGenerator::MarkEndRooms()
 {
 	TArray<FIntPoint> Offsets = { {0,1},{0,-1},{1,0},{-1,0} };
 	for (const FIntPoint& Point : Rooms)
@@ -312,7 +322,6 @@ void ARoomGenerator::AssignEndRooms()
 	{
 		for (int j = i + 1; j < EndRooms.Num(); j++)
 		{
-			//TODO: 수정
 			const int Distance = FindShortestPath(EndRooms[i], EndRooms[j]).Num();
 			if (Distance > MaxDistance)
 			{
@@ -336,22 +345,11 @@ void ARoomGenerator::AssignEndRooms()
 	Grid[EndRooms[1].Y][EndRooms[1].X] = 5;
 }
 
-void ARoomGenerator::StartNextFloor()
+void ARoomGenerator::StartNextFloor() const
 {
-	TArray<TArray<TPair<int, bool>>> Map;
-	Map.SetNum(MapSize);
-	for (int i = 0; i < MapSize; i++)
-	{
-		Map[i].SetNum(MapSize);
-		for (int j = 0; j < MapSize; j++)
-		{
-			Map[i][j] = {Grid[i][j], false};	
-		}
-	}
-	
 	if (UPepccineGameInstance *PepccineGameInstance = Cast<UPepccineGameInstance>(GetGameInstance()))
 	{
-		PepccineGameInstance->GetRoomManager()->SetMap(Map);
-		UGameplayStatics::OpenLevel(GetWorld(),"StartRoom");
+		PepccineGameInstance->GetRoomManager()->GenerateMap(Grid);
+		PepccineGameInstance->GetRoomManager()->StartFloor();
 	}
 }
