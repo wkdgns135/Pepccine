@@ -27,22 +27,22 @@ void UPepccineWeaponItemComponent::InitWeaponComponent(ACharacter* InOwnerCharac
 	if (!PoolSubSystem)
 	{
 		UE_LOG(LogTemp, Error, TEXT("PoolSubSystem이 설정되어있지 않습니다."));
+		return;
 	}
 	
-	if (ProjectileClass && PoolSubSystem)
-	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		// 프로젝타일을 생성한 주체 설정
-		SpawnParams.Instigator = OwnerCharacter;
-		SpawnParams.Owner = GetOwner();
-
-		PoolSubSystem->InitializePool(ProjectileClass, 10, SpawnParams);
-	}
-	else
+	if (!ProjectileClass)
 	{
 		UE_LOG(LogTemp, Error, TEXT("투사체 클래스가 설정되어있지 않습니다."));
+		return;
 	}
+	
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	// 프로젝타일을 생성한 주체 설정
+	SpawnParams.Instigator = OwnerCharacter;
+	SpawnParams.Owner = GetOwner();
+
+	PoolSubSystem->InitializePool(ProjectileClass, 10, SpawnParams);
 }
 
 void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage, const FVector& ShootDirection)

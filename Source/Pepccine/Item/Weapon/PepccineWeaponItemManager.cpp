@@ -49,7 +49,7 @@ void UPepccineWeaponItemManager::PickUpItem(const UPepccineWeaponItemData* Weapo
 		SubWeaponItemData = NewWeaponItemData;
 	}
 
-	// 스탯 초기 설정
+	// 패시브 적용하여 스탯 조정
 	UpdateWeaponItemStats(NewWeaponItemData->GetWeaponItemType());
 
 	// 획득한 무기 장착
@@ -136,73 +136,63 @@ void UPepccineWeaponItemManager::UpdateWeaponItemStats(EPepccineWeaponItemType W
 		                                            ? MainWeaponItemData
 		                                            : SubWeaponItemData;
 
-	const UPepccineWeaponItemData* DefaultWeaponItemData = GetWorld()->
-	                                                       GetSubsystem<UPepccineItemSpawnerSubSystem>()->
-	                                                       GetItemDataAsset()->
-	                                                       GetWeaponItemDataAsset()->
-	                                                       GetWeaponsItemById(TargetWeaponItem->GetItemId());
+	UPepccineWeaponItemData* DefaultWeaponItemData = GetWorld()->
+	                                                 GetSubsystem<UPepccineItemSpawnerSubSystem>()->
+	                                                 GetItemDataAsset()->
+	                                                 GetWeaponItemDataAsset()->
+	                                                 GetWeaponsItemById(TargetWeaponItem->GetItemId());
 
 	for (const UPepccinePassiveItemData* PassiveItemData : PassiveItemDatas)
 	{
 		for (const FPepccineWeaponStatModifier Modifier : PassiveItemData->GetWeaponStatModifiers())
 		{
-			switch (const EPepccineWeaponStatName StatName = Modifier.WeaponItemStatName)
+			const EPepccineWeaponStatName StatName = Modifier.WeaponItemStatName;
+			if (Modifier.WeaponItemType == TargetWeaponItem->GetWeaponItemType())
 			{
-			case EPepccineWeaponStatName::EPWSN_AttackMultiplier:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->AttackMultiplier = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().AttackMultiplier);
-				break;
-			case EPepccineWeaponStatName::EPWSN_AttackRange:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->AttackRange = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().AttackRange);
-				break;
-			case EPepccineWeaponStatName::EPWSN_FireRate:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->FireRate = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().FireRate);
-				break;
-			case EPepccineWeaponStatName::EPWSN_ZoomMultiplier:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->ZoomMultiplier = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().ZoomMultiplier);
-				break;
-			case EPepccineWeaponStatName::EPWSN_MagazineSize:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->MagazineSize = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().MagazineSize);
-				break;
-			case EPepccineWeaponStatName::EPWSN_MagazineAmmo:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->MagazineAmmo = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().MagazineAmmo);
-				break;
-			case EPepccineWeaponStatName::EPWSN_SpareAmmo:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->SpareAmmo = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().SpareAmmo);
-				break;
-			case EPepccineWeaponStatName::EPWSN_BulletSpeed:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->BulletSpeed = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().BulletSpeed);
-				break;
-			case EPepccineWeaponStatName::EPWSN_ReloadSpeed:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->ReloadSpeed = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().ReloadSpeed);
-				break;
-			case EPepccineWeaponStatName::EPWSN_ProjectileCount:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->ProjectileCount = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().ProjectileCount);
-				break;
-			case EPepccineWeaponStatName::EPWSN_BulletSpread:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->BulletSpread = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().BulletSpread);
-				break;
-			case EPepccineWeaponStatName::EPWSN_Recoil:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->Recoil = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().Recoil);
-				break;
-			case EPepccineWeaponStatName::EPWSN_Weight:
-				TargetWeaponItem->GetWeaponItemStatsPointer()->Weight = CalculateTotalValueFromDefault(
-					StatName, DefaultWeaponItemData->GetWeaponItemStats().Weight);
-				break;
+				GetWeaponItemStatRefByName(TargetWeaponItem, StatName) = CalculateTotalValueFromDefault(
+					StatName, GetWeaponItemStatRefByName(DefaultWeaponItemData, StatName));
 			}
 		}
 	}
+}
+
+float& UPepccineWeaponItemManager::GetWeaponItemStatRefByName(
+	UPepccineWeaponItemData* InWeaponItemData, const EPepccineWeaponStatName WeaponItemStatName)
+{
+	if (InWeaponItemData)
+	{
+		switch (WeaponItemStatName)
+		{
+		case EPepccineWeaponStatName::EPWSN_AttackMultiplier:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->AttackMultiplier;
+		case EPepccineWeaponStatName::EPWSN_AttackRange:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->AttackRange;
+		case EPepccineWeaponStatName::EPWSN_FireRate:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->FireRate;
+		case EPepccineWeaponStatName::EPWSN_ZoomMultiplier:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->ZoomMultiplier;
+		case EPepccineWeaponStatName::EPWSN_MagazineSize:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->MagazineSize;
+		case EPepccineWeaponStatName::EPWSN_MagazineAmmo:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo;
+		case EPepccineWeaponStatName::EPWSN_SpareAmmo:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo;
+		case EPepccineWeaponStatName::EPWSN_BulletSpeed:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->BulletSpeed;
+		case EPepccineWeaponStatName::EPWSN_ReloadSpeed:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->ReloadSpeed;
+		case EPepccineWeaponStatName::EPWSN_ProjectileCount:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->ProjectileCount;
+		case EPepccineWeaponStatName::EPWSN_BulletSpread:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->BulletSpread;
+		case EPepccineWeaponStatName::EPWSN_Recoil:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->Recoil;
+		case EPepccineWeaponStatName::EPWSN_Weight:
+			return InWeaponItemData->GetWeaponItemStatsPointer()->Weight;
+		}
+	}
+
+	return InWeaponItemData->GetWeaponItemStatsPointer()->AttackMultiplier;
 }
 
 float UPepccineWeaponItemManager::CalculateTotalValueFromDefault(const EPepccineWeaponStatName WeaponItemStatName,

@@ -27,15 +27,15 @@ public:
 	// 액티브 데이터 에셋
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE UPepccineActiveItemDataAsset* GetActiveItemDataAsset() const { return ActiveItemDataAsset; }
-	// 체력 포션
-	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE UPepccineResourceItemData* GetHealingPotion() const { return HealingPotion; }
 	// 탄약통
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE UPepccineResourceItemData* GetAmmoBoxItem() const { return AmmoBoxItem; }
 	// 코인
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE UPepccineResourceItemData* GetCoinItem() const { return CoinItem; }
+	// 체력 포션
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FORCEINLINE UPepccineResourceItemData* GetHealingPotion() const { return HealingPotion; }
 
 protected:
 
@@ -48,13 +48,13 @@ protected:
 	// 액티브 데이터 에셋
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "액티브 아이템 데이터 에셋"))
 	UPepccineActiveItemDataAsset* ActiveItemDataAsset;
-	// 체력 포션
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "체력 포션"))
-	UPepccineResourceItemData* HealingPotion;
 	// 탄약통
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "탄약통"))
 	UPepccineResourceItemData* AmmoBoxItem;
 	// 코인
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "코인"))
 	UPepccineResourceItemData* CoinItem;
+	// 체력 포션
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "체력 포션"))
+	UPepccineResourceItemData* HealingPotion;
 };

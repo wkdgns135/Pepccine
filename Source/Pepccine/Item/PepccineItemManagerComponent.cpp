@@ -11,7 +11,7 @@
 #include "Resource/PepccineResourceItemData.h"
 
 UPepccineItemManagerComponent::UPepccineItemManagerComponent()
-	: WeaponItemManager(nullptr), PassiveItemManager(nullptr), ActiveItemManager(nullptr), SpawnerSubSystem(nullptr)
+	: WeaponItemManager(nullptr), PassiveItemManager(nullptr), ActiveItemManager(nullptr)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
@@ -30,18 +30,18 @@ void UPepccineItemManagerComponent::BeginPlay()
 	ActiveItemManager = NewObject<UPepccineActiveItemManager>(this);
 	ActiveItemManager->InitializeManager(this);
 
-	SpawnerSubSystem = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
-
-	if (WeaponItemManager && PassiveItemManager && ActiveItemManager && SpawnerSubSystem)
+	if (WeaponItemManager && PassiveItemManager && ActiveItemManager)
 	{
 		if (ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner()))
 		{
 			// 무기 컴포넌트 등록
 			WeaponItemManager->SetWeaponItemComponent(OwnerCharacter);
 
-			if (const UPepccineWeaponItemData* WeaponItemData = SpawnerSubSystem->GetItemDataAsset()
-				->GetWeaponItemDataAsset()
-				->GetWeaponsItemById(0))
+			if (const UPepccineWeaponItemData* WeaponItemData = GetWorld()
+			                                                    ->GetSubsystem<UPepccineItemSpawnerSubSystem>()
+			                                                    ->GetItemDataAsset()
+			                                                    ->GetWeaponItemDataAsset()
+			                                                    ->GetWeaponsItemById(0))
 			{
 				// 기본 무기 장착
 				WeaponItemManager->EquipDefaultWeapon(WeaponItemData);
@@ -110,7 +110,7 @@ bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemDa
 			UGameplayStatics::PlaySoundAtLocation(this, PickUpSound, GetOwner()->GetActorLocation());
 		}
 	}
-	
+
 	return true;
 }
 
@@ -133,18 +133,32 @@ void UPepccineItemManagerComponent::IncreaseStatsOperations(TArray<FPepccineWeap
 {
 	for (const FPepccineWeaponStatModifier& Modifier : Modifiers)
 	{
+		UPepccineWeaponItemData* TargetWeaponItemData = WeaponItemManager->GetWeaponItemData(
+			Modifier.WeaponItemType);
+
 		// 합연산
 		if (Modifier.StatModifierDefault.StatModifyType == EPepccineStatModifyType::EPSMT_Add)
 		{
-			TotalWeaponStatSum.FindOrAdd({Modifier.WeaponItemType, Modifier.WeaponItemStatName}) += Modifier.
-				StatModifierDefault.
-				StatModifyValue;
+			TotalWeaponStatSum.FindOrAdd({Modifier.WeaponItemType, Modifier.WeaponItemStatName})
+				+= Modifier.StatModifierDefault.StatModifyValue;
+
+			if (TargetWeaponItemData)
+			{
+				WeaponItemManager->GetWeaponItemStatRefByName(TargetWeaponItemData, Modifier.WeaponItemStatName)
+					+= Modifier.StatModifierDefault.StatModifyValue;
+			}
 		}
 		// 곱연산
 		else
 		{
-			TotalWeaponStatProduct.FindOrAdd({Modifier.WeaponItemType, Modifier.WeaponItemStatName}, 1.0f) *= Modifier.
-				StatModifierDefault.StatModifyValue;
+			TotalWeaponStatProduct.FindOrAdd({Modifier.WeaponItemType, Modifier.WeaponItemStatName}, 1.0f)
+				*= Modifier.StatModifierDefault.StatModifyValue;
+
+			if (TargetWeaponItemData)
+			{
+				WeaponItemManager->GetWeaponItemStatRefByName(TargetWeaponItemData, Modifier.WeaponItemStatName)
+					*= Modifier.StatModifierDefault.StatModifyValue;
+			}
 		}
 	}
 }
@@ -161,8 +175,8 @@ void UPepccineItemManagerComponent::IncreaseStatsOperations(TArray<FPepccineChar
 		// 곱연산
 		else
 		{
-			TotalCharacterStatProduct.FindOrAdd(Modifier.CharacterStatName, 1.0f) *= Modifier.StatModifierDefault.
-				StatModifyValue;
+			TotalCharacterStatProduct.FindOrAdd(Modifier.CharacterStatName, 1.0f)
+				*= Modifier.StatModifierDefault.StatModifyValue;
 		}
 	}
 }
@@ -171,6 +185,9 @@ void UPepccineItemManagerComponent::DecreaseStatsOperations(TArray<FPepccineWeap
 {
 	for (const FPepccineWeaponStatModifier& Modifier : Modifiers)
 	{
+		UPepccineWeaponItemData* TargetWeaponItemData = WeaponItemManager->GetWeaponItemData(
+			Modifier.WeaponItemType);
+
 		// 합연산
 		if (Modifier.StatModifierDefault.StatModifyType == EPepccineStatModifyType::EPSMT_Add)
 		{
@@ -179,6 +196,12 @@ void UPepccineItemManagerComponent::DecreaseStatsOperations(TArray<FPepccineWeap
 				TotalWeaponStatSum[{Modifier.WeaponItemType, Modifier.WeaponItemStatName}] -= Modifier.
 					StatModifierDefault.
 					StatModifyValue;
+
+				if (TargetWeaponItemData)
+				{
+					WeaponItemManager->GetWeaponItemStatRefByName(TargetWeaponItemData, Modifier.WeaponItemStatName)
+						-= Modifier.StatModifierDefault.StatModifyValue;
+				}
 			}
 		}
 		// 곱연산
@@ -189,6 +212,12 @@ void UPepccineItemManagerComponent::DecreaseStatsOperations(TArray<FPepccineWeap
 				TotalWeaponStatProduct[{Modifier.WeaponItemType, Modifier.WeaponItemStatName}] *= Modifier.
 					StatModifierDefault.
 					StatModifyValue;
+
+				if (TargetWeaponItemData)
+				{
+					WeaponItemManager->GetWeaponItemStatRefByName(TargetWeaponItemData, Modifier.WeaponItemStatName)
+						/= Modifier.StatModifierDefault.StatModifyValue;
+				}
 			}
 		}
 	}
@@ -203,9 +232,7 @@ void UPepccineItemManagerComponent::DecreaseStatsOperations(TArray<FPepccineChar
 		{
 			if (TotalCharacterStatSum.Find(Modifier.CharacterStatName))
 			{
-				TotalCharacterStatSum[Modifier.CharacterStatName] -= Modifier.
-				                                                     StatModifierDefault.
-				                                                     StatModifyValue;
+				TotalCharacterStatSum[Modifier.CharacterStatName] -= Modifier.StatModifierDefault.StatModifyValue;
 			}
 		}
 		// 곱연산
@@ -213,9 +240,7 @@ void UPepccineItemManagerComponent::DecreaseStatsOperations(TArray<FPepccineChar
 		{
 			if (TotalCharacterStatProduct.Find(Modifier.CharacterStatName))
 			{
-				TotalCharacterStatProduct[Modifier.CharacterStatName] *= Modifier.
-				                                                         StatModifierDefault.
-				                                                         StatModifyValue;
+				TotalCharacterStatProduct[Modifier.CharacterStatName] /= Modifier.StatModifierDefault.StatModifyValue;
 			}
 		}
 	}
@@ -264,10 +289,10 @@ FVector UPepccineItemManagerComponent::GetShootDirection() const
 
 	// Ray 설정
 	const FVector Start = WorldLocation;
-	const FVector End = Start + (WorldDirection * 10000); // Ray 길이
+	const FVector End = Start + (WorldDirection * 10000);
 	FHitResult HitResult;
 
-	DrawDebugLine(GetWorld(), Start, End, FColor::Green, true, 2.0f);
+	// DrawDebugLine(GetWorld(), Start, End, FColor::Green, true, 2.0f);
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetOwner());

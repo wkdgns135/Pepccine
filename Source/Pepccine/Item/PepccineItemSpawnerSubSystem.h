@@ -5,6 +5,7 @@
 
 #include "PepccineItemSpawnerSubSystem.generated.h"
 
+class UItemSpawnWeightData;
 class UPepccineItemDataAssetBase;
 class UPepccineItemDataBase;
 class APepccineDropItem;
@@ -15,16 +16,18 @@ class PEPCCINE_API UPepccineItemSpawnerSubSystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
-	// 무조건 생성
+	// 서브 시스템 무조건 생성
 	FORCEINLINE virtual bool ShouldCreateSubsystem(UObject* Outer) const override { return true; }
 	
 	// 아이템 스포너 초기화
 	UFUNCTION(BlueprintCallable, category = "Item|Spawner")
 	void InitSpawner(UPepccineItemDataAssetBase* InItemDataAsset, const TSubclassOf<APepccineDropItem>& InSpawnedActor);
-
 	// 아이템 스폰
 	UFUNCTION(BlueprintCallable, category = "Item|Spawner")
-	void SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData);
+	void SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData) const;
+
+	// 확률로 아이템 스폰
+	void SpawnItemFromDataAsset(const FVector& SpawnLocation, UItemSpawnWeightData* SpawnWeightData);
 	
 	// getter
 	// 아이템 데이터 에셋 가져오기
@@ -39,5 +42,4 @@ protected:
 	// 스폰 엑터
 	UPROPERTY(EditDefaultsOnly, Category = "Item|Spawner", DisplayName = "스폰 엑터")
 	TSubclassOf<APepccineDropItem> SpawnedActor;
-	
 };

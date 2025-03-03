@@ -1,5 +1,6 @@
 ﻿#include "PepccineDropItem.h"
 
+#include "PepccineItemDataAssetBase.h"
 #include "PepccineItemDataBase.h"
 #include "PepccineItemManagerComponent.h"
 #include "Components/SphereComponent.h"
@@ -40,7 +41,7 @@ void APepccineDropItem::BeginPlay()
 void APepccineDropItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+
 	// 스태틱 메쉬 상하 움직임
 	CurrentTime += DeltaTime;
 	CurrentTime = FMath::Fmod(CurrentTime, 360.0f);
@@ -49,7 +50,7 @@ void APepccineDropItem::Tick(float DeltaTime)
 
 	const FVector NewLocation = StartLocation + (GetActorUpVector() * Offset);
 	StaticMeshComp->SetRelativeLocation(NewLocation);
-	
+
 	// 스태틱 메쉬 회전
 	AddActorLocalRotation(FRotator(0, DeltaTime * 45.0f, 0));
 }
@@ -72,7 +73,8 @@ void APepccineDropItem::InitializeDropItem(const UPepccineItemDataBase* InDropIt
 		{
 			StaticMeshComp->SetRelativeScale3D(FVector(0.25f, 0.25f, 0.25f));
 
-			UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(StaticMeshComp->GetMaterial(0), this);
+			UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(
+				StaticMeshComp->GetMaterial(0), this);
 			DynMaterial->SetTextureParameterValue(FName("ItemIcon"), DropItemData->GetIconTexture());
 
 			StaticMeshComp->SetMaterial(0, DynMaterial);
@@ -96,10 +98,10 @@ void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 
 		if (!DropItemData)
 		{
-			UE_LOG(LogTemp,Warning, TEXT("아이템 데이터가 없습니다!"));
+			UE_LOG(LogTemp, Warning, TEXT("아이템 데이터가 없습니다!"));
 			return;
 		}
-	
+
 		UPepccineWeaponItemData* BeforeWeapon = nullptr;
 
 		// 무기 아이템
@@ -112,16 +114,18 @@ void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 		else if (UPepccineResourceItemData* ResourceItemData = Cast<UPepccineResourceItemData>(DropItemData))
 		{
 			int32 RemainingCount = 0;
-			
+
 			if (ResourceItemData->GetResourceItemType() == EPepccineResourceItemType::EPRIT_AmmoBox)
 			{
-				const UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main);
+				const UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->GetWeaponItemData(
+					EPepccineWeaponItemType::EPWIT_Main);
 				if (!MainWeaponData)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("주 무기가 없습니다."));
 					return;
 				}
-				RemainingCount = (MainWeaponData->GetWeaponItemStats().SpareAmmo + ResourceItemData->GetResourceAmount()) - 999;
+				RemainingCount = (MainWeaponData->GetWeaponItemStats().SpareAmmo + ResourceItemData->
+					GetResourceAmount()) - 999;
 			}
 			else if (ResourceItemData->GetResourceItemType() == EPepccineResourceItemType::EPRIT_Coin)
 			{
@@ -145,8 +149,7 @@ void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 		if (BeforeWeapon)
 		{
 			IsDestroy = false;
-			DropItemData = BeforeWeapon;
-			StaticMeshComp->SetStaticMesh(BeforeWeapon->GetMeshToSpawn());
+			ChangeWeaponItemData(BeforeWeapon);
 		}
 
 		if (IsDestroy)
@@ -154,5 +157,30 @@ void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 			// 획득 후 엑터 제거
 			Destroy();
 		}
+	}
+}
+
+void APepccineDropItem::ChangeWeaponItemData(UPepccineWeaponItemData* WeaponItemData) const
+{
+	if (UPepccineWeaponItemData* DropWeaponItemData = Cast<UPepccineWeaponItemData>(DropItemData))
+	{
+		// 원본 데이터
+		const UPepccineWeaponItemData* DefaultWeaponItemData = GetWorld()->
+		                                                       GetSubsystem<UPepccineItemSpawnerSubSystem>()->
+		                                                       GetItemDataAsset()->GetWeaponItemDataAsset()->
+		                                                       GetWeaponsItemById(WeaponItemData->GetItemId());
+		// 스탯 원본 데이터로 설정
+		DropWeaponItemData->SetWeaponStats(DefaultWeaponItemData->GetWeaponItemStats());
+
+		// 현재 탄약 수, 예비 탄약 수는 이전 무기에서 가져오기
+		DropWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = WeaponItemData->GetWeaponItemStats().MagazineAmmo;
+		DropWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = WeaponItemData->GetWeaponItemStats().SpareAmmo;
+
+		// 스태틱 메시 설정
+		StaticMeshComp->SetStaticMesh(WeaponItemData->GetMeshToSpawn());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("무기 데이터가 아닙니다."));
 	}
 }

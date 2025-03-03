@@ -1,4 +1,6 @@
 ﻿#include "PepccineItemSpawnerSubSystem.h"
+
+#include "ItemSpawnWeightData.h"
 #include "PepccineDropItem.h"
 #include "PepccineItemDataBase.h"
 
@@ -9,7 +11,7 @@ void UPepccineItemSpawnerSubSystem::InitSpawner(UPepccineItemDataAssetBase* InIt
 	SpawnedActor = InSpawnedActor;
 }
 
-void UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData)
+void UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData) const
 {
 	if (!ItemDataAsset)
 	{
@@ -31,4 +33,27 @@ void UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& SpawnLocation, UPep
 			DropItem->InitializeDropItem(DropItemData);
 		}
 	}
+}
+
+void UPepccineItemSpawnerSubSystem::SpawnItemFromDataAsset(const FVector& SpawnLocation,
+	UItemSpawnWeightData* SpawnWeightData)
+{
+	TArray<int32> Weights = {
+		SpawnWeightData->WeaponItemWeight,
+		SpawnWeightData->PassiveItemWeight,
+		SpawnWeightData->ActiveItemWeight,
+		SpawnWeightData->AmmoBoxItemWeight,
+		SpawnWeightData->CoinItemWeight,
+		SpawnWeightData->HealingPotionItemWeight
+	};
+
+	// 누적 가중치 적용
+	for (int32 i = 1; i < Weights.Num(); ++i)
+	{
+		Weights[i] += Weights[i - 1];
+	}
+
+	// 랜덤 값
+	int32 RandomValue = FMath::RandRange(0, Weights.Last() - 1);
+	
 }
