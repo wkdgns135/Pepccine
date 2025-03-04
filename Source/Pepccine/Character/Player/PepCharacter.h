@@ -46,6 +46,7 @@ public:
 	bool bIsZooming = false;
 	bool bIsSprinting = false;
 	bool bIsClimbing = false;
+	bool bIsStunning = false;
 	
 	bool bIsCrouching = false;
 	bool bIsSprintable = true;
@@ -177,6 +178,7 @@ private:
 	
 	FVector RollDirection;
 	FVector GetRollDirection();
+	FVector GetKnockbackDirection(AActor* DamageSource, AActor* Victim);
 	
 	UPROPERTY()
 	APepccineDropItem* CurrentDropItem;
@@ -195,6 +197,7 @@ private:
 	void CheckSprinting();
 	void CheckRolling(float DeltaTime);
 	void SetWeight();
+	void Stumble(AActor* DamageCauser);
 
 	// TEST CODE
 	void TestApplyStatModifier();

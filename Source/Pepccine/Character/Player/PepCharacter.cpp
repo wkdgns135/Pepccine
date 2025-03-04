@@ -82,7 +82,10 @@ void APepCharacter::InitializeCharacterMovement() const
 {
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
-		if (!PlayerStatComponent) return;
+		if (!PlayerStatComponent)
+		{
+			return;
+		}
 		MovementComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
 		MovementComponent->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
 		MovementComponent->JumpZVelocity = PlayerStatComponent->GetCurrentStats().MovementStats.JumpZVelocity;
@@ -94,7 +97,10 @@ void APepCharacter::InitializeCharacterMovement() const
 #pragma region
 void APepCharacter::CheckSprinting()
 {
-	if (!PlayerStatComponent) return;
+	if (!PlayerStatComponent)
+	{
+		return;
+	}
 	if (bIsSprinting)
 	{
 		if (!PlayerStatComponent->DecreaseStamina(0.25))
@@ -122,8 +128,11 @@ void APepCharacter::SetCharacterMovement()
 {
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
-		if (!MovementComponent) return;
-		
+		if (!MovementComponent)
+		{
+			return;
+		}
+
 		const float WalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed - LooseWeight;
 		SetCharacterSpeed(WalkSpeed);
 
@@ -134,7 +143,10 @@ void APepCharacter::SetCharacterMovement()
 
 void APepCharacter::SetWeight()
 {
-	if (!PlayerStatComponent) return;
+	if (!PlayerStatComponent)
+	{
+		return;
+	}
 	const float WeaponWeight = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Weight;
 	const float PlayerStrength = PlayerStatComponent->GetCurrentStats().MovementStats.Strength;
 
@@ -183,21 +195,58 @@ void APepCharacter::AddObservers()
 	}
 }
 
-void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType)
+void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult,
+                                EMonsterSkill SkillType)
 {
-	if (bIsRolling | !PepccineMontageComponent) return;
-	
+	if (bIsRolling || !HitReactionComponent || !PepccineMontageComponent)
+	{
+		return;
+	}
+
 	PlayerStatComponent->DecreaseHealth(DamageAmount);
 
 	FVector HitDirection = HitResult.ImpactNormal;
 
-	HitReactionComponent->HitReaction("Spine", HitDirection);
-	//PepccineMontageComponent->Stumble(2.0);
+	//HitReactionComponent->HitReaction("Spine", HitDirection);
+	Stumble(DamageCauser);
 }
+
+void APepCharacter::Stumble(AActor* DamageCauser)
+{
+	if (!PepccineMontageComponent) return;
+
+	bIsStunning = true;
+
+	constexpr float YForce = 500.0f;
+	constexpr float ZFore = 300.0f;
+	
+	FVector KnockbackForce = GetKnockbackDirection(DamageCauser, this) * YForce;
+	GetCharacterMovement()->AddImpulse(KnockbackForce + FVector(0, 0, ZFore), true);
+
+	PepccineMontageComponent->Stumble(2.0);
+	// TriggerCameraShake(); 수치줘서 효과조절
+}
+
+FVector APepCharacter::GetKnockbackDirection(AActor* DamageSource, AActor* Victim)
+{
+	if (!DamageSource || !Victim) return FVector::ZeroVector;
+
+	// 피해를 받은 캐릭터의 위치
+	FVector VictimLocation = Victim->GetActorLocation();
+	FVector SourceLocation = DamageSource->GetActorLocation();
+
+	// 피해 방향 (공격자 -> 피해자 벡터)
+	FVector KnockbackDir = (VictimLocation - SourceLocation).GetSafeNormal();
+	return KnockbackDir;
+}
+
 
 void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth)
 {
-	if (!PrograssBarComponent) return;
+	if (!PrograssBarComponent)
+	{
+		return;
+	}
 	if (NewHealth == 0)
 	{
 		Dead();
@@ -208,14 +257,20 @@ void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth
 
 void APepCharacter::OnStaminaChanged(float NewStamina, float MaxStamina)
 {
-	if (!PrograssBarComponent) return;
+	if (!PrograssBarComponent)
+	{
+		return;
+	}
 	//UE_LOG(LogTemp, Warning, TEXT("Stamina Updated: %f / %f"), NewStamina, MaxStamina);
 	PrograssBarComponent->SetStamina(NewStamina, MaxStamina);
 }
 
 void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
 {
-	if (DetectedActors.DetectedActors.Num() == 0) return;
+	if (DetectedActors.DetectedActors.Num() == 0)
+	{
+		return;
+	}
 
 	const FDetectedActorInfo* MinDistActor = Algo::MinElement(DetectedActors.DetectedActors,
 	                                                          [](const FDetectedActorInfo& InfoA,
@@ -235,7 +290,7 @@ void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
 
 		CurrentDropItem = DropItem;
 	}
-	
+
 	//UE_LOG(LogTemp, Warning, TEXT("Number of DectedActor: %d"), DetectedActors.DetectedActors.Num());
 	//UE_LOG(LogTemp, Warning, TEXT("Detected Actors: [%s]"), *MinDistActor->Actor->GetName());
 	//UE_LOG(LogTemp, Warning, TEXT("Detected Actors Loc: [%f]"), MinDistActor->Distance);
@@ -246,7 +301,10 @@ void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
 #pragma region
 void APepCharacter::Dead()
 {
-	if (!bIsPlayerAlive) return;
+	if (!bIsPlayerAlive)
+	{
+		return;
+	}
 	bIsPlayerAlive = false;
 
 	if (APepccinePlayerController* PepccinePlayerController = Cast<APepccinePlayerController>(PlayerController))
@@ -278,7 +336,7 @@ void APepCharacter::Dead()
 
 void APepCharacter::Move(const FInputActionValue& Value)
 {
-	if (bIsRolling | !bIsPlayerAlive) return;
+	if (bIsRolling || !bIsPlayerAlive || bIsStunning || bIsClimbing) return;
 	FVector2D MoveInput = Value.Get<FVector2D>();
 
 	//UE_LOG(LogTemp, Log, TEXT("MovementVector: [%s]"), *MoveInput.ToString());
@@ -309,18 +367,23 @@ void APepCharacter::OnMovementStopped()
 
 void APepCharacter::JumpStart()
 {
-	if (bIsRolling | !bIsPlayerAlive | !EnhancedRadarComponent | GetCharacterMovement()->IsFalling()) return;
+	if (bIsRolling || !bIsPlayerAlive || !PepccineMontageComponent || !EnhancedRadarComponent || GetCharacterMovement()->IsFalling() || bIsStunning || bIsClimbing) return;
 
 	if (PlayerStatComponent->DecreaseStaminaByPercentage(5))
 	{
-		if (EnhancedRadarComponent->IsAbleToClimb())
+		const FClimbObstacleInfo* ClimbInfo = EnhancedRadarComponent->IsAbleToClimb();
+		
+		if (ClimbInfo->bCanClimb)
 		{
-			bIsClimbing = true;
-			UE_LOG(LogTemp, Log, TEXT("Climb!"));
+			//bIsClimbing = true;
+			UE_LOG(LogTemp, Log, TEXT("Climb! [%f]"), ClimbInfo->Height);
+			
 			FVector ClimbDirection = GetActorForwardVector() * 200.f;
-			FVector ClimbUp = FVector(0.f, 0.f, 600.f);
+			FVector ClimbUp = FVector(0.f, 0.f, ClimbInfo->Height * 3);
 
 			LaunchCharacter(ClimbDirection + ClimbUp, true, true);
+			
+			PepccineMontageComponent->Climbing();
 		}
 		else
 		{
@@ -339,7 +402,8 @@ void APepCharacter::JumpStop()
 
 void APepCharacter::UseItem()
 {
-	if (!bIsPlayerAlive) return;
+	if (!bIsPlayerAlive || bIsStunning) return;
+	
 	UE_LOG(LogTemp, Log, TEXT("UseItem!"));
 	UpdateWeaponUI();
 }
@@ -354,7 +418,7 @@ void APepCharacter::Look(const FInputActionValue& value)
 
 void APepCharacter::StartSprint(const FInputActionValue& value)
 {
-	if (bIsRolling | !bIsPlayerAlive) return;
+	if (bIsRolling || !bIsPlayerAlive || bIsStunning || bIsClimbing) return;
 
 	if (bIsRollable)
 	{
@@ -380,8 +444,8 @@ void APepCharacter::StopSprint(const FInputActionValue& value)
 
 void APepCharacter::Roll()
 {
-	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling() | !
-		bIsPlayerAlive) return;
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent || GetCharacterMovement()->IsFalling() || !
+		bIsPlayerAlive || bIsStunning || bIsClimbing) return;
 
 	// 임시
 	//TriggerCameraShake();
@@ -432,7 +496,8 @@ FVector APepCharacter::GetRollDirection()
 
 void APepCharacter::Crouching()
 {
-	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive) return;
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive || bIsStunning || bIsClimbing) return;
+
 	bIsCrouching = GetCharacterMovement()->IsCrouching();
 
 	if (bIsCrouching)
@@ -451,7 +516,7 @@ void APepCharacter::Crouching()
 
 void APepCharacter::Reload()
 {
-	if (!bIsPlayerAlive) return;
+	if (!bIsPlayerAlive || bIsStunning || bIsClimbing) return;
 
 	//HitReactionComponent->EnterRagdoll(5);
 
@@ -464,7 +529,8 @@ void APepCharacter::Reload()
 
 void APepCharacter::Interactive()
 {
-	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent) return;
+	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing) return;
+	
 	float ItemWeight = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Weight;
 
 	// 아이템 인벤토리에 추가
@@ -516,8 +582,10 @@ void APepCharacter::Interactive()
 				switch (Feature.CharacterFeatureName)
 				{
 				case EPepccineCharacterFeatureName::EPCFN_Roll:
+					bIsRollable = true;
 					break;
 				case EPepccineCharacterFeatureName::EPCFN_Sprint:
+					bIsSprintable = true;
 					break;
 				}
 			}
@@ -584,8 +652,9 @@ void APepCharacter::UpdateWeaponUI()
 	UTexture2D* SubWeaponImage = SubWeaponData ? SubWeaponData->GetIconTexture() : nullptr;
 
 	// 현재 장착된 무기가 주무기인지 확인
-	bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main;
-	
+	bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() ==
+		EPepccineWeaponItemType::EPWIT_Main;
+
 	// WeaponWidget 업데이트
 	ItemIconComponent->SetWeaponItem(
 		MainWeaponImage,
@@ -596,9 +665,10 @@ void APepCharacter::UpdateWeaponUI()
 		bIsMainWeaponEquipped
 	);
 }
+
 void APepCharacter::OpenInventory()
 {
-	if (bIsRolling || !InventoryComponent) return;
+	if (bIsRolling || !InventoryComponent || bIsStunning) return;
 
 	bIsInventoryOpened = !bIsInventoryOpened;
 	InventoryComponent->ToggleInventory();
@@ -620,10 +690,11 @@ void APepCharacter::OpenInventory()
 
 void APepCharacter::SwapItem(const FInputActionValue& value)
 {
-	if (!bIsPlayerAlive || bIsReloading || bIsSwapping) return;
+	if (!bIsPlayerAlive || bIsReloading || bIsSwapping || bIsStunning || bIsClimbing) return;
+	
 	float ScrollValue = value.Get<float>();
 	bIsSwapping = true;
-	
+
 	if (ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main) != nullptr &&
 		ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub) != nullptr)
 	{
@@ -635,7 +706,7 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 		{
 			ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Main);
 		}
-		
+
 		SetWeight();
 		UpdateWeaponUI();
 
@@ -650,17 +721,19 @@ void APepCharacter::StopFire()
 
 void APepCharacter::Fire()
 {
-	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent || bIsReloading) return;
-	
+	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent || bIsReloading || bIsStunning || bIsClimbing) return;
+
 	float CurrentAmmo = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineAmmo;
 	if (CurrentAmmo <= 0)
 	{
 		PepccineMontageComponent->Attack();
 	}
 	else
-	{ 
+	{
 		PepccineMontageComponent->Fire();
 		ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
+
+		
 	}
 
 	bIsFiring = true;
@@ -669,7 +742,7 @@ void APepCharacter::Fire()
 
 void APepCharacter::ZoomIn()
 {
-	if (bIsRolling | !bIsPlayerAlive) return;
+	if (bIsRolling || !bIsPlayerAlive || bIsStunning) return;
 
 	bIsZooming = true;
 

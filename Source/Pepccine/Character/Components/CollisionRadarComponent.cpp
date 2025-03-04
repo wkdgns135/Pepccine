@@ -21,13 +21,18 @@ void UCollisionRadarComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CurrentClimbInfo = new FClimbObstacleInfo();
+
 	if (DetectionZone)
 	{
 		DetectionZone->SetCollisionProfileName(TEXT("OverlapAll"));
 	}
 
-	if (!bIsUseRadar || !DetectionZone) return;
-	
+	if (!bIsUseRadar || !DetectionZone)
+	{
+		return;
+	}
+
 	AddDetectZone();
 
 	if (AActor* Owner = GetOwner())
@@ -56,14 +61,14 @@ void UCollisionRadarComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 	if (bIsUseSweep)
 	{
-		bIsAbleToClimb = CanClimbOverObstacle();
+		CurrentClimbInfo = CanClimbOverObstacle();
 	}
 }
 
-bool UCollisionRadarComponent::CanClimbOverObstacle() const
+FClimbObstacleInfo* UCollisionRadarComponent::CanClimbOverObstacle() const
 {
 	AActor* Owner = GetOwner();
-	if (!Owner) return false;
+	if (!Owner) return CurrentClimbInfo;
 
 	FVector Start = Owner->GetActorLocation();
 	FVector End = Start + (Owner->GetActorForwardVector() * 100.f);
@@ -77,13 +82,13 @@ bool UCollisionRadarComponent::CanClimbOverObstacle() const
 	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
 
 	bool bHit = GetWorld()->SweepMultiByObjectType(
-			HitResults,
-			Start,
-			End,
-			FQuat::Identity,
-			ObjectQueryParams,
-			FCollisionShape::MakeCapsule(34.f, 88.f),
-			QueryParams
+		HitResults,
+		Start,
+		End,
+		FQuat::Identity,
+		ObjectQueryParams,
+		FCollisionShape::MakeCapsule(34.f, 88.f),
+		QueryParams
 	);
 
 	if (bHit)
@@ -96,26 +101,36 @@ bool UCollisionRadarComponent::CanClimbOverObstacle() const
 				{
 					DrawDebugCapsule(GetWorld(), Hit.ImpactPoint, 100.0f, 50.0f, FQuat::Identity, FColor::Red, false, 2.0f);
 				}
-				
-				float ObstacleTop = Hit.GetActor()->GetActorLocation().Z + Hit.GetActor()->GetSimpleCollisionHalfHeight();
+
+				float ObstacleTop = Hit.GetActor()->GetActorLocation().Z + Hit.GetActor()->GetSimpleCollisionHalfHeight() * 2;
 				float CharacterBottom = Start.Z;
-				float ObstacleHeight = ObstacleTop - CharacterBottom;
-				
+				CurrentClimbInfo->Height = ObstacleTop - CharacterBottom;
+
+				//UE_LOG(LogTemp, Warning, TEXT("ObstacleTop: [%f], CharacterBottom: [%f]"), ObstacleTop, CharacterBottom);
+
 				FVector ObstacleExtent = Hit.GetActor()->GetComponentsBoundingBox().GetExtent();
-				float ObstacleWidth = ObstacleExtent.X * 2;
-				//UE_LOG(LogTemp, Warning, TEXT("벽 높이: [%f], 벽 폭: [%f]"), ObstacleHeight, ObstacleWidth);
-				
-				if (ObstacleHeight < 110 && ObstacleWidth < 150)
+				CurrentClimbInfo->Width = ObstacleExtent.X * 2;
+
+				//UE_LOG(LogTemp, Warning, TEXT("벽 높이: [%f], 벽 폭: [%f]"), CurrentClimbInfo->Height, CurrentClimbInfo->Width);
+
+				if (CurrentClimbInfo->Height < 210 && CurrentClimbInfo->Width < 150)
 				{
+					CurrentClimbInfo->bCanClimb = true;
 					//UE_LOG(LogTemp, Warning, TEXT("벽을 넘을 수 있음!"));
-					return true;
 				}
+				else
+				{
+					CurrentClimbInfo->bCanClimb = false;
+				}
+
+				return CurrentClimbInfo;
 			}
 		}
 	}
 
-	return false;
+	return CurrentClimbInfo;
 }
+
 
 void UCollisionRadarComponent::AddDetectZone()
 {
@@ -151,7 +166,10 @@ void UCollisionRadarComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
 
 bool UCollisionRadarComponent::IsInFieldOfView(AActor* TargetActor) const
 {
-	if (!TargetActor) return false;
+	if (!TargetActor)
+	{
+		return false;
+	}
 
 	FVector MyLocation = GetOwner()->GetActorLocation();
 	FVector TargetLocation = TargetActor->GetActorLocation();
@@ -171,7 +189,10 @@ void UCollisionRadarComponent::DetectActors()
 
 	for (AActor* Actor : NearbyActors)
 	{
-		if (!Actor) continue;
+		if (!Actor)
+		{
+			continue;
+		}
 
 		const float Distance = FVector::Dist(GetOwner()->GetActorLocation(), Actor->GetActorLocation());
 
@@ -194,7 +215,10 @@ void UCollisionRadarComponent::DetectActors()
 
 void UCollisionRadarComponent::DrawDebugVisualization()
 {
-	if (!bShowDetectionRadius && !bShowFieldOfView) return;
+	if (!bShowDetectionRadius && !bShowFieldOfView)
+	{
+		return;
+	}
 
 	FVector Location = GetOwner()->GetActorLocation();
 	FVector Forward = GetOwner()->GetActorForwardVector();

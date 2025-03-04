@@ -58,8 +58,9 @@ void UPepccineAnimInstance::AnimNotify_EndDraw()
 	UE_LOG(LogTemp, Log, TEXT("EndDraw!"));
 	Owner->bIsSwapping = false;
 }
+
 void UPepccineAnimInstance::AnimNotify_EndGettingUp()
 {
 	UE_LOG(LogTemp, Log, TEXT("EndGettingUp"));
-	//Owner->bIsStumbling = false;
+	Owner->bIsStunning = false;
 }
