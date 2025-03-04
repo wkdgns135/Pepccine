@@ -9,6 +9,8 @@ void UCharacterSaveManager::Initialize(FSubsystemCollectionBase& Collection)
 
 	UE_LOG(LogTemp, Warning, TEXT("Character Save Manager Initialized"));
 	bIsFirstTimeLoaded = true;
+
+	SavePlayerStats(FPlayerStats());
 }
 
 bool UCharacterSaveManager::LoadPlayerStats(FPlayerStats& OutStats)
