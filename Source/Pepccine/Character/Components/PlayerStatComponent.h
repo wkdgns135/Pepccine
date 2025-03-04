@@ -75,12 +75,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	const FPlayerStats& GetCurrentStats() const { return CurrentStats; }
 
+	/** 스탯 초기화 (기본값으로 리셋) */
+	void InitializeStats();
 	/** 특정 Modifier를 적용 */
 	void ApplyStatModifier(const FStatModifier& Modifier);
 	/** 특정 Modifier를 제거 */
 	void RemoveStatModifier(const FStatModifier& Modifier);
 
-private:
+	/** 적용된 스탯 수정 목록 (아이템, 버프 등) */
+	TArray<FStatModifier> ActiveModifiers;
 	/* 현재 스텟 */
 	FPlayerStats CurrentStats;
 	/** 현재 적용된 모든 Modifier의 합연산 총합 */
@@ -88,15 +91,11 @@ private:
 	/** 현재 적용된 모든 Modifier의 곱연산 총합 */
 	FPlayerStats CurrentTotalMul;
 
-	/** 적용된 스탯 수정 목록 (아이템, 버프 등) */
-	TArray<FStatModifier> ActiveModifiers;
-
+private:
 	/** 모든 Modifier를 적용하여 스탯을 다시 계산 */
 	void RecalculateStats();
 	/** 스탯 값이 제한을 초과하지 않도록 보정 */
 	void ClampStats();
-	/** 스탯 초기화 (기본값으로 리셋) */
-	void InitializeStats();
 	
 	/** 게임에서 사용할 기본 스탯을 저장하는 데이터 애셋 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))

@@ -19,6 +19,7 @@
 #include "Character/Animation/PepccineHitReactionComponent.h"
 #include "Character/Components/BattleComponent.h"
 #include "Character/Data/ActorInfo.h"
+#include "Character/Data/CharacterSaveManager.h"
 #include "Item/PepccineDropItem.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
 #include "Item/Resource/PepccineResourceItemData.h"
@@ -66,6 +67,34 @@ void APepCharacter::BeginPlay()
 
 	InitializeCharacterMovement();
 	AddObservers();
+
+	UCharacterSaveManager* SaveManager = GetGameInstance()->GetSubsystem<UCharacterSaveManager>();
+	if (const bool FirstTimePlay = SaveManager->GetIsFirstTimeLoaded())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("First Time Loaded [%d]"), FirstTimePlay);
+		SaveManager->SetIsFirstTimeLoaded(FirstTimePlay);
+		PlayerStatComponent->LoadAndApplyPlayerStatDataAsset();
+	}
+	else
+	{
+		SaveManager->LoadPlayerStats(PlayerStatComponent->CurrentStats,
+		PlayerStatComponent->ActiveModifiers,
+		PlayerStatComponent->CurrentTotalAdd,
+		PlayerStatComponent->CurrentTotalMul);
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Player Stats Loaded [%s]"), *PlayerStatComponent->PrintStats());
+}
+
+void APepCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	
+	UCharacterSaveManager* SaveManager = GetGameInstance()->GetSubsystem<UCharacterSaveManager>();
+	SaveManager->SavePlayerStats(PlayerStatComponent->CurrentStats,
+		PlayerStatComponent->ActiveModifiers,
+		PlayerStatComponent->CurrentTotalAdd,
+		PlayerStatComponent->CurrentTotalMul);
 }
 
 void APepCharacter::Tick(float DeltaTime)
@@ -382,10 +411,7 @@ void APepCharacter::Climb()
 void APepCharacter::JumpStart()
 {
 	if (bIsRolling || !bIsPlayerAlive || !PepccineMontageComponent || !EnhancedRadarComponent || GetCharacterMovement()->
-		IsFalling() || bIsStunning || bIsClimbing)
-	{
-		return;
-	}
+		IsFalling() || bIsStunning || bIsClimbing) return;
 
 	if (PlayerStatComponent->DecreaseStaminaByPercentage(5))
 	{
@@ -554,10 +580,7 @@ void APepCharacter::Reload()
 
 void APepCharacter::Interactive()
 {
-	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing)
-	{
-		return;
-	}
+	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing) return;
 
 	float ItemWeight = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Weight;
 
@@ -568,8 +591,7 @@ void APepCharacter::Interactive()
 		if (UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 패시브 아이템
-			InventoryComponent->AddItem(PassiveItem->GetIconTexture(), PassiveItem->GetDisplayName(),
-			                            PassiveItem->GetDescription(), PlayerStatComponent->PrintStats());
+			UE_LOG(LogTemp, Warning, TEXT("패시브 아이템 [%s]"), *PlayerStatComponent->PrintStats());
 
 			TArray<FPepccineCharacterStatModifier> CharacterStatModifiers = PassiveItem->GetCharacterStatModifiers();
 			for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)
@@ -603,6 +625,11 @@ void APepCharacter::Interactive()
 					}
 				}
 			}
+
+			UE_LOG(LogTemp, Warning, TEXT("패시브 아이템 먹은 후 [%s]"), *PlayerStatComponent->PrintStats());
+			// 인벤토리에 추가
+			InventoryComponent->AddItem(PassiveItem->GetIconTexture(), PassiveItem->GetDisplayName(),
+																	PassiveItem->GetDescription(), PlayerStatComponent->PrintStats());
 
 			TArray<FPepccineCharacterFeature> CharacterFeatures = PassiveItem->GetCharacterFeatures();
 			for (const FPepccineCharacterFeature& Feature : CharacterFeatures)
@@ -699,9 +726,21 @@ void APepCharacter::UpdateWeaponUI()
 
 void APepCharacter::OpenInventory()
 {
-	if (bIsRolling || !InventoryComponent || bIsStunning)
+	if (bIsRolling || !InventoryComponent || bIsStunning || !ItemManagerComponent) return;
+	
+	if (bIsLoaded)
 	{
-		return;
+		UE_LOG(LogTemp, Warning, TEXT("아이템 로딩중"));
+		// 아이템 매니저에서 패시브 아이템 목록 가져와서 인벤토리에 넣는 작업 1회성
+		TMap<int32, UPepccinePassiveItemData*> PassiveItems = ItemManagerComponent->GetPassiveItemDatas();
+
+		for (const auto& PassiveItem : PassiveItems)
+		{
+			InventoryComponent->AddItem(PassiveItem.Value->GetIconTexture(), PassiveItem.Value->GetDisplayName(),
+																	PassiveItem.Value->GetDescription(), PlayerStatComponent->PrintStats());
+		}
+		
+		bIsLoaded = false;
 	}
 
 	bIsInventoryOpened = !bIsInventoryOpened;
