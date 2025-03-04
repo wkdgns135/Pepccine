@@ -365,25 +365,38 @@ void APepCharacter::OnMovementStopped()
 	UE_LOG(LogTemp, Log, TEXT("Movement Stopped!"));
 }
 
+void APepCharacter::Climb(FClimbObstacleInfo* ClimbInfo)
+{
+	ClimbInfo->bCanClimb = false;
+	//bIsClimbing = true;
+	UE_LOG(LogTemp, Log, TEXT("Climb! [%f]"), ClimbInfo->Height);
+
+	FVector NewLocation = GetActorLocation();
+	NewLocation.Z += ClimbInfo->Height + 50.0f;
+
+	SetActorLocation(NewLocation, false, nullptr, ETeleportType::TeleportPhysics);
+
+	/*
+	FVector ClimbDirection = GetActorForwardVector() * 200.f;
+	FVector ClimbUp = FVector(0.f, 0.f, ClimbInfo->Height * 3);
+
+	LaunchCharacter(ClimbDirection + ClimbUp, true, true);
+	// TriggerCameraShake(3.0f, 3.0f, 0.3f);
+	*/
+	PepccineMontageComponent->Climbing();
+}
+
 void APepCharacter::JumpStart()
 {
 	if (bIsRolling || !bIsPlayerAlive || !PepccineMontageComponent || !EnhancedRadarComponent || GetCharacterMovement()->IsFalling() || bIsStunning || bIsClimbing) return;
 
 	if (PlayerStatComponent->DecreaseStaminaByPercentage(5))
 	{
-		const FClimbObstacleInfo* ClimbInfo = EnhancedRadarComponent->IsAbleToClimb();
+		FClimbObstacleInfo* ClimbInfo = EnhancedRadarComponent->IsAbleToClimb();
 		
 		if (ClimbInfo->bCanClimb)
 		{
-			//bIsClimbing = true;
-			UE_LOG(LogTemp, Log, TEXT("Climb! [%f]"), ClimbInfo->Height);
-			
-			FVector ClimbDirection = GetActorForwardVector() * 200.f;
-			FVector ClimbUp = FVector(0.f, 0.f, ClimbInfo->Height * 3);
-
-			LaunchCharacter(ClimbDirection + ClimbUp, true, true);
-			
-			PepccineMontageComponent->Climbing();
+			Climb(ClimbInfo);
 		}
 		else
 		{
@@ -411,6 +424,8 @@ void APepCharacter::UseItem()
 void APepCharacter::Look(const FInputActionValue& value)
 {
 	FVector2D LookInput = value.Get<FVector2D>();
+
+	ShotStack = 0;
 
 	AddControllerYawInput(LookInput.X);
 	AddControllerPitchInput(LookInput.Y);
@@ -523,7 +538,10 @@ void APepCharacter::Reload()
 	bIsReloading = true;
 
 	ItemManagerComponent->ReloadWeapon();
-	PepccineMontageComponent->Reloading(0.5f);
+	
+	const float WeaponReloadSpeed = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().ReloadSpeed;
+	PepccineMontageComponent->Reloading(WeaponReloadSpeed);
+	
 	UpdateWeaponUI();
 }
 
@@ -727,13 +745,24 @@ void APepCharacter::Fire()
 	if (CurrentAmmo <= 0)
 	{
 		PepccineMontageComponent->Attack();
+		// 근거리 공격 추가
 	}
 	else
 	{
 		PepccineMontageComponent->Fire();
 		ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 
-		
+		const float Recoil = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Recoil * -1;
+		const float FireRate = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().FireRate;
+		const float RandDirYaw = FMath::RandRange(-2, 2);
+		const float NewPitch = Recoil / FireRate;
+
+		if (ShotStack < 50)
+		{
+			AddControllerPitchInput(NewPitch); // 위
+			++ShotStack;
+		}
+		AddControllerYawInput(NewPitch * RandDirYaw); // 왼쪽
 	}
 
 	bIsFiring = true;
@@ -771,23 +800,22 @@ void APepCharacter::ToggleCameraView()
 	ThirdPersonCamera->SetActive(!bIsFirstPersonView);
 }
 
-void APepCharacter::TriggerCameraShake()
+void APepCharacter::TriggerCameraShake(float Amplitude, float Frequency, float Duration)
 {
-	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-	if (PC && PC->PlayerCameraManager)
+	if (PlayerController && PlayerController->PlayerCameraManager)
 	{
 		UPepccineCameraModifier* Modifier
 			= Cast<UPepccineCameraModifier>(
-				PC->PlayerCameraManager->FindCameraModifierByClass(UPepccineCameraModifier::StaticClass()));
+				PlayerController->PlayerCameraManager->FindCameraModifierByClass(UPepccineCameraModifier::StaticClass()));
 		if (!Modifier)
 		{
 			Modifier = Cast<UPepccineCameraModifier>(
-				PC->PlayerCameraManager->AddNewCameraModifier(UPepccineCameraModifier::StaticClass()));
+				PlayerController->PlayerCameraManager->AddNewCameraModifier(UPepccineCameraModifier::StaticClass()));
 		}
 
 		if (Modifier)
 		{
-			Modifier->StartShake(10.0f, 20.0f, 0.5f);
+			Modifier->StartShake(Amplitude, Frequency, Duration);
 		}
 	}
 }

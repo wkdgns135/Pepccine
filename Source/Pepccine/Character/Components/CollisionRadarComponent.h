@@ -12,6 +12,9 @@ struct FClimbObstacleInfo
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Climbing")
+	int index = 0;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Climbing")
 	bool bCanClimb = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Climbing")

@@ -14,6 +14,7 @@
 #include "Monster/Data/MonsterSkill.h"
 #include "PepCharacter.generated.h"
 
+struct FClimbObstacleInfo;
 class UInputMappingContext;
 class UInputAction;
 class USpringArmComponent;
@@ -68,7 +69,7 @@ public:
 	UFUNCTION()
 	void OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType);
 	
-	void TriggerCameraShake();
+	void TriggerCameraShake(float Amplitude, float Frequency, float Duration);
 	
 	// inline
 	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }
@@ -175,6 +176,7 @@ private:
 	float SprintHoldStartTime = 0.0f;
 	float SprintHoldThreshold = 0.2f;
 	float LooseWeight = 0.0f;
+	int ShotStack = 0;
 	
 	FVector RollDirection;
 	FVector GetRollDirection();
@@ -198,6 +200,7 @@ private:
 	void CheckRolling(float DeltaTime);
 	void SetWeight();
 	void Stumble(AActor* DamageCauser);
+	void Climb(FClimbObstacleInfo* ClimbInfo);
 
 	// TEST CODE
 	void TestApplyStatModifier();
