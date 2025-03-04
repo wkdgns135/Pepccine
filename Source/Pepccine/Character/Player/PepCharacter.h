@@ -181,6 +181,7 @@ private:
 	FVector RollDirection;
 	FVector GetRollDirection();
 	FVector GetKnockbackDirection(AActor* DamageSource, AActor* Victim);
+	FVector ClimbTargetLocation;
 	
 	UPROPERTY()
 	APepccineDropItem* CurrentDropItem;
@@ -200,7 +201,7 @@ private:
 	void CheckRolling(float DeltaTime);
 	void SetWeight();
 	void Stumble(AActor* DamageCauser);
-	void Climb(FClimbObstacleInfo* ClimbInfo);
+	void Climb();
 
 	// TEST CODE
 	void TestApplyStatModifier();
