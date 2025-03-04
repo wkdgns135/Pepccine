@@ -35,7 +35,7 @@ public:
 	void InitSpawner(UPepccineItemDataAssetBase* InItemDataAsset, const TSubclassOf<APepccineDropItem>& InSpawnedActor);
 	// 아이템 스폰
 	UFUNCTION(BlueprintCallable, Category = "Item|Spawner")
-	void SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData);
+	void SpawnItem(const FVector& SpawnLocation, const UPepccineItemDataBase* DropItemData);
 	// 확률로 아이템 스폰
 	UFUNCTION(BlueprintPure, Category = "Item|Spawner")
 	UPepccineItemDataBase* GetRandomItemFromWeightDataAsset(const UPepccineItemSpawnWeightData* SpawnWeightData) const;
@@ -52,4 +52,5 @@ protected:
 	UPepccineItemDataAssetBase* ItemDataAsset;
 	// 스폰 엑터
 	TSubclassOf<APepccineDropItem> SpawnedActor;
+	// 이전에 스폰된 아이템 아이디 목록
 };

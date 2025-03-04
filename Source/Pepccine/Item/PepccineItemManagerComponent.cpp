@@ -316,15 +316,10 @@ FVector UPepccineItemManagerComponent::GetShootDirection() const
 
 // FPepccineItemSaveData UPepccineItemManagerComponent::GetSaveItemData() const
 // {
-// 	TArray<int32> PassiveItemIds;
-// 	for (auto PassiveItem : PassiveItemDatas)
-// 	{
-// 		PassiveItemIds.Add(PassiveItem.Key);
-// 	}
-//
 // 	int32 MainWeaponItemId = -1;
 // 	FPepccineSaveWeaponAmmo MainWeaponAmmo;
-// 	if (MainWeaponItemData)
+// 	if (const UPepccineWeaponItemData* MainWeaponItemData = WeaponItemManager->GetWeaponItemData(
+// 		EPepccineWeaponItemType::EPWIT_Main))
 // 	{
 // 		MainWeaponItemId = MainWeaponItemData->GetItemId();
 // 		MainWeaponAmmo.MagazinesAmmo = MainWeaponItemData->GetWeaponItemStats().MagazineAmmo;
@@ -332,7 +327,8 @@ FVector UPepccineItemManagerComponent::GetShootDirection() const
 // 	}
 // 	int32 SubWeaponItemId = -1;
 // 	FPepccineSaveWeaponAmmo SubWeaponAmmo;
-// 	if (SubWeaponItemData)
+// 	if (const UPepccineWeaponItemData* SubWeaponItemData = WeaponItemManager->GetWeaponItemData(
+// 		EPepccineWeaponItemType::EPWIT_Sub))
 // 	{
 // 		SubWeaponItemId = SubWeaponItemData->GetItemId();
 // 		SubWeaponAmmo.MagazinesAmmo = SubWeaponItemData->GetWeaponItemStats().MagazineAmmo;
@@ -341,30 +337,56 @@ FVector UPepccineItemManagerComponent::GetShootDirection() const
 // 	const EPepccineWeaponItemType EquippedWeaponItemType = GetEquippedWeaponItemData()
 // 		                                                       ? GetEquippedWeaponItemData()->GetWeaponItemType()
 // 		                                                       : EPepccineWeaponItemType::EPWIT_Sub;
+// 	TArray<int32> PassiveItemIds;
+// 	for (auto PassiveItem : PassiveItemManager->GetPassiveItemDatas())
+// 	{
+// 		PassiveItemIds.Add(PassiveItem.Key);
+// 	}
+// 	int32 ActiveItemId = -1;
+// 	if (const UPepccineActiveItemData* ActiveItemData = ActiveItemManager->GetActiveItemData())
+// 	{
+// 		ActiveItemId = ActiveItemData->GetItemId();
+// 	}
 //
 // 	return FPepccineItemSaveData(MainWeaponItemId,
 // 	                             MainWeaponAmmo,
 // 	                             SubWeaponItemId,
 // 	                             SubWeaponAmmo,
 // 	                             EquippedWeaponItemType,
-// 	                             PassiveItemIds);
+// 	                             PassiveItemIds, ActiveItemId, CoinCount);
 // }
-//
+
 // void UPepccineItemManagerComponent::LoadItemData(const FPepccineItemSaveData& SaveData)
 // {
-// 	const UPepccineItemDataAssetBase* ItemDataBase = ItemSpawner->GetItemDataAsset();
+// 	UPepccineItemSpawnerSubSystem* ItemSpawnerSubSystem = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
+// 	if (!ItemSpawnerSubSystem)
+// 	{
+// 		UE_LOG(LogTemp, Warning, TEXT("아이템 스포너 서브시스템이 없습니다."));
+// 		return;
+// 	}
+// 	
+// 	const UPepccineItemDataAssetBase* ItemDataBase = ItemSpawnerSubSystem->GetItemDataAsset();
+// 	if (!ItemDataBase)
+// 	{
+// 		UE_LOG(LogTemp, Warning, TEXT("아이템 데이터 베이스가 없습니다."));
+// 		return;
+// 	}
+// 	
 // 	if (SaveData.MainWeaponItemId >= 0 && SaveData.MainWeaponItemId < ItemDataBase->GetWeaponItemDataAsset()->
 // 		GetWeaponItemDatas().Num())
 // 	{
-// 		PickUpItem(ItemDataBase->GetWeaponItemDataAsset()->GetWeaponsItemById(SaveData.MainWeaponItemId), false);
-// 		MainWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = SaveData.MainWeaponAmmo.MagazinesAmmo;
-// 		MainWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SaveData.MainWeaponAmmo.SpareAmmo;
+// 		PickUpItem(ItemDataBase->GetWeaponItemDataAsset()->GetWeaponItemDatasById(SaveData.MainWeaponItemId), false);
+// 		if (UPepccineWeaponItemData* MainWeaponItemData = WeaponItemManager->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main))
+// 		{
+// 			MainWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = SaveData.MainWeaponAmmo.MagazinesAmmo;
+// 			MainWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SaveData.MainWeaponAmmo.SpareAmmo;
+// 		}
 // 	}
 // 	else
 // 	{
 // 		MainWeaponItemData = nullptr;
 // 	}
-//
+// 	
 // 	if (SaveData.SubWeaponItemId >= 0 && SaveData.SubWeaponItemId < ItemDataBase->GetWeaponItemDataAsset()->
 // 		GetWeaponItemDatas().Num())
 // 	{
@@ -372,11 +394,11 @@ FVector UPepccineItemManagerComponent::GetShootDirection() const
 // 		SubWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = SaveData.SubWeaponAmmo.MagazinesAmmo;
 // 		SubWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SaveData.SubWeaponAmmo.SpareAmmo;
 // 	}
-//
+// 	
 // 	EquipWeapon(SaveData.EquippedWeaponItemType == EPepccineWeaponItemType::EPWIT_Main
 // 		            ? MainWeaponItemData
 // 		            : SubWeaponItemData, false);
-//
+// 	
 // 	for (const int32 Id : SaveData.PassiveItemIds)
 // 	{
 // 		const UPepccinePassiveItemData* PassiveItemData = ItemDataBase->GetPassiveItemDataAsset()->

@@ -48,15 +48,23 @@ struct FPepccineItemSaveData
 	// 패시브 아이템 아이디 목록
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (DesplayName = "패시브 아이템 아이디 목록"))
 	TArray<int32> PassiveItemIds;
+	// 액티브 아이템 아이디
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (DesplayName = "액티브 아이템 아이디"))
+	int32 ActiveItemId;
+	// 코인 개수
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (DesplayName = "코인 개수"))
+	int32 CoinCount;
 
 	FPepccineItemSaveData(): MainWeaponItemId(-1), SubWeaponItemId(-1),
-	                         EquippedWeaponItemType(EPepccineWeaponItemType::EPWIT_Main)
+	                         EquippedWeaponItemType(EPepccineWeaponItemType::EPWIT_Main), ActiveItemId(-1), CoinCount(0)
 	{
 	}
 
-	FPepccineItemSaveData(const int32 InMainWeaponId, const FPepccineSaveWeaponAmmo InMainWeaponAmmo,const int32 InSubWeaponId, const FPepccineSaveWeaponAmmo InSubWeaponAmmo,
+	FPepccineItemSaveData(const int32 InMainWeaponId, const FPepccineSaveWeaponAmmo InMainWeaponAmmo,
+	                      const int32 InSubWeaponId, const FPepccineSaveWeaponAmmo InSubWeaponAmmo,
 	                      const EPepccineWeaponItemType InEquippedWeaponItemType,
-	                      const TArray<int32>& InPassiveItemIds)
+	                      const TArray<int32>& InPassiveItemIds,
+	                      const int32 InActiveItemId, const int32 InCoinCount)
 	{
 		MainWeaponItemId = InMainWeaponId;
 		MainWeaponAmmo = InMainWeaponAmmo;
@@ -64,5 +72,7 @@ struct FPepccineItemSaveData
 		SubWeaponAmmo = InSubWeaponAmmo;
 		EquippedWeaponItemType = InEquippedWeaponItemType;
 		PassiveItemIds = InPassiveItemIds;
+		ActiveItemId = InActiveItemId;
+		CoinCount = InCoinCount;
 	}
 };

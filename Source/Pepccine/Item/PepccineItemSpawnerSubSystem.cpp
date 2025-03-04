@@ -15,7 +15,7 @@ void UPepccineItemSpawnerSubSystem::InitSpawner(UPepccineItemDataAssetBase* InIt
 	SpawnedActor = InSpawnedActor;
 }
 
-void UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData)
+void UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& SpawnLocation,const UPepccineItemDataBase* DropItemData)
 {
 	if (!ItemDataAsset)
 	{

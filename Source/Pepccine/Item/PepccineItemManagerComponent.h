@@ -38,7 +38,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// 데이터 저장 관련
 
-	// // 아이템 세이브 데이터 구조체 가져오기
+	// 아이템 세이브 데이터 구조체 가져오기
 	// UFUNCTION(BlueprintCallable)
 	// FPepccineItemSaveData GetSaveItemData() const;
 	//
