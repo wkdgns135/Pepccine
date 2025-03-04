@@ -21,8 +21,6 @@ void UCollisionRadarComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CurrentClimbInfo = new FClimbObstacleInfo();
-
 	if (DetectionZone)
 	{
 		DetectionZone->SetCollisionProfileName(TEXT("OverlapAll"));
@@ -61,14 +59,14 @@ void UCollisionRadarComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 	if (bIsUseSweep)
 	{
-		CurrentClimbInfo = CanClimbOverObstacle();
+		bIsClimbing = CanClimbOverObstacle();
 	}
 }
 
-FClimbObstacleInfo* UCollisionRadarComponent::CanClimbOverObstacle() const
+bool UCollisionRadarComponent::CanClimbOverObstacle() const
 {
 	AActor* Owner = GetOwner();
-	if (!Owner) return CurrentClimbInfo;
+	if (!Owner) return false;
 
 	FVector Start = Owner->GetActorLocation();
 	FVector End = Start + (Owner->GetActorForwardVector() * 100.f);
@@ -101,34 +99,30 @@ FClimbObstacleInfo* UCollisionRadarComponent::CanClimbOverObstacle() const
 				{
 					DrawDebugCapsule(GetWorld(), Hit.ImpactPoint, 100.0f, 50.0f, FQuat::Identity, FColor::Red, false, 2.0f);
 				}
-
+				
 				float ObstacleTop = Hit.GetActor()->GetActorLocation().Z + Hit.GetActor()->GetSimpleCollisionHalfHeight() * 2;
 				float CharacterBottom = Start.Z;
-				CurrentClimbInfo->Height = ObstacleTop - CharacterBottom;
+				float Height = ObstacleTop - CharacterBottom;
 
 				//UE_LOG(LogTemp, Warning, TEXT("ObstacleTop: [%f], CharacterBottom: [%f]"), ObstacleTop, CharacterBottom);
 
+				/*
 				FVector ObstacleExtent = Hit.GetActor()->GetComponentsBoundingBox().GetExtent();
-				CurrentClimbInfo->Width = ObstacleExtent.X * 2;
+				float Width = ObstacleExtent.X * 2;
+				*/
 
 				//UE_LOG(LogTemp, Warning, TEXT("벽 높이: [%f], 벽 폭: [%f]"), CurrentClimbInfo->Height, CurrentClimbInfo->Width);
 
-				if (CurrentClimbInfo->Height < 210 && CurrentClimbInfo->Width < 150)
+				if (Height < 210)
 				{
-					CurrentClimbInfo->bCanClimb = true;
+					return true;
 					//UE_LOG(LogTemp, Warning, TEXT("벽을 넘을 수 있음!"));
 				}
-				else
-				{
-					CurrentClimbInfo->bCanClimb = false;
-				}
-
-				return CurrentClimbInfo;
 			}
 		}
 	}
 
-	return CurrentClimbInfo;
+	return false;
 }
 
 
