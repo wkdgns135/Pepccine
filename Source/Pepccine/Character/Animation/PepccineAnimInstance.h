@@ -21,6 +21,10 @@ protected:
 	//Notify
 	UFUNCTION()
 	void AnimNotify_EndReloading();
+	UFUNCTION()
+	void AnimNotify_EndDraw();
+	UFUNCTION()
+	void AnimNotify_EndGettingUp();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<class APepCharacter> Owner;
@@ -46,6 +50,8 @@ protected:
 	float MovingThreshould;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	bool bIsFalling;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
+	bool bIsClimbing;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	float ControllerPitch;
 };

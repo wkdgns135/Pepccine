@@ -311,6 +311,8 @@ void APepCharacter::JumpStart()
 {
 	if (bIsRolling | !bIsPlayerAlive | !EnhancedRadarComponent | GetCharacterMovement()->IsFalling()) return;
 
+	bIsClimbing = false;
+
 	if (PlayerStatComponent->DecreaseStaminaByPercentage(5))
 	{
 		if (EnhancedRadarComponent->IsAbleToClimb())
@@ -321,7 +323,6 @@ void APepCharacter::JumpStart()
 			FVector ClimbUp = FVector(0.f, 0.f, 600.f);
 
 			LaunchCharacter(ClimbDirection + ClimbUp, true, true);
-			bIsClimbing = false;
 		}
 		else
 		{

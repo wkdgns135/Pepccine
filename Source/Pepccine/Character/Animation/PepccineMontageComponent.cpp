@@ -80,6 +80,14 @@ void UPepccineMontageComponent::Stumble()
 	}
 }
 
+void UPepccineMontageComponent::StumbleGetUp()
+{
+	if (AnimInstance && StumbleGetUpMontage)
+	{
+		AnimInstance->Montage_Play(StumbleGetUpMontage);
+	}
+}
+
 void UPepccineMontageComponent::Roll(FVector Dir, FRotator ActorRotation)
 {
 	float ForwardDeltaDegree = 0;
