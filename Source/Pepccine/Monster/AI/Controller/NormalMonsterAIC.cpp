@@ -25,6 +25,7 @@ void ANormalMonsterAIC::InitializeBehaviorTree(APawn* InPawn)
 {
     ABaseMonster* BaseMonster = Cast<ABaseMonster>(InPawn);
     UBehaviorTree* BehaviorTree = BaseMonster->GetBehaviorTree();
+
     if (BaseMonster && BehaviorTree)
     {
         if (UseBlackboard(BehaviorTree->BlackboardAsset, BlackboardComponent))

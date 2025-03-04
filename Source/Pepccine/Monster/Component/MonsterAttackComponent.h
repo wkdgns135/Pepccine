@@ -21,6 +21,7 @@ public:
 	void AttackTrace();
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void PlayTransitionMontage();
+	FORCEINLINE float GetAttackRange() { return AttackRange; }
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
