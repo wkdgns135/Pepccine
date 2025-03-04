@@ -68,4 +68,5 @@ void UPepccineAnimInstance::AnimNotify_EndGettingUp()
 void UPepccineAnimInstance::AnimNotify_EndClimb()
 {
 	UE_LOG(LogTemp, Log, TEXT("EndClimb"));
+	Owner->bIsClimbing = false;
 }
