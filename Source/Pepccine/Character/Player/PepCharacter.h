@@ -37,6 +37,7 @@ class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver
 public:
 	APepCharacter();
 
+	// 내부 & 애니매이션 사용
 	bool bIsFiring = false;
 	bool bIsFirstPersonView = false;
 	bool bIsInventoryOpened = false;
@@ -54,10 +55,9 @@ public:
 	bool bIsRollable = true;
 
 	bool bIsSwapping = false;
-
 	bool bIsPlayerAlive = true;
-
 	bool bIsMainWeaponEquipped = false;
+	// 내부 & 애니매이션 사용
 
 	// UE delegate
 	UFUNCTION()
