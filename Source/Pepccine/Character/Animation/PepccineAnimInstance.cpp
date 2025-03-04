@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Character/Animation/PepccineAnimInstance.h"
 #include "Character/Player/PepCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -53,4 +50,5 @@ void UPepccineAnimInstance::NativeUpdateAnimation(float dt)
 void UPepccineAnimInstance::AnimNotify_EndReloading()
 {
 	UE_LOG(LogTemp, Log, TEXT("EndReload!"));
+	Owner->bIsReloading = false;
 }

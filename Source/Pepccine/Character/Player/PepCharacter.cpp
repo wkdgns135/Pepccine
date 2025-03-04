@@ -185,12 +185,14 @@ void APepCharacter::AddObservers()
 
 void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType)
 {
-	if (bIsRolling) return;
+	if (bIsRolling | !PepccineMontageComponent) return;
+	
 	PlayerStatComponent->DecreaseHealth(DamageAmount);
 
 	FVector HitDirection = HitResult.ImpactNormal;
 
 	HitReactionComponent->HitReaction("Spine", HitDirection);
+	//PepccineMontageComponent->Stumble();
 }
 
 void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth)
@@ -451,17 +453,14 @@ void APepCharacter::Crouching()
 void APepCharacter::Reload()
 {
 	if (!bIsPlayerAlive) return;
-	UE_LOG(LogTemp, Log, TEXT("Reload!"));
 
 	//HitReactionComponent->EnterRagdoll(5);
 
 	bIsReloading = true;
 
 	ItemManagerComponent->ReloadWeapon();
-	PepccineMontageComponent->Reloading(1.0f);
+	PepccineMontageComponent->Reloading(0.8f);
 	UpdateWeaponUI();
-
-	bIsReloading = false;
 }
 
 void APepCharacter::Interactive()
@@ -626,6 +625,9 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 	if (!bIsPlayerAlive) return;
 	float ScrollValue = value.Get<float>();
 
+	//ItemManagerComponent->GetEquippedWeaponItemData()
+	// 주무기 보조무기 둘다 장착했는지 확인 필요
+	
 	if (bIsMainWeaponEquipped)
 	{
 		ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Sub);
