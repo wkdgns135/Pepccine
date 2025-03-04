@@ -53,6 +53,8 @@ public:
 	bool bIsRolling = false;
 	bool bIsRollable = true;
 
+	bool bIsSwapping = false;
+
 	bool bIsPlayerAlive = true;
 
 	bool bIsMainWeaponEquipped = false;

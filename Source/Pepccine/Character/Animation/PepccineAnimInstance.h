@@ -6,9 +6,6 @@
 #include "Animation/AnimInstance.h"
 #include "PepccineAnimInstance.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class PEPCCINE_API UPepccineAnimInstance : public UAnimInstance
 {

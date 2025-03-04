@@ -459,7 +459,7 @@ void APepCharacter::Reload()
 	bIsReloading = true;
 
 	ItemManagerComponent->ReloadWeapon();
-	PepccineMontageComponent->Reloading(0.8f);
+	PepccineMontageComponent->Reloading(0.5f);
 	UpdateWeaponUI();
 }
 
@@ -622,25 +622,28 @@ void APepCharacter::OpenInventory()
 
 void APepCharacter::SwapItem(const FInputActionValue& value)
 {
-	if (!bIsPlayerAlive) return;
+	if (!bIsPlayerAlive || bIsReloading || bIsSwapping) return;
 	float ScrollValue = value.Get<float>();
-
+	bIsSwapping = true;
 	//ItemManagerComponent->GetEquippedWeaponItemData()
 	// 주무기 보조무기 둘다 장착했는지 확인 필요
-	
-	if (bIsMainWeaponEquipped)
+	if (ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main) != nullptr &&
+		ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub) != nullptr)
 	{
-		ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Sub);
-	}
-	else
-	{
-		ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Main);
-	}
+		if (bIsMainWeaponEquipped)
+		{
+			ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Sub);
+		}
+		else
+		{
+			ItemManagerComponent->SwapWeapon(EPepccineWeaponItemType::EPWIT_Main);
+		}
+		
+		SetWeight();
+		UpdateWeaponUI();
 
-	SetWeight();
-	UpdateWeaponUI();
-
-	PepccineMontageComponent->Draw();
+		PepccineMontageComponent->Draw();
+	}
 }
 
 void APepCharacter::StopFire()
