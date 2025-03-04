@@ -458,7 +458,7 @@ void APepCharacter::Reload()
 	bIsReloading = true;
 
 	ItemManagerComponent->ReloadWeapon();
-	PepccineMontageComponent->Reloading();
+	PepccineMontageComponent->Reloading(1.0f);
 	UpdateWeaponUI();
 
 	bIsReloading = false;

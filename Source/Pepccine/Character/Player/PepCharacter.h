@@ -66,8 +66,6 @@ public:
 	void OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType);
 	
 	void TriggerCameraShake();
-
-	bool IsMainWeapon();
 	
 	// inline
 	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }
