@@ -72,11 +72,12 @@ void UPepccineMontageComponent::Pick()
 	}
 }
 
-void UPepccineMontageComponent::Stumble()
+void UPepccineMontageComponent::Stumble(float time)
 {
 	if (AnimInstance && StumbleMontage)
 	{
 		AnimInstance->Montage_Play(StumbleMontage);
+		GetWorld()->GetTimerManager().SetTimer(GetUpTimerHandle, this, &UPepccineMontageComponent::StumbleGetUp, time, false);
 	}
 }
 
@@ -85,6 +86,14 @@ void UPepccineMontageComponent::StumbleGetUp()
 	if (AnimInstance && StumbleGetUpMontage)
 	{
 		AnimInstance->Montage_Play(StumbleGetUpMontage);
+	}
+}
+
+void UPepccineMontageComponent::Climbing()
+{
+	if (AnimInstance && ClimbingMontage)
+	{
+		AnimInstance->Montage_Play(ClimbingMontage);
 	}
 }
 

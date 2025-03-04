@@ -51,8 +51,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	bool bIsFalling;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
-	bool bIsClimbing;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	float ControllerPitch;
 };
 

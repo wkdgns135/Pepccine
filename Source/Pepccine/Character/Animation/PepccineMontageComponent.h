@@ -33,9 +33,11 @@ public:
 	UFUNCTION()
 	void Pick();
 	UFUNCTION()
-	void Stumble();
+	void Stumble(float time);
 	UFUNCTION()
 	void StumbleGetUp();
+	UFUNCTION()
+	void Climbing();
 
 protected:
 	// Called when the game starts
@@ -66,4 +68,8 @@ protected:
 	UAnimMontage* StumbleMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* StumbleGetUpMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* ClimbingMontage;
+
+	FTimerHandle GetUpTimerHandle;
 };

@@ -192,7 +192,7 @@ void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const 
 	FVector HitDirection = HitResult.ImpactNormal;
 
 	HitReactionComponent->HitReaction("Spine", HitDirection);
-	//PepccineMontageComponent->Stumble();
+	//PepccineMontageComponent->Stumble(2.0);
 }
 
 void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth)
