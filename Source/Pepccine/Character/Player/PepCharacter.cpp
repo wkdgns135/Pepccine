@@ -786,6 +786,8 @@ void APepCharacter::Fire()
 {
 	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent || bIsReloading || bIsStunning || bIsClimbing || bIsSprinting) return;
 	bIsFiring = true;
+
+	if (!ItemManagerComponent->GetEquippedWeaponItemData()) return;
 	
 	float CurrentAmmo = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineAmmo;
 	if (CurrentAmmo <= 0)
@@ -804,11 +806,8 @@ void APepCharacter::Fire()
 
 void APepCharacter::ZoomIn()
 {
-	if (bIsRolling || !bIsPlayerAlive || bIsStunning)
-	{
-		return;
-	}
-
+	if (bIsRolling || !bIsPlayerAlive || bIsStunning || !ItemManagerComponent->GetEquippedWeaponItemData()) return;
+	
 	bIsZooming = true;
 
 	ToggleCameraView();
