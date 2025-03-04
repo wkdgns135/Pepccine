@@ -104,7 +104,7 @@ void ABaseRoomController::PlacePlayer()
 	{
 		if (PlayerCharacter)
 		{
-			PlayerCharacter->SetActorLocation({0, 0, 0});
+			PlayerCharacter->SetActorLocation({0, 0, 50});
 			PlayerCharacter->SetActorRotation({0, 0, 0});
 		}
 	}
