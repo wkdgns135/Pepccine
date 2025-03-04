@@ -80,7 +80,7 @@ void APepCharacter::BeginPlay()
 		bIsLoaded = true;
 	}
 	
-	UE_LOG(LogTemp, Warning, TEXT("Player Stats Loaded [%s]"), *PlayerStatComponent->PrintStats());
+	// UE_LOG(LogTemp, Warning, TEXT("Player Stats Loaded [%s]"), *PlayerStatComponent->PrintStats());
 }
 
 void APepCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
