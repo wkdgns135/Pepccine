@@ -19,7 +19,6 @@ void UPepccinePassiveItemManager::AddPassiveItemData(UPepccinePassiveItemData* I
 {
 	// 무기 스탯
 	ItemManager->IncreaseStatsOperations(InPassiveItemData->GetWeaponStatModifiers());
-
 	// 캐릭터 스탯
 	ItemManager->IncreaseStatsOperations(InPassiveItemData->GetCharacterStatModifiers());
 

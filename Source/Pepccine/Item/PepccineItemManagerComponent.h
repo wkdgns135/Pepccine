@@ -202,7 +202,4 @@ private:
 	// 코인
 	UPROPERTY(VisibleInstanceOnly, Category = "Item|Resource", meta = (DisplayName = "코인 수"))
 	int32 CoinCount = 0;
-
-	UPROPERTY()
-	UPepccineItemSpawnerSubSystem* SpawnerSubSystem;
 };

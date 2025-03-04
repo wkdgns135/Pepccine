@@ -5,6 +5,25 @@
 #include "Components/SphereComponent.h"
 #include "CollisionRadarComponent.generated.h"
 
+USTRUCT(BlueprintType)
+struct FClimbObstacleInfo
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Climbing")
+	int index = 0;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Climbing")
+	bool bCanClimb = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Climbing")
+	float Height = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Climbing")
+	float Width = 0.0f;
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActorDetectedEnhanced, FDetectedActorList&, DetectedActors);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -27,11 +46,17 @@ public:
   UPROPERTY(EditAnywhere, Category = "Radar")
   bool bIsUseRadar = false;
 
+	UPROPERTY(EditAnywhere, Category = "Radar")
+	bool bIsUseSweep = false;
+
+	FORCEINLINE_DEBUGGABLE FClimbObstacleInfo* IsAbleToClimb() const { return CurrentClimbInfo; } 
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	FClimbObstacleInfo* CurrentClimbInfo;
+	
   UPROPERTY(VisibleAnywhere, Category = "Radar")
   USphereComponent* DetectionZone;
 
@@ -44,12 +69,14 @@ private:
   UPROPERTY(EditAnywhere, Category = "Debug")
   bool bShowDebug = true;
 
+	UPROPERTY()
   TArray<AActor*> NearbyActors;
 
   bool IsInFieldOfView(AActor* TargetActor) const;
   void DetectActors();
   void DrawDebugVisualization();
   void AddDetectZone();
+	FClimbObstacleInfo* CanClimbOverObstacle() const;
 
   UFUNCTION()
   void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
