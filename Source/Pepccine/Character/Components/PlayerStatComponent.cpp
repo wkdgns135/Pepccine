@@ -1,11 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "Character/Components/PlayerStatComponent.h"
 
 #include "Character/Data/CharacterSaveManager.h"
 #include "Character/Data/PlayerStatDataAsset.h"
-#include "Character/Data/PlayerStatSaveGame.h"
-#include "Kismet/GameplayStatics.h"
 
 UPlayerStatComponent::UPlayerStatComponent()
 {

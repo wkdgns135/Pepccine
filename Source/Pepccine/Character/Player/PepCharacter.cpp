@@ -80,6 +80,8 @@ void APepCharacter::BeginPlay()
 		bIsLoaded = true;
 	}
 	
+	UpdateWeaponUI();
+	
 	// UE_LOG(LogTemp, Warning, TEXT("Player Stats Loaded [%s]"), *PlayerStatComponent->PrintStats());
 }
 
