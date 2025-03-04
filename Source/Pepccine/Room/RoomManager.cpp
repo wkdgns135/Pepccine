@@ -16,16 +16,22 @@ void URoomManager::GenerateMap(const TArray<TArray<int>>& Grid)
 		{
 			switch (Grid[i][j])
 			{
-			default: Map[i][j] = NewRoom(ERoomType::ENone); break;
-			case 1 : Map[i][j] = NewRoom(ERoomType::EDefault); break;
-			case 2 : Map[i][j] = NewRoom(ERoomType::EStart); break;
-			case 3 : Map[i][j] = NewRoom(ERoomType::EBoss); break;
-			case 4 : Map[i][j] = NewRoom(ERoomType::EItem); break;
-			case 5 : Map[i][j] = NewRoom(ERoomType::EShop); break;
+			default: Map[i][j] = NewRoom(ERoomType::ENone);
+				break;
+			case 1: Map[i][j] = NewDefaultRoom(Grid, FIntPoint(j, i));
+				break;
+			case 2: Map[i][j] = NewRoom(ERoomType::EStart);
+				break;
+			case 3: Map[i][j] = NewRoom(ERoomType::EBoss);
+				break;
+			case 4: Map[i][j] = NewRoom(ERoomType::EItem);
+				break;
+			case 5: Map[i][j] = NewRoom(ERoomType::EShop);
+				break;
 			}
-			
+
 			Map[i][j]->RoomPoint = FIntPoint(j, i);
-			
+
 			if (Map[i][j]->RoomType == ERoomType::EStart)
 			{
 				CurrentRoom = Map[i][j];
@@ -84,6 +90,70 @@ FRoomData* URoomManager::NewRoom(const ERoomType RoomType)
 	return NewRoom;
 }
 
+FRoomData* URoomManager::NewDefaultRoom(const TArray<TArray<int>>& Grid, const FIntPoint RoomPoint)
+{
+	FRoomData* NewRoom = new FRoomData();
+	NewRoom->RoomType = ERoomType::EDefault;
+
+    bool bLeftRoom = GetCheckRoomGrid(Grid, RoomPoint + FIntPoint(-1, 0));
+    bool bRightRoom = GetCheckRoomGrid(Grid, RoomPoint + FIntPoint(1, 0));
+    bool bUpRoom = GetCheckRoomGrid(Grid, RoomPoint + FIntPoint(0, -1));
+    bool bDownRoom = GetCheckRoomGrid(Grid, RoomPoint + FIntPoint(0, 1));
+
+    int AdjacentRoomCount = bLeftRoom + bRightRoom + bUpRoom + bDownRoom;
+
+    TArray<TSoftObjectPtr<UWorld>> PossibleRoomLevels;
+
+    switch (AdjacentRoomCount)
+    {
+    case 4:
+        PossibleRoomLevels.Append(GetCurrentFloorRoomData()->Default4WayRoomLevels);
+        break;
+    case 3:
+        PossibleRoomLevels.Append(GetCurrentFloorRoomData()->Default4WayRoomLevels);
+        PossibleRoomLevels.Append(GetCurrentFloorRoomData()->Default3WayRoomLevels);
+        break;
+    case 2:
+        PossibleRoomLevels.Append(GetCurrentFloorRoomData()->Default4WayRoomLevels);
+        PossibleRoomLevels.Append(GetCurrentFloorRoomData()->Default3WayRoomLevels);
+        if ((bLeftRoom && bRightRoom) || (bUpRoom && bDownRoom))
+        {
+            PossibleRoomLevels.Append(GetCurrentFloorRoomData()->Default2WayParallelRoomLevels);
+        }
+        else
+        {
+            PossibleRoomLevels.Append(GetCurrentFloorRoomData()->Default2WayPerpendicularRoomLevels);
+        }
+        break;
+    case 1:
+        PossibleRoomLevels.Append(GetCurrentFloorRoomData()->Default4WayRoomLevels);
+        PossibleRoomLevels.Append(GetCurrentFloorRoomData()->Default3WayRoomLevels);
+        PossibleRoomLevels.Append(GetCurrentFloorRoomData()->Default2WayParallelRoomLevels);
+        PossibleRoomLevels.Append(GetCurrentFloorRoomData()->Default2WayPerpendicularRoomLevels);
+        PossibleRoomLevels.Append(GetCurrentFloorRoomData()->Default1WayRoomLevels);
+        break;
+    default:
+        NewRoom->RoomLevel = nullptr;
+        return NewRoom;
+    }
+
+    if (PossibleRoomLevels.Num() > 0)
+    {
+        NewRoom->RoomLevel = PossibleRoomLevels[FMath::RandRange(0, PossibleRoomLevels.Num() - 1)];
+    }
+    else
+    {
+        NewRoom->RoomLevel = nullptr;
+    }
+
+    return NewRoom;
+}
+
+bool URoomManager::GetCheckRoomGrid(const TArray<TArray<int>>& Grid, const FIntPoint Point) const
+{
+	return Grid.IsValidIndex(Point.Y) && Grid[Point.Y].IsValidIndex(Point.X) && Grid[Point.Y][Point.X] >= 1;
+}
+
 void URoomManager::PrintFloor() const
 {
 	if (!GEngine) return; // GEngine이 null이라면 종료
@@ -94,7 +164,7 @@ void URoomManager::PrintFloor() const
 
 	for (const TArray<FRoomData*>& RoomRow : Map)
 	{
-		FString RowDebugString; 
+		FString RowDebugString;
 		for (const FRoomData* Room : RoomRow)
 		{
 			FString RoomInfo;

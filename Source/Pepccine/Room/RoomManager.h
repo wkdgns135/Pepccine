@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "RoomManager.generated.h"
 
+class UPepccineItemDataBase;
 class ULevelStreamingDynamic;
 enum class EDoorDirection : uint8;
 class UFloorRoomData;
@@ -39,6 +40,8 @@ public:
 	FIntPoint RoomPoint;
 	UPROPERTY()
 	ULevelStreamingDynamic *StreamingLevel = nullptr;
+	UPROPERTY()
+	TMap<UPepccineItemDataBase*, FVector> ItemData;
 };
 
 UCLASS(DefaultToInstanced, EditInlineNew)
@@ -64,6 +67,8 @@ public:
 	
 private:
 	FRoomData* NewRoom(const ERoomType RoomType);
+	FRoomData* NewDefaultRoom(const TArray<TArray<int>>& Grid, const FIntPoint RoomPoint);
+	bool GetCheckRoomGrid(const TArray<TArray<int>>& Grid, const FIntPoint Point) const;
 	void PrintFloor() const;
 	
 public:
