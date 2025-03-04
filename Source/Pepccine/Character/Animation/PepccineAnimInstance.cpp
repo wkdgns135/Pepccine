@@ -52,3 +52,5 @@ void UPepccineAnimInstance::AnimNotify_EndReloading()
 	UE_LOG(LogTemp, Log, TEXT("EndReload!"));
 	Owner->bIsReloading = false;
 }
+
+
