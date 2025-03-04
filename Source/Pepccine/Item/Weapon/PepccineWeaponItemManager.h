@@ -20,7 +20,7 @@ class PEPCCINE_API UPepccineWeaponItemManager : public UPepccineItemSubManager
 public:
 	// 캐릭터에 부착되어 있는 무기 액터 설정
 	void SetWeaponItemComponent(ACharacter* OwnerCharacter);
-	
+
 	// 기본 무기 장착
 	void EquipDefaultWeapon(const UPepccineWeaponItemData* WeaponItemData);
 	// 무기 획득
@@ -35,15 +35,19 @@ public:
 	void FireWeapon(float WeaponDamage, const FVector& ShootDirection) const;
 	// 현재 장착 중인 무기 재장전
 	void ReloadWeapon() const;
-
 	// 무기 스탯 초기 설정
 	void UpdateWeaponItemStats(EPepccineWeaponItemType WeaponItemType) const;
+
 	
+	// getter
+
 	// 스탯 계산
 	float CalculateTotalValueFromDefault(EPepccineWeaponStatName WeaponItemStatName, float WeaponItemStat) const;
 
-	// getter
-	
+	// 스탯 이름으로 스탯 참조 가져오기
+	static float& GetWeaponItemStatRefByName(UPepccineWeaponItemData* InWeaponItemData,
+	                                         EPepccineWeaponStatName WeaponItemStatName);
+
 	// 무기 컴포넌트 가져오기
 	FORCEINLINE UPepccineWeaponItemComponent* GetWeaponItemComp() const { return WeaponItemComp; };
 	// 무기 데이터 가져오기
@@ -51,8 +55,8 @@ public:
 		const EPepccineWeaponItemType WeaponItemType)
 	{
 		return WeaponItemType == EPepccineWeaponItemType::EPWIT_Main
-				   ? MainWeaponItemData
-				   : SubWeaponItemData;
+			       ? MainWeaponItemData
+			       : SubWeaponItemData;
 	}
 
 	// 장착 중인 무기 데이터 가져오기

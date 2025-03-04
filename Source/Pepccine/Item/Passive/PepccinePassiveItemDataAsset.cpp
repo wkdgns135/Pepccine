@@ -6,13 +6,13 @@ void UPepccinePassiveItemDataAsset::PostEditChangeProperty(struct FPropertyChang
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UPepccinePassiveItemDataAsset, PassiveItems))
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UPepccinePassiveItemDataAsset, PassiveItemDatas))
 	{
-		for (int32 i = 0; i < PassiveItems.Num(); i++)
+		for (int32 i = 0; i < PassiveItemDatas.Num(); i++)
 		{
-			if (PassiveItems[i])
+			if (PassiveItemDatas[i])
 			{
-				if (UPepccinePassiveItemData* PassiveItem = dynamic_cast<UPepccinePassiveItemData*>(PassiveItems[i]))
+				if (UPepccinePassiveItemData* PassiveItem = dynamic_cast<UPepccinePassiveItemData*>(PassiveItemDatas[i]))
 				{
 					PassiveItem->SetItemId(i);
 					if (!PassiveItem->GetMeshToSpawn())
