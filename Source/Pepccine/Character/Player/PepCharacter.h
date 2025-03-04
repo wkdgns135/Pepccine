@@ -59,6 +59,7 @@ public:
 	bool bIsSwapping = false;
 	bool bIsPlayerAlive = true;
 	bool bIsMainWeaponEquipped = false;
+	bool bIsLoaded = false;
 	// 내부 & 애니매이션 사용
 
 	// UE delegate
@@ -77,6 +78,7 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
