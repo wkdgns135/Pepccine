@@ -34,6 +34,8 @@ public:
 	void Pick();
 	UFUNCTION()
 	void Stumble();
+	UFUNCTION()
+	void StumbleGetUp();
 
 protected:
 	// Called when the game starts
@@ -62,4 +64,6 @@ protected:
 	UAnimMontage* PickMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* StumbleMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* StumbleGetUpMontage;
 };

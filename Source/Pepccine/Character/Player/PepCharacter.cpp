@@ -311,8 +311,6 @@ void APepCharacter::JumpStart()
 {
 	if (bIsRolling | !bIsPlayerAlive | !EnhancedRadarComponent | GetCharacterMovement()->IsFalling()) return;
 
-	bIsClimbing = false;
-	
 	if (PlayerStatComponent->DecreaseStaminaByPercentage(5))
 	{
 		if (EnhancedRadarComponent->IsAbleToClimb())

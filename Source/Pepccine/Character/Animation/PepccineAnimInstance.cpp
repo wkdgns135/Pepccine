@@ -13,6 +13,7 @@ UPepccineAnimInstance::UPepccineAnimInstance()
 	bIsCrouch = false;
 	bIsSprint = false;
 	bIsFalling = false;
+	bIsClimbing = false;
 	bIsMainWeapon = false;
 	ControllerPitch = 0.0f;
 }
@@ -39,6 +40,7 @@ void UPepccineAnimInstance::NativeUpdateAnimation(float dt)
 		Direction = CalculateDirection(Velocity, Owner->GetActorRotation());
 		bIsIdle = Speed < MovingThreshould;
 		bIsFalling = Movement->IsFalling();
+		bIsClimbing = Owner->bIsClimbing;
 		bIsCrouch = Movement->IsCrouching();
 		bIsSprint = Owner->bIsSprinting;
 		float Pitch = Owner->GetControlRotation().Pitch;
@@ -53,4 +55,13 @@ void UPepccineAnimInstance::AnimNotify_EndReloading()
 	Owner->bIsReloading = false;
 }
 
-
+void UPepccineAnimInstance::AnimNotify_EndDraw()
+{
+	UE_LOG(LogTemp, Log, TEXT("EndDraw!"));
+	Owner->bIsSwapping = false;
+}
+void UPepccineAnimInstance::AnimNotify_EndGettingUp()
+{
+	UE_LOG(LogTemp, Log, TEXT("EndGettingUp"));
+	//Owner->bIsStumbling = false;
+}
