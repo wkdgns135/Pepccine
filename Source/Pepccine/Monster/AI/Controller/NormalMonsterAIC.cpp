@@ -28,24 +28,24 @@ void ANormalMonsterAIC::InitializeBehaviorTree(APawn* InPawn)
         {
             RunBehaviorTree(BehaviorTree);
 
-            // �÷��̾ �⺻ Ÿ������ ����
-            FTimerHandle TimerHandle;
-            GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
-                {
-                    ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-                    if (PlayerCharacter)
-                    {
-                        SetTarget(PlayerCharacter);
-                    }
-                }, 0.1f, false);
+            // 1. 맵이 바로 전환될때 타이머 람다 함수 내에서 예외 발생 (GetWorld()가 nullptr)
+            // 2. 람다 함수 자체가 레벨이 전환될때 캡쳐로 넘긴 this 포인터의 유효성을 검사하지 못함.
+            GetWorldTimerManager().SetTimerForNextTick(this, &ANormalMonsterAIC::SetTarget);
+            
         }
     }
 }
 
-void ANormalMonsterAIC::SetTarget(AActor* Target)
+void ANormalMonsterAIC::SetTarget()
 {
-    if (BlackboardComponent)
+    if (UWorld *World = GetWorld())
     {
-        BlackboardComponent->SetValueAsObject("TargetActor", Target);
+        if (ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(World, 0))
+        {
+            if (BlackboardComponent)
+            {
+                BlackboardComponent->SetValueAsObject("TargetActor", PlayerCharacter);
+            }
+        }
     }
 }

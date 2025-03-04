@@ -65,4 +65,5 @@ private:
 public:
 	FORCEINLINE FVector GetSpawnPosition() const { return SpawnPosition->GetComponentLocation(); }
 	FORCEINLINE FRotator GetSpawnRotation() const { return GetActorRotation(); }
+	FORCEINLINE EDoorDirection GetDirection() const { return Direction; }
 };

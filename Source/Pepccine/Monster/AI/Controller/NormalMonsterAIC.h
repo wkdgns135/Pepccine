@@ -17,7 +17,7 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void BeginPlay() override;
 
-	void SetTarget(AActor* Target);
+	void SetTarget();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")

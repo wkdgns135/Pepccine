@@ -60,6 +60,7 @@ void ABaseRoomController::PlacePlayer()
 		ABaseDoor* Door = Cast<ABaseDoor>(Actor);
 		if (Door && RoomManager)
 		{
+			if (Door->GetDirection() == EDoorDirection::ENone)continue;
 			if (Door->GetDirectionRoom() == RoomManager->GetPreviousRoomData())
 			{
 				if (PlayerCharacter)
