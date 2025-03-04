@@ -49,3 +49,8 @@ void UPepccineAnimInstance::NativeUpdateAnimation(float dt)
 		bIsMainWeapon = Owner->bIsMainWeaponEquipped;
 	}
 }
+
+void UPepccineAnimInstance::AnimNotify_EndReloading()
+{
+	UE_LOG(LogTemp, Log, TEXT("EndReload!"));
+}

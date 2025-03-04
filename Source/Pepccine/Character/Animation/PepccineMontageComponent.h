@@ -19,7 +19,7 @@ public:
 	UFUNCTION()
 	void Fire();
 	UFUNCTION()
-	void Reloading();
+	void Reloading(float PlayRate);
 	UFUNCTION()
 	void Attack();
 	UFUNCTION()
@@ -32,6 +32,8 @@ public:
 	void GetUp();
 	UFUNCTION()
 	void Pick();
+	UFUNCTION()
+	void Stumble();
 
 protected:
 	// Called when the game starts
@@ -58,4 +60,6 @@ protected:
 	UAnimMontage* GetUpMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* PickMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* StumbleMontage;
 };

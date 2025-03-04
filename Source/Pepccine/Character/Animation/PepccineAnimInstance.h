@@ -21,6 +21,10 @@ protected:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float dt) override;
 
+	//Notify
+	UFUNCTION()
+	void AnimNotify_EndReloading();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<class APepCharacter> Owner;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")

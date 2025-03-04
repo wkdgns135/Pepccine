@@ -21,11 +21,11 @@ void UPepccineMontageComponent::Fire()
 	}
 }
 
-void UPepccineMontageComponent::Reloading()
+void UPepccineMontageComponent::Reloading(float PlayRate)
 {
 	if (AnimInstance && ReloadMontage)
 	{
-		AnimInstance->Montage_Play(ReloadMontage);
+		AnimInstance->Montage_Play(ReloadMontage, PlayRate);
 	}
 }
 
@@ -72,6 +72,13 @@ void UPepccineMontageComponent::Pick()
 	}
 }
 
+void UPepccineMontageComponent::Stumble()
+{
+	if (AnimInstance && StumbleMontage)
+	{
+		AnimInstance->Montage_Play(StumbleMontage);
+	}
+}
 
 void UPepccineMontageComponent::Roll(FVector Dir, FRotator ActorRotation)
 {
