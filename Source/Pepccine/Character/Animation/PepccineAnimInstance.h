@@ -25,6 +25,8 @@ protected:
 	void AnimNotify_EndDraw();
 	UFUNCTION()
 	void AnimNotify_EndGettingUp();
+	UFUNCTION()
+	void AnimNotify_EndClimb();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<class APepCharacter> Owner;

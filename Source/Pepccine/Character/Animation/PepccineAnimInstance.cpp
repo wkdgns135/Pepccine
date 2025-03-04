@@ -63,3 +63,8 @@ void UPepccineAnimInstance::AnimNotify_EndGettingUp()
 	UE_LOG(LogTemp, Log, TEXT("EndGettingUp"));
 	//Owner->bIsStumbling = false;
 }
+
+void UPepccineAnimInstance::AnimNotify_EndClimb()
+{
+	UE_LOG(LogTemp, Log, TEXT("EndClimb"));
+}
