@@ -598,7 +598,6 @@ void APepCharacter::UpdateWeaponUI()
 		bIsMainWeaponEquipped
 	);
 }
-
 void APepCharacter::OpenInventory()
 {
 	if (bIsRolling || !InventoryComponent) return;
@@ -626,8 +625,7 @@ void APepCharacter::SwapItem(const FInputActionValue& value)
 	if (!bIsPlayerAlive || bIsReloading || bIsSwapping) return;
 	float ScrollValue = value.Get<float>();
 	bIsSwapping = true;
-	//ItemManagerComponent->GetEquippedWeaponItemData()
-	// 주무기 보조무기 둘다 장착했는지 확인 필요
+	
 	if (ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main) != nullptr &&
 		ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub) != nullptr)
 	{
@@ -662,7 +660,7 @@ void APepCharacter::Fire()
 		PepccineMontageComponent->Attack();
 	}
 	else
-	{
+	{ 
 		PepccineMontageComponent->Fire();
 		ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
 	}
