@@ -1,5 +1,5 @@
 #include "Character/Animation/PepccineMontageComponent.h"
-#include "GameFramework/Character.h"
+#include "Character/Player/PepCharacter.h"
 
 UPepccineMontageComponent::UPepccineMontageComponent()
 {
@@ -8,9 +8,11 @@ UPepccineMontageComponent::UPepccineMontageComponent()
 void UPepccineMontageComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	Owner = Cast<ACharacter>(GetOwner());
+	Owner = Cast<APepCharacter>(GetOwner());
 	TObjectPtr<class USkeletalMeshComponent> Mesh = Cast<USkeletalMeshComponent>(Owner->GetMesh());
 	AnimInstance = Mesh->GetAnimInstance();
+
+	AnimInstance->OnMontageBlendingOut.AddDynamic(this, &UPepccineMontageComponent::OnMontageBlendingOut);
 }
 
 void UPepccineMontageComponent::Fire()
@@ -161,4 +163,30 @@ void UPepccineMontageComponent::Roll(FVector Dir, FRotator ActorRotation)
 
 	UE_LOG(LogTemp, Log, TEXT("%s"), *Dir.ToString());
 	UE_LOG(LogTemp, Log, TEXT("%.0f"), ForwardDeltaDegree);
+}
+
+void UPepccineMontageComponent::OnMontageBlendingOut(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (!Montage || !Owner) return;
+
+	if (Montage == ReloadMontage)
+	{
+		UE_LOG(LogTemp, Log, TEXT("EndReload!"));
+		Owner->bIsReloading = false;
+	}
+	else if (Montage == DrawMontage)
+	{
+		UE_LOG(LogTemp, Log, TEXT("EndDraw!"));
+		Owner->bIsSwapping = false;
+	}
+	else if (Montage == GetUpMontage)
+	{
+		UE_LOG(LogTemp, Log, TEXT("EndGettingUp"));
+		Owner->bIsStunning = false;
+	}
+	else if (Montage == ClimbingMontage)
+	{
+		UE_LOG(LogTemp, Log, TEXT("EndClimb"));
+		Owner->bIsClimbing = false;
+	}
 }
