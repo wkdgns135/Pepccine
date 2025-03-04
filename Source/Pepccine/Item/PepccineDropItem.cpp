@@ -2,10 +2,9 @@
 
 #include "PepccineItemDataAssetBase.h"
 #include "PepccineItemDataBase.h"
-#include "PepccineItemManagerComponent.h"
+#include "Item/Manager/PepccineItemManagerComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Framework/Docking/LayoutExtender.h"
 #include "Passive/PepccinePassiveItemData.h"
 #include "Resource/PepccineResourceItemData.h"
 #include "Weapon/PepccineWeaponItemData.h"

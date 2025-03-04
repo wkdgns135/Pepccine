@@ -3,7 +3,7 @@
 #include "PepccineWeaponItemData.h"
 #include "GameFramework/Character.h"
 #include "Item/PepccineItemDataAssetBase.h"
-#include "Item/PepccineItemManagerComponent.h"
+#include "Item/Manager/PepccineItemManagerComponent.h"
 #include "Item/PepccineItemSpawnerSubSystem.h"
 
 void UPepccineWeaponItemManager::SetWeaponItemComponent(ACharacter* OwnerCharacter)
@@ -61,9 +61,15 @@ void UPepccineWeaponItemManager::PickUpItem(const UPepccineWeaponItemData* Weapo
 void UPepccineWeaponItemManager::EquipWeapon(UPepccineWeaponItemData* Weapon, const bool bIsPlayEquipSound) const
 {
 	// 무기가 없거나 무기 컴포넌트가 없을 경우 장착 X
-	if (!Weapon || !WeaponItemComp)
+	if (!Weapon)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("교체할 무기가 없거나 무기 컴포넌트가 없습니다."));
+		UE_LOG(LogTemp, Warning, TEXT("교체할 무기가 없습니다."));
+		return;
+	}
+
+	if (!WeaponItemComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("무기 컴포넌트가 없습니다."));
 		return;
 	}
 

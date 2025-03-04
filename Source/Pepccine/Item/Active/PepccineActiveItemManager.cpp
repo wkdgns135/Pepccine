@@ -1,7 +1,7 @@
 ﻿#include "PepccineActiveItemManager.h"
 
 #include "PepccineActiveItemData.h"
-#include "Item/PepccineItemManagerComponent.h"
+#include "Item/Manager/PepccineItemManagerComponent.h"
 
 void UPepccineActiveItemManager::PickUpItem(const UPepccineActiveItemData* InActiveItemData)
 {

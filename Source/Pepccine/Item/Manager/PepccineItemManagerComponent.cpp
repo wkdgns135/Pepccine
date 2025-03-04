@@ -1,14 +1,16 @@
-﻿#include "Item/PepccineItemManagerComponent.h"
+﻿#include "PepccineItemManagerComponent.h"
 
-#include "PepccineItemDataAssetBase.h"
-#include "PepccineItemSaveData.h"
-#include "PepccineItemSpawnerSubSystem.h"
-#include "Active/PepccineActiveItemData.h"
+#include "Item/PepccineItemDataAssetBase.h"
+#include "Item/PepccineItemSaveData.h"
+#include "Item/PepccineItemSpawnerSubSystem.h"
+#include "Item/Active/PepccineActiveItemData.h"
 #include "GameFramework/Character.h"
+#include "Item/Active/PepccineActiveItemDataAsset.h"
 #include "Kismet/GameplayStatics.h"
-#include "Passive/PepccinePassiveItemData.h"
-#include "Passive/PepccineStatModifier.h"
-#include "Resource/PepccineResourceItemData.h"
+#include "Item/Passive/PepccinePassiveItemData.h"
+#include "Item/Passive/PepccinePassiveItemDataAsset.h"
+#include "Item/Passive/PepccineStatModifier.h"
+#include "Item/Resource/PepccineResourceItemData.h"
 
 UPepccineItemManagerComponent::UPepccineItemManagerComponent()
 	: WeaponItemManager(nullptr), PassiveItemManager(nullptr), ActiveItemManager(nullptr)
@@ -37,16 +39,22 @@ void UPepccineItemManagerComponent::BeginPlay()
 			// 무기 컴포넌트 등록
 			WeaponItemManager->SetWeaponItemComponent(OwnerCharacter);
 
-			if (const UPepccineWeaponItemData* WeaponItemData = GetWorld()
-			                                                    ->GetSubsystem<UPepccineItemSpawnerSubSystem>()
-			                                                    ->GetItemDataAsset()
-			                                                    ->GetWeaponItemDataAsset()
-			                                                    ->GetWeaponItemDatasById(0))
-			{
-				// 기본 무기 장착
-				WeaponItemManager->EquipDefaultWeapon(WeaponItemData);
-			}
+			// if (const UPepccineWeaponItemData* WeaponItemData = GetWorld()
+			//                                                     ->GetSubsystem<UPepccineItemSpawnerSubSystem>()
+			//                                                     ->GetItemDataAsset()
+			//                                                     ->GetWeaponItemDataAsset()
+			//                                                     ->GetWeaponItemDatasById(0))
+			// {
+			// 	// 기본 무기 장착
+			// 	WeaponItemManager->EquipDefaultWeapon(WeaponItemData);
+			// }
 		}
+	}
+
+	// 데이터 로드
+	if (LoadItemSaveData())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("아이템 데이터 로드 성공!"));
 	}
 }
 
@@ -62,6 +70,154 @@ void UPepccineItemManagerComponent::TickComponent(float DeltaTime, enum ELevelTi
 		if (FMath::IsNearlyZero(ActiveItemCooldown))
 		{
 			ActiveItemManager->SetIsActiveItemCooldown(false);
+		}
+	}
+}
+
+void UPepccineItemManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	// 데이터 세이브
+	SaveItemSaveData();
+}
+
+bool UPepccineItemManagerComponent::LoadItemSaveData()
+{
+	const UPepccineItemSaveData* SaveData = Cast<UPepccineItemSaveData>(
+		UGameplayStatics::LoadGameFromSlot(TEXT("ItemSaveData"), 0));
+
+	if (!SaveData)
+	{
+		SaveData = Cast<UPepccineItemSaveData>(
+			UGameplayStatics::CreateSaveGameObject(UPepccineItemSaveData::StaticClass()));
+	}
+
+	FPepccineItemSaveDataStruct SaveDataStruct = SaveData->ItemSaveData;
+
+	const UPepccineItemSpawnerSubSystem* ItemSpawnerSubSystem = GetWorld()->GetSubsystem<
+		UPepccineItemSpawnerSubSystem>();
+	if (!ItemSpawnerSubSystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("아이템 스포너 서브시스템이 없습니다."));
+		return false;
+	}
+
+	const UPepccineItemDataAssetBase* ItemDataBase = ItemSpawnerSubSystem->GetItemDataAsset();
+	if (!ItemDataBase)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("아이템 데이터 베이스가 없습니다."));
+		return false;
+	}
+
+	// 주 무기
+	if (SaveDataStruct.MainWeaponItemId >= 0 && SaveDataStruct.MainWeaponItemId < ItemDataBase->GetWeaponItemDataAsset()
+		->GetWeaponItemDatas().Num())
+	{
+		PickUpItem(ItemDataBase->GetWeaponItemDataAsset()->GetWeaponItemDatasById(SaveDataStruct.MainWeaponItemId),
+		           false);
+		if (UPepccineWeaponItemData* MainWeaponItemData = WeaponItemManager->GetWeaponItemData(
+			EPepccineWeaponItemType::EPWIT_Main))
+		{
+			MainWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = SaveDataStruct.MainWeaponAmmo.MagazinesAmmo;
+			MainWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SaveDataStruct.MainWeaponAmmo.SpareAmmo;
+		}
+	}
+
+	// 보조 무기
+	if (SaveDataStruct.SubWeaponItemId >= 0 && SaveDataStruct.SubWeaponItemId < ItemDataBase->GetWeaponItemDataAsset()->
+		GetWeaponItemDatas().Num())
+	{
+		PickUpItem(ItemDataBase->GetWeaponItemDataAsset()->GetWeaponItemDatasById(SaveDataStruct.SubWeaponItemId),
+		           false);
+		if (UPepccineWeaponItemData* SubWeaponItemData = WeaponItemManager->GetWeaponItemData(
+			EPepccineWeaponItemType::EPWIT_Sub))
+		{
+			SubWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = SaveDataStruct.SubWeaponAmmo.MagazinesAmmo;
+			SubWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SaveDataStruct.SubWeaponAmmo.SpareAmmo;
+		}
+	}
+
+	// 무기 장착
+	if (UPepccineWeaponItemData* EquippedWeaponItemData = WeaponItemManager->GetWeaponItemData(
+		SaveDataStruct.EquippedWeaponItemType))
+	{
+		WeaponItemManager->EquipWeapon(EquippedWeaponItemData, false);
+	}
+
+	// 패시브
+	for (const int32 Id : SaveDataStruct.PassiveItemIds)
+	{
+		if (Id >= 0 && Id < ItemDataBase->GetWeaponItemDataAsset()->GetWeaponItemDatas().Num())
+		{
+			if (UPepccinePassiveItemData* PassiveItemData = ItemDataBase->GetPassiveItemDataAsset()->
+			                                                              GetPassiveItemById(Id))
+			{
+				PickUpItem(PassiveItemData);
+			}
+		}
+	}
+
+	// 액티브
+	if (SaveDataStruct.ActiveItemId >= 0 && SaveDataStruct.ActiveItemId < ItemDataBase->GetWeaponItemDataAsset()->
+		GetWeaponItemDatas().Num())
+	{
+		if (UPepccineActiveItemData* ActiveItemData = ItemDataBase->GetActiveItemDataAsset()->
+		                                                            GetActiveItemById(SaveDataStruct.ActiveItemId))
+		{
+			PickUpItem(ActiveItemData);
+		}
+	}
+
+	// 돈
+	CoinCount = SaveDataStruct.CoinCount;
+
+	return true;
+}
+
+void UPepccineItemManagerComponent::SaveItemSaveData()
+{
+	UPepccineItemSaveData* SaveData = Cast<UPepccineItemSaveData>(
+		UGameplayStatics::LoadGameFromSlot(TEXT("ItemSaveData"), 0));
+
+	if (SaveData)
+	{
+		// 주 무기
+		if (const UPepccineWeaponItemData* MainWeaponItemData = GetWeaponItemData(
+			EPepccineWeaponItemType::EPWIT_Main))
+		{
+			SaveData->ItemSaveData.MainWeaponItemId = MainWeaponItemData->GetItemId();
+			SaveData->ItemSaveData.MainWeaponAmmo.MagazinesAmmo = MainWeaponItemData->GetWeaponItemStats().MagazineAmmo;
+			SaveData->ItemSaveData.MainWeaponAmmo.SpareAmmo = MainWeaponItemData->GetWeaponItemStats().SpareAmmo;
+		}
+		// 보조 무기
+		if (const UPepccineWeaponItemData* SubWeaponItemData = GetWeaponItemData(
+			EPepccineWeaponItemType::EPWIT_Sub))
+		{
+			SaveData->ItemSaveData.SubWeaponItemId = SubWeaponItemData->GetItemId();
+			SaveData->ItemSaveData.SubWeaponAmmo.MagazinesAmmo = SubWeaponItemData->GetWeaponItemStats().MagazineAmmo;
+			SaveData->ItemSaveData.SubWeaponAmmo.SpareAmmo = SubWeaponItemData->GetWeaponItemStats().SpareAmmo;
+		}
+
+		// 현재 장착 중인 무기
+		if (GetEquippedWeaponItemData())
+		{
+			SaveData->ItemSaveData.EquippedWeaponItemType = GetEquippedWeaponItemData()->GetWeaponItemType();
+		}
+
+		// 패시브
+		GetPassiveItemDatas().GenerateKeyArray(SaveData->ItemSaveData.PassiveItemIds);
+		// 액티브
+		if (const UPepccineActiveItemData* ActiveItemData = GetActiveItemData())
+		{
+			SaveData->ItemSaveData.ActiveItemId = ActiveItemData->GetItemId();
+		}
+		// 코인
+		CoinCount = SaveData->ItemSaveData.CoinCount;
+
+		if (UGameplayStatics::SaveGameToSlot(SaveData, "ItemSaveData", 0))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("아이템 데이터 저장 성공!"));
 		}
 	}
 }
@@ -358,51 +514,5 @@ FVector UPepccineItemManagerComponent::GetShootDirection() const
 
 // void UPepccineItemManagerComponent::LoadItemData(const FPepccineItemSaveData& SaveData)
 // {
-// 	UPepccineItemSpawnerSubSystem* ItemSpawnerSubSystem = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
-// 	if (!ItemSpawnerSubSystem)
-// 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("아이템 스포너 서브시스템이 없습니다."));
-// 		return;
-// 	}
-// 	
-// 	const UPepccineItemDataAssetBase* ItemDataBase = ItemSpawnerSubSystem->GetItemDataAsset();
-// 	if (!ItemDataBase)
-// 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("아이템 데이터 베이스가 없습니다."));
-// 		return;
-// 	}
-// 	
-// 	if (SaveData.MainWeaponItemId >= 0 && SaveData.MainWeaponItemId < ItemDataBase->GetWeaponItemDataAsset()->
-// 		GetWeaponItemDatas().Num())
-// 	{
-// 		PickUpItem(ItemDataBase->GetWeaponItemDataAsset()->GetWeaponItemDatasById(SaveData.MainWeaponItemId), false);
-// 		if (UPepccineWeaponItemData* MainWeaponItemData = WeaponItemManager->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main))
-// 		{
-// 			MainWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = SaveData.MainWeaponAmmo.MagazinesAmmo;
-// 			MainWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SaveData.MainWeaponAmmo.SpareAmmo;
-// 		}
-// 	}
-// 	else
-// 	{
-// 		MainWeaponItemData = nullptr;
-// 	}
-// 	
-// 	if (SaveData.SubWeaponItemId >= 0 && SaveData.SubWeaponItemId < ItemDataBase->GetWeaponItemDataAsset()->
-// 		GetWeaponItemDatas().Num())
-// 	{
-// 		PickUpItem(ItemDataBase->GetWeaponItemDataAsset()->GetWeaponsItemById(SaveData.SubWeaponItemId), false);
-// 		SubWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = SaveData.SubWeaponAmmo.MagazinesAmmo;
-// 		SubWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SaveData.SubWeaponAmmo.SpareAmmo;
-// 	}
-// 	
-// 	EquipWeapon(SaveData.EquippedWeaponItemType == EPepccineWeaponItemType::EPWIT_Main
-// 		            ? MainWeaponItemData
-// 		            : SubWeaponItemData, false);
-// 	
-// 	for (const int32 Id : SaveData.PassiveItemIds)
-// 	{
-// 		const UPepccinePassiveItemData* PassiveItemData = ItemDataBase->GetPassiveItemDataAsset()->
-// 		                                                                GetPassiveItemById(Id);
-// 		PickUpItem(PassiveItemData);
-// 	}
+
 // }
