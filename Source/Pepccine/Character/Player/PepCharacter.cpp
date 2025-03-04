@@ -681,10 +681,7 @@ void APepCharacter::Interactive()
 
 void APepCharacter::UpdateWeaponUI()
 {
-	if (!ItemManagerComponent || !ItemIconComponent)
-	{
-		return;
-	}
+	if (!ItemManagerComponent || !ItemIconComponent) return;
 
 	// 주무기 정보
 	UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->
@@ -702,18 +699,21 @@ void APepCharacter::UpdateWeaponUI()
 	UTexture2D* SubWeaponImage = SubWeaponData ? SubWeaponData->GetIconTexture() : nullptr;
 
 	// 현재 장착된 무기가 주무기인지 확인
-	bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() ==
+	if (ItemManagerComponent->GetEquippedWeaponItemData())
+	{
+		bIsMainWeaponEquipped = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemType() ==
 		EPepccineWeaponItemType::EPWIT_Main;
 
-	// WeaponWidget 업데이트
-	ItemIconComponent->SetWeaponItem(
-		MainWeaponImage,
-		SubWeaponImage,
-		bIsMainWeaponEquipped ? MainWeaponName : SubWeaponName,
-		bIsMainWeaponEquipped ? MainWeaponAmmo : SubWeaponAmmo,
-		bIsMainWeaponEquipped ? MainSpareAmmo : SubWeaponMaxAmmo,
-		bIsMainWeaponEquipped
-	);
+		// WeaponWidget 업데이트
+		ItemIconComponent->SetWeaponItem(
+			MainWeaponImage,
+			SubWeaponImage,
+			bIsMainWeaponEquipped ? MainWeaponName : SubWeaponName,
+			bIsMainWeaponEquipped ? MainWeaponAmmo : SubWeaponAmmo,
+			bIsMainWeaponEquipped ? MainSpareAmmo : SubWeaponMaxAmmo,
+			bIsMainWeaponEquipped
+		);
+	}
 }
 
 void APepCharacter::OpenInventory()
