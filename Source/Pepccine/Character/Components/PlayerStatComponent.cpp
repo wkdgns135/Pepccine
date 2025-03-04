@@ -17,6 +17,7 @@ void UPlayerStatComponent::BeginPlay()
 	Super::BeginPlay();
 
 	StartRepeatingTimer();
+	InitializeStats();
 }
 
 void UPlayerStatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -39,16 +40,6 @@ void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 #pragma region
 void UPlayerStatComponent::InitializeStats()
 {
-	if (PlayerStatDataAsset)
-	{
-		CurrentStats = PlayerStatDataAsset->DefaultStats;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerStatDataAsset이 설정되지 않았습니다! 기본값을 사용합니다."));
-		CurrentStats = FPlayerStats(); // 기본값 적용
-	}
-
 	// Modifier 총합 초기화
 	CurrentTotalAdd = FPlayerStats();
 	CurrentTotalAdd.HealthStats.CurrentHealth = 0.0f;
@@ -119,10 +110,13 @@ void UPlayerStatComponent::SetPlayerStatDataAsset(UPlayerStatDataAsset* NewDataA
 	if (!NewDataAsset)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SetPlayerStatDataAsset() 실패: 전달된 DataAsset이 NULL입니다!"));
+		CurrentStats = FPlayerStats();
 		return;
 	}
 
 	PlayerStatDataAsset = NewDataAsset;
+	CurrentStats = PlayerStatDataAsset->DefaultStats;
+	
 	InitializeStats();
 
 	UE_LOG(LogTemp, Log, TEXT("새로운 PlayerStatDataAsset이 적용되었습니다."));

@@ -13,16 +13,10 @@ class PEPCCINE_API UCharacterSaveManager : public UGameInstanceSubsystem
 	
 public:
 	UFUNCTION(BlueprintCallable, Category = "Stats")
-	bool LoadPlayerStats(FPlayerStats& OutStats,
-	                            TArray<FStatModifier>& OutModifiers,
-	                            FPlayerStats& OutTotalAdd,
-	                            FPlayerStats& OutTotalMul);
+	bool LoadPlayerStats(FPlayerStats& OutStats);
 	
 	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void SavePlayerStats(const FPlayerStats& InStats,
-	                            const TArray<FStatModifier>& InModifiers,
-	                            FPlayerStats InTotalAdd,
-	                            FPlayerStats InTotalMul);
+	void SavePlayerStats(const FPlayerStats& InStats);
 
 	bool IsFirstTimeLoaded() const { return bIsFirstTimeLoaded; }
 

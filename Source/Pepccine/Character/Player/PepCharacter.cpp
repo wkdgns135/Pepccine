@@ -68,21 +68,19 @@ void APepCharacter::BeginPlay()
 	AddObservers();
 
 	UCharacterSaveManager* SaveManager = GetGameInstance()->GetSubsystem<UCharacterSaveManager>();
-	if (const bool FirstTimePlay = SaveManager->GetIsFirstTimeLoaded())
+	if (bool FirstTimePlay = SaveManager->GetIsFirstTimeLoaded())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("First Time Loaded [%d]"), FirstTimePlay);
-		SaveManager->SetIsFirstTimeLoaded(FirstTimePlay);
-		PlayerStatComponent->LoadAndApplyPlayerStatDataAsset();
+		SaveManager->SetIsFirstTimeLoaded(!FirstTimePlay);
 	}
 	else
 	{
-		SaveManager->LoadPlayerStats(PlayerStatComponent->CurrentStats,
-		PlayerStatComponent->ActiveModifiers,
-		PlayerStatComponent->CurrentTotalAdd,
-		PlayerStatComponent->CurrentTotalMul);
+		UE_LOG(LogTemp, Warning, TEXT("N Time Loaded [%d]"), FirstTimePlay);
+		SaveManager->LoadPlayerStats(PlayerStatComponent->CurrentStats);
+		bIsLoaded = true;
 	}
 	
-	//UE_LOG(LogTemp, Warning, TEXT("Player Stats Loaded [%s]"), *PlayerStatComponent->PrintStats());
+	UE_LOG(LogTemp, Warning, TEXT("Player Stats Loaded [%s]"), *PlayerStatComponent->PrintStats());
 }
 
 void APepCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -90,10 +88,7 @@ void APepCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 	
 	UCharacterSaveManager* SaveManager = GetGameInstance()->GetSubsystem<UCharacterSaveManager>();
-	SaveManager->SavePlayerStats(PlayerStatComponent->CurrentStats,
-		PlayerStatComponent->ActiveModifiers,
-		PlayerStatComponent->CurrentTotalAdd,
-		PlayerStatComponent->CurrentTotalMul);
+	SaveManager->SavePlayerStats(PlayerStatComponent->CurrentStats);
 }
 
 void APepCharacter::Tick(float DeltaTime)
@@ -456,20 +451,14 @@ void APepCharacter::Look(const FInputActionValue& value)
 
 void APepCharacter::StartSprint(const FInputActionValue& value)
 {
-	if (bIsRolling || !bIsPlayerAlive || bIsStunning || bIsClimbing)
-	{
-		return;
-	}
+	if (bIsRolling || !bIsPlayerAlive || bIsStunning || bIsClimbing) return;
 
 	if (bIsRollable)
 	{
 		SprintHoldStartTime = GetWorld()->GetTimeSeconds();
 	}
 
-	if (!bIsSprintable)
-	{
-		return;
-	}
+	if (!bIsSprintable) return;
 	bIsSprinting = true;
 }
 
@@ -540,10 +529,7 @@ FVector APepCharacter::GetRollDirection()
 
 void APepCharacter::Crouching()
 {
-	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive || bIsStunning || bIsClimbing)
-	{
-		return;
-	}
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive || bIsStunning || bIsClimbing) return;
 
 	bIsCrouching = GetCharacterMovement()->IsCrouching();
 
@@ -566,6 +552,9 @@ void APepCharacter::Reload()
 	if (!bIsPlayerAlive || bIsStunning || bIsClimbing || bIsReloading) return;
 
 	//HitReactionComponent->EnterRagdoll(5);
+
+	if (ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineSize
+		== ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineAmmo) return;
 
 	bIsReloading = true;
 
@@ -684,6 +673,8 @@ void APepCharacter::Interactive()
 	else
 	{
 	}
+
+	CurrentDropItem = nullptr;
 }
 
 void APepCharacter::UpdateWeaponUI()
@@ -793,7 +784,7 @@ void APepCharacter::StopFire()
 
 void APepCharacter::Fire()
 {
-	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent || bIsReloading || bIsStunning || bIsClimbing) return;
+	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent || bIsReloading || bIsStunning || bIsClimbing || bIsSprinting) return;
 	bIsFiring = true;
 	
 	float CurrentAmmo = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineAmmo;
