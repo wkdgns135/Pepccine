@@ -38,13 +38,15 @@ public:
 	void StumbleGetUp();
 	UFUNCTION()
 	void Climbing();
+	UFUNCTION()
+	void OnMontageBlendingOut(UAnimMontage* Montage, bool bInterrupted);
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
-	TObjectPtr<class ACharacter> Owner;
+	TObjectPtr<class APepCharacter> Owner;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	UAnimInstance* AnimInstance;
 	
