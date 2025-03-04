@@ -19,7 +19,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE FString GetDescription() const { return Description; };
 	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE int32 GetItemTier() const { return ItemTier; };
+	FORCEINLINE int32 GetItemRarity() const { return ItemRarity; };
 
 	FORCEINLINE UStaticMesh* GetMeshToSpawn() { return MeshToSpawn; };
 	FORCEINLINE FRotator GetMeshRotationToSpawn() const { return MeshRotationToSpawn; };
@@ -42,10 +42,10 @@ protected:
 	// 화면에 보여질 아이템 설명
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "설명", MultiLine = "true"))
 	FString Description;
-	// 아이템 레어도(0 ~ 4티어)
+	// 아이템 희귀도(0 ~ 4)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info",
-		meta = (DisplayName = "레어도", ClampMin = "0", ClampMax = "4"))
-	int32 ItemTier;
+		meta = (DisplayName = "아이템 희귀도", ClampMin = "0", ClampMax = "4"))
+	int32 ItemRarity;
 	// 스폰할 때 보여질 메시
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Info", meta = (DisplayName = "스폰 메시"))
 	TObjectPtr<UStaticMesh> MeshToSpawn;

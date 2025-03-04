@@ -41,7 +41,7 @@ void UPepccineItemManagerComponent::BeginPlay()
 			                                                    ->GetSubsystem<UPepccineItemSpawnerSubSystem>()
 			                                                    ->GetItemDataAsset()
 			                                                    ->GetWeaponItemDataAsset()
-			                                                    ->GetWeaponsItemById(0))
+			                                                    ->GetWeaponItemDatasById(0))
 			{
 				// 기본 무기 장착
 				WeaponItemManager->EquipDefaultWeapon(WeaponItemData);

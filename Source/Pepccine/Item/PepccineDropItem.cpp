@@ -168,7 +168,7 @@ void APepccineDropItem::ChangeWeaponItemData(UPepccineWeaponItemData* WeaponItem
 		const UPepccineWeaponItemData* DefaultWeaponItemData = GetWorld()->
 		                                                       GetSubsystem<UPepccineItemSpawnerSubSystem>()->
 		                                                       GetItemDataAsset()->GetWeaponItemDataAsset()->
-		                                                       GetWeaponsItemById(WeaponItemData->GetItemId());
+		                                                       GetWeaponItemDatasById(WeaponItemData->GetItemId());
 		// 스탯 원본 데이터로 설정
 		DropWeaponItemData->SetWeaponStats(DefaultWeaponItemData->GetWeaponItemStats());
 

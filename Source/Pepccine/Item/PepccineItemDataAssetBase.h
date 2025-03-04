@@ -17,7 +17,7 @@ class PEPCCINE_API UPepccineItemDataAssetBase : public UPrimaryDataAsset
 
 public:
 	// getter
-
+	
 	// 무기 데이터 에셋
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE UPepccineWeaponItemDataAsset* GetWeaponItemDataAsset() const { return WeaponItemDataAsset; }

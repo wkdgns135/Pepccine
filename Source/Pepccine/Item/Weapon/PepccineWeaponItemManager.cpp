@@ -140,7 +140,7 @@ void UPepccineWeaponItemManager::UpdateWeaponItemStats(EPepccineWeaponItemType W
 	                                                 GetSubsystem<UPepccineItemSpawnerSubSystem>()->
 	                                                 GetItemDataAsset()->
 	                                                 GetWeaponItemDataAsset()->
-	                                                 GetWeaponsItemById(TargetWeaponItem->GetItemId());
+	                                                 GetWeaponItemDatasById(TargetWeaponItem->GetItemId());
 
 	for (const UPepccinePassiveItemData* PassiveItemData : PassiveItemDatas)
 	{
