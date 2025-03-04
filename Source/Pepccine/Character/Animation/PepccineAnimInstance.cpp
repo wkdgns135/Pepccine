@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Character/Animation/PepccineAnimInstance.h"
 #include "Character/Player/PepCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -48,4 +45,28 @@ void UPepccineAnimInstance::NativeUpdateAnimation(float dt)
 		(Pitch > 90) ? ControllerPitch = Pitch - 360 : ControllerPitch = Pitch;
 		bIsMainWeapon = Owner->bIsMainWeaponEquipped;
 	}
+}
+
+void UPepccineAnimInstance::AnimNotify_EndReloading()
+{
+	UE_LOG(LogTemp, Log, TEXT("EndReload!"));
+	Owner->bIsReloading = false;
+}
+
+void UPepccineAnimInstance::AnimNotify_EndDraw()
+{
+	UE_LOG(LogTemp, Log, TEXT("EndDraw!"));
+	Owner->bIsSwapping = false;
+}
+
+void UPepccineAnimInstance::AnimNotify_EndGettingUp()
+{
+	UE_LOG(LogTemp, Log, TEXT("EndGettingUp"));
+	Owner->bIsStunning = false;
+}
+
+void UPepccineAnimInstance::AnimNotify_EndClimb()
+{
+	UE_LOG(LogTemp, Log, TEXT("EndClimb"));
+	Owner->bIsClimbing = false;
 }

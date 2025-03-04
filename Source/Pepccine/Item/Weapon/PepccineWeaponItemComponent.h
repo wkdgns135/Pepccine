@@ -21,15 +21,17 @@ public:
 
 	// 초기화
 	void InitWeaponComponent(ACharacter* InOwnerCharacter);
-
 	// 무기 발사
 	void Fire(const float& WeaponDamage, const FVector& ShootDirection);
 	// 무기 재장전
 	bool Reload() const;
-
 	// 무기 장착
 	void EquipWeapon(UPepccineWeaponItemData* WeaponItemData, bool bIsPlayEquipSound = true);
 
+	// 확산 각도 계산
+	float CalculateSpreadAngle(float BaseAngle, float MaxAngle) const;
+	
+	// 발사 가능 여부
 	FORCEINLINE void CanFire()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("발사 가능!"));

@@ -77,15 +77,6 @@ void ABaseDoor::OnStarted()
 {
 	bIsLocked = true;
 	LockDoor();
-	
-	if (URoomManager *RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager())
-	{
-		const FRoomData* RoomData = GetDirectionRoom();
-		if (RoomData->RoomType == ERoomType::ENone)
-		{
-			Destroy();
-		}
-	}
 }
 
 void ABaseDoor::OnCleared()

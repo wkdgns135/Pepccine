@@ -6,6 +6,7 @@
 
 #include "PepccineDropItem.generated.h"
 
+class UPepccineWeaponItemData;
 class UPepccineItemManagerComponent;
 class UWidgetComponent;
 class UPepccineItemDataBase;
@@ -32,6 +33,9 @@ public:
 	// 아이템 획득
 	UFUNCTION(BlueprintCallable)
 	void PickUpItem(UPepccineItemManagerComponent* ItemManagerComponent);
+
+	// 무기 데이터 변경
+	void ChangeWeaponItemData(UPepccineWeaponItemData* WeaponItemData) const;
 
 	// getter
 	// 스태틱 메시 컴포넌트 가져오기

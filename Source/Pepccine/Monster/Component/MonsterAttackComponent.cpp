@@ -41,6 +41,7 @@ void UMonsterAttackComponent::PlayTransitionMontage()
     }
 }
 
+// AttackTraceì— ë§¤ê°œë³€ìˆ˜ë¡œ SkillType, AttackType(ì›ê±°ë¦¬, ê·¼ê±°ë¦¬) ë„£ì–´ì•¼ í•©ë‹ˆë‹¤.
 void UMonsterAttackComponent::AttackTrace()
 {
     ABaseMonster* OwnerMonster = Cast<ABaseMonster>(GetOwner());
@@ -78,7 +79,7 @@ void UMonsterAttackComponent::ExecuteTrace(ABaseMonster* OwnerMonster, float Ran
 
     if (bHit)
     {
-        // Ãæµ¹ À§Ä¡¿¡ Á¡(µğ¹ö±× ¿ë)
+        // ï¿½æµ¹ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½)
         FVector HitLocation = HitResult.Location;
         DrawDebugPoint(GetWorld(), HitLocation, 10.0f, FColor::Red, false, 2.0f);
 
@@ -90,12 +91,13 @@ void UMonsterAttackComponent::ExecuteTrace(ABaseMonster* OwnerMonster, float Ran
             UMonsterStatComponent* StatComp = OwnerMonster->FindComponentByClass<UMonsterStatComponent>();
             if (StatComp)
             {
-                SendHitResult(Player, StatComp->Attack, HitResult);
+                SendHitResult(Player, StatComp->Attack, HitResult, EMonsterSkill::None);
             }
             else
             {
                 UE_LOG(LogTemp, Error, TEXT("StatComp is nullptr in ExecuteTrace!"));
             }
+            
         }
     }
     else

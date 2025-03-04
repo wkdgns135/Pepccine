@@ -5,6 +5,7 @@
 #include "Character/Components/CrosshairHUDComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
 
 APepccinePlayerController::APepccinePlayerController()
 {
@@ -55,6 +56,31 @@ void APepccinePlayerController::SetMenu()
   if (UButton* BackButton = MenuInstance->BackButton)
   {
     BackButton->OnClicked.AddDynamic(this, &APepccinePlayerController::OnBackButtonClicked);
+  }
+
+  if (UTextBlock* GameOver = MenuInstance->GameOver)
+  {
+    GameOver->SetVisibility(ESlateVisibility::Hidden);
+  }
+}
+
+void APepccinePlayerController::ShowGameOver(bool IsVisible)
+{
+  UTextBlock* GameOver = MenuInstance->GameOver;
+  UButton* BackButton = MenuInstance->BackButton;
+  
+  if (GameOver && BackButton)
+  {
+    if (IsVisible)
+    {
+      GameOver->SetVisibility(ESlateVisibility::Visible);
+      BackButton->SetVisibility(ESlateVisibility::Hidden);
+    }
+    else
+    {
+      GameOver->SetVisibility(ESlateVisibility::Hidden);
+      BackButton->SetVisibility(ESlateVisibility::Visible);
+    }
   }
 }
 

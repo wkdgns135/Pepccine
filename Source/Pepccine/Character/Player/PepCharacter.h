@@ -11,9 +11,10 @@
 #include "Character/Data/ActorInfo.h"
 #include "Character/Interfaces/IStaminaObserver.h"
 #include "Item/PepccineDropItem.h"
-#include "Kismet/GameplayStatics.h"
+#include "Monster/Data/MonsterSkill.h"
 #include "PepCharacter.generated.h"
 
+struct FClimbObstacleInfo;
 class UInputMappingContext;
 class UInputAction;
 class USpringArmComponent;
@@ -37,6 +38,7 @@ class PEPCCINE_API APepCharacter : public ACharacter, public IIStaminaObserver
 public:
 	APepCharacter();
 
+	// 내부 & 애니매이션 사용
 	bool bIsFiring = false;
 	bool bIsFirstPersonView = false;
 	bool bIsInventoryOpened = false;
@@ -44,6 +46,8 @@ public:
 	bool bIsMoving = false;
 	bool bIsZooming = false;
 	bool bIsSprinting = false;
+	bool bIsClimbing = false;
+	bool bIsStunning = false;
 	
 	bool bIsCrouching = false;
 	bool bIsSprintable = true;
@@ -52,9 +56,10 @@ public:
 	bool bIsRolling = false;
 	bool bIsRollable = true;
 
+	bool bIsSwapping = false;
 	bool bIsPlayerAlive = true;
-
 	bool bIsMainWeaponEquipped = false;
+	// 내부 & 애니매이션 사용
 
 	// UE delegate
 	UFUNCTION()
@@ -62,11 +67,9 @@ public:
 	// Observer Pattern
 	virtual void OnStaminaChanged(float NewStamina, float MaxStamina) override;
 	UFUNCTION()
-	void OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult);
+	void OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType);
 	
-	void TriggerCameraShake();
-
-	bool IsMainWeapon();
+	void TriggerCameraShake(float Amplitude, float Frequency, float Duration);
 	
 	// inline
 	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }
@@ -173,9 +176,12 @@ private:
 	float SprintHoldStartTime = 0.0f;
 	float SprintHoldThreshold = 0.2f;
 	float LooseWeight = 0.0f;
+	int ShotStack = 0;
 	
 	FVector RollDirection;
 	FVector GetRollDirection();
+	FVector GetKnockbackDirection(AActor* DamageSource, AActor* Victim);
+	FVector ClimbTargetLocation;
 	
 	UPROPERTY()
 	APepccineDropItem* CurrentDropItem;
@@ -194,6 +200,8 @@ private:
 	void CheckSprinting();
 	void CheckRolling(float DeltaTime);
 	void SetWeight();
+	void Stumble(AActor* DamageCauser);
+	void Climb();
 
 	// TEST CODE
 	void TestApplyStatModifier();

@@ -40,10 +40,9 @@ public:
 	void UpdateHealthBar(float CurrentHealth, float MaxHealth);
 	void InitializeHealthBar();
 
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster")
-	EMonsterType MonsterType;
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UMonsterAttackComponent* AttackComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -53,12 +52,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	UBehaviorTree* BehaviorTree;
-
-	virtual void BeginPlay() override;
-
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster")
+	EMonsterType MonsterType;
 private:
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void OnHitReceived(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult);
+	void OnHitReceived(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType);
 	void Die();
 };

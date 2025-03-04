@@ -16,6 +16,8 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void BeginPlay() override;
 
+	void SetTarget();
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UBlackboardComponent* BlackboardComponent;
@@ -23,5 +25,4 @@ protected:
 
 private:
 	void InitializeBehaviorTree(APawn* InPawn);
-	void SetTarget(AActor* Target);
 };

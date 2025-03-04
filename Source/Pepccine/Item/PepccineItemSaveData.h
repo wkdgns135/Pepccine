@@ -45,7 +45,6 @@ struct FPepccineItemSaveData
 	// 장착 중인 무기 아이디
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (DesplayName = "장착 무기 타입"))
 	EPepccineWeaponItemType EquippedWeaponItemType;
-
 	// 패시브 아이템 아이디 목록
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (DesplayName = "패시브 아이템 아이디 목록"))
 	TArray<int32> PassiveItemIds;

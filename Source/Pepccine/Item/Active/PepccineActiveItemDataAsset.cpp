@@ -6,13 +6,13 @@ void UPepccineActiveItemDataAsset::PostEditChangeProperty(struct FPropertyChange
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UPepccineActiveItemDataAsset, ActiveItems))
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UPepccineActiveItemDataAsset, ActiveItemDatas))
 	{
-		for (int32 i = 0; i < ActiveItems.Num(); i++)
+		for (int32 i = 0; i < ActiveItemDatas.Num(); i++)
 		{
-			if (ActiveItems[i])
+			if (ActiveItemDatas[i])
 			{
-				if (UPepccineActiveItemData* ActiveItem = dynamic_cast<UPepccineActiveItemData*>(ActiveItems[i]))
+				if (UPepccineActiveItemData* ActiveItem = dynamic_cast<UPepccineActiveItemData*>(ActiveItemDatas[i]))
 				{
 					ActiveItem->SetItemId(i);
 				}
