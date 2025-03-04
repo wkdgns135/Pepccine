@@ -30,7 +30,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UMonsterAttackComponent* AttackComponent;
 
@@ -43,6 +44,6 @@ protected:
 private:
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void OnHitReceived(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult);
+	void OnHitReceived(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType);
 	void Die();
 };

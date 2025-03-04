@@ -6,9 +6,6 @@
 #include "Animation/AnimInstance.h"
 #include "PepccineAnimInstance.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class PEPCCINE_API UPepccineAnimInstance : public UAnimInstance
 {
@@ -20,6 +17,16 @@ public:
 protected:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float dt) override;
+
+	//Notify
+	UFUNCTION()
+	void AnimNotify_EndReloading();
+	UFUNCTION()
+	void AnimNotify_EndDraw();
+	UFUNCTION()
+	void AnimNotify_EndGettingUp();
+	UFUNCTION()
+	void AnimNotify_EndClimb();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<class APepCharacter> Owner;

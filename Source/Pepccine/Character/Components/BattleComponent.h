@@ -2,9 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Monster/Data/MonsterSkill.h"
 #include "BattleComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnCharacterHited, AActor*, DamageCauser, float, DamageAmount, const FHitResult&, HitResult);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnCharacterHited, AActor*, DamageCauser, float, DamageAmount, const FHitResult&, HitResult, EMonsterSkill, SkillType);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PEPCCINE_API UBattleComponent : public UActorComponent
@@ -14,8 +15,8 @@ class PEPCCINE_API UBattleComponent : public UActorComponent
 public:
 	UBattleComponent();
 
-	void SendHitResult(AActor* HitTarget, float DamageAmount, const FHitResult& HitResult) const;
-	void ReceiveHitResult(float DamageAmount, AActor* DamageCauser, const FHitResult& HitResult) const;
+	void SendHitResult(AActor* HitTarget, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType) const;
+	void ReceiveHitResult(float DamageAmount, AActor* DamageCauser, const FHitResult& HitResult, EMonsterSkill SkillType) const;
 
 	UPROPERTY(BlueprintAssignable, Category = "Delegate | Battle")
 	FOnCharacterHited OnCharacterHited;

@@ -24,6 +24,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Room")
 	bool bIsRoomClear;
 
+	UPROPERTY(VisibleInstanceOnly, Category = "Room")
 	int MonsterCount;
 	
 protected:

@@ -4,7 +4,6 @@
 #include "Components/ActorComponent.h"
 #include "BaseSkillComponent.generated.h"
 
-
 UCLASS(Abstract)
 class PEPCCINE_API UBaseSkillComponent : public UActorComponent
 {
@@ -24,7 +23,7 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     float Damage;
 
-    // ¾Ö´Ï¸ÞÀÌ¼Ç ¸ùÅ¸ÁÖ Àç»ý ÇÔ¼ö
+    // ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
     void PlaySkillMontage();
     bool IsCooldownOver() const;
     void StartCooldown();

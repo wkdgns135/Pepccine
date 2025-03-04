@@ -24,7 +24,7 @@ void ABaseRoomController::BeginPlay()
 {
 	Super::BeginPlay();
 	MonsterCount = 0;
-	GetWorldTimerManager().SetTimerForNextTick([this]{StartRoom();});
+	GetWorldTimerManager().SetTimerForNextTick(this, &ABaseRoomController::StartRoom);
 }
 
 void ABaseRoomController::ClearRoom()

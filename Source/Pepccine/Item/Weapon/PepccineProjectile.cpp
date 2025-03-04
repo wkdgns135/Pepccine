@@ -78,7 +78,7 @@ void APepccineProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 			{
 				if (const UBattleComponent* BattleComp = OwnerCharacter->GetComponentByClass<UBattleComponent>())
 				{
-					BattleComp->SendHitResult(Enemy, WeaponDamage, Hit);
+					BattleComp->SendHitResult(Enemy, WeaponDamage, Hit, EMonsterSkill::None);
 				}
 			}
 		}
