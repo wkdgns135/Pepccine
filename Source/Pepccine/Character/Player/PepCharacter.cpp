@@ -227,7 +227,7 @@ void APepCharacter::Stumble(AActor* DamageCauser)
 	GetCharacterMovement()->AddImpulse(KnockbackForce + FVector(0, 0, ZFore), true);
 
 	PepccineMontageComponent->Stumble(2.0);
-	// TriggerCameraShake(); 수치줘서 효과조절
+	TriggerCameraShake(10, 10, 0.5);
 }
 
 FVector APepCharacter::GetKnockbackDirection(AActor* DamageSource, AActor* Victim)
@@ -469,9 +469,6 @@ void APepCharacter::Roll()
 		return;
 	}
 
-	// 임시
-	//TriggerCameraShake();
-
 	bIsRolling = true;
 	RollDirection = GetRollDirection();
 
@@ -541,10 +538,7 @@ void APepCharacter::Crouching()
 
 void APepCharacter::Reload()
 {
-	if (!bIsPlayerAlive || bIsStunning || bIsClimbing)
-	{
-		return;
-	}
+	if (!bIsPlayerAlive || bIsStunning || bIsClimbing || bIsReloading) return;
 
 	//HitReactionComponent->EnterRagdoll(5);
 
@@ -730,11 +724,8 @@ void APepCharacter::OpenInventory()
 
 void APepCharacter::SwapItem(const FInputActionValue& value)
 {
-	if (!bIsPlayerAlive || bIsReloading || bIsSwapping || bIsStunning || bIsClimbing)
-	{
-		return;
-	}
-
+	if (!bIsPlayerAlive || bIsReloading || bIsStunning || bIsClimbing) return;
+	
 	float ScrollValue = value.Get<float>();
 	bIsSwapping = true;
 
@@ -764,11 +755,9 @@ void APepCharacter::StopFire()
 
 void APepCharacter::Fire()
 {
-	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent || bIsReloading || bIsStunning || bIsClimbing)
-	{
-		return;
-	}
-
+	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent || bIsReloading || bIsStunning || bIsClimbing) return;
+	bIsFiring = true;
+	
 	float CurrentAmmo = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineAmmo;
 	if (CurrentAmmo <= 0)
 	{
@@ -792,8 +781,7 @@ void APepCharacter::Fire()
 		}
 		AddControllerYawInput(NewPitch * RandDirYaw); // 왼쪽
 	}
-
-	bIsFiring = true;
+	
 	UpdateWeaponUI();
 }
 
@@ -1027,10 +1015,7 @@ void APepCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			this,
 			&APepCharacter::Fire
 		);
-	}
 
-	if (PlayerController->FireAction)
-	{
 		EnhancedInput->BindAction(
 			PlayerController->FireAction,
 			ETriggerEvent::Completed,
