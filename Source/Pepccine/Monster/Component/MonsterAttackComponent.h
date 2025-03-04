@@ -5,6 +5,7 @@
 #include "Character/Components/BattleComponent.h"
 #include "MonsterAttackComponent.generated.h"
 
+class ABaseMonster;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PEPCCINE_API UMonsterAttackComponent : public UBattleComponent
@@ -32,5 +33,5 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	
+	void ExecuteTrace(ABaseMonster* OwnerMonster, float Range, float CapsuleRadius, float CapsuleHalfHeight);
 };
