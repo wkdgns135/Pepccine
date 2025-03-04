@@ -1,6 +1,5 @@
 ﻿#include "PepCharacter.h"
 
-#include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include "EnhancedInputComponent.h"
@@ -83,7 +82,7 @@ void APepCharacter::BeginPlay()
 		PlayerStatComponent->CurrentTotalMul);
 	}
 	
-	UE_LOG(LogTemp, Warning, TEXT("Player Stats Loaded [%s]"), *PlayerStatComponent->PrintStats());
+	//UE_LOG(LogTemp, Warning, TEXT("Player Stats Loaded [%s]"), *PlayerStatComponent->PrintStats());
 }
 
 void APepCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -807,18 +806,6 @@ void APepCharacter::Fire()
 	{
 		PepccineMontageComponent->Fire();
 		ItemManagerComponent->FireWeapon(PlayerStatComponent->GetCurrentStats().CombatStats.AttackDamage);
-
-		const float Recoil = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Recoil * -1;
-		const float FireRate = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().FireRate;
-		const float RandDirYaw = FMath::RandRange(-2, 2);
-		const float NewPitch = Recoil / FireRate;
-
-		if (ShotStack < 50)
-		{
-			AddControllerPitchInput(NewPitch); // 위
-			++ShotStack;
-		}
-		AddControllerYawInput(NewPitch * RandDirYaw); // 왼쪽
 	}
 	
 	UpdateWeaponUI();
