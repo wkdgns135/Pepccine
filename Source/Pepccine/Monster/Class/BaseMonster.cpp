@@ -1,5 +1,6 @@
 #include "Monster/Class/BaseMonster.h"
 
+#include "MovieSceneObjectBindingID.h"
 #include "PepccineGameState.h"
 #include "Monster/Component/MonsterStatComponent.h"
 #include "Monster/Component/MonsterAttackComponent.h"
@@ -14,7 +15,8 @@ ABaseMonster::ABaseMonster()
 	AttackComponent = CreateDefaultSubobject<UMonsterAttackComponent>(TEXT("AttackComponent"));
 	HitReactionComponent = CreateDefaultSubobject<UHitReactionComponent>(TEXT("HitReactionComponent"));
 	HealthBarWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
-
+	
+	HealthBarWidgetComp->SetupAttachment(RootComponent);
 	HealthBarWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
 	HealthBarWidgetComp->SetDrawSize(FVector2D(77.0f, 7.0f));
 	HealthBarWidgetComp->SetRelativeLocation(FVector(0, 0, 100.0f));
@@ -38,6 +40,19 @@ void ABaseMonster::BeginPlay()
 	UE_LOG(LogTemp, Warning, TEXT("Monster Spawned!"));
 
 	InitializeHealthBar();
+}
+
+void ABaseMonster::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	// [장훈] 몬스터가 Destroy 될때 방의 몬스터 카운트 감소
+	if (APepccineGameState* PepccineGameState = Cast<APepccineGameState>(GetWorld()->GetGameState()))
+	{
+		if (ABaseRoomController* RoomController = PepccineGameState->GetRoomController())
+		{
+			RoomController->DecreaseMonsterCount();
+		}
+	}
 }
 
 void ABaseMonster::InitializeHealthBar()
@@ -109,14 +124,6 @@ void ABaseMonster::Die()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopMovementImmediately();
-
-	if (APepccineGameState* PepccineGameState = Cast<APepccineGameState>(GetWorld()->GetGameState()))
-	{
-		if (ABaseRoomController* RoomController = PepccineGameState->GetRoomController())
-		{
-			RoomController->DecreaseMonsterCount();
-		}
-	}
-
+	
 	SetLifeSpan(5.0f);
 }

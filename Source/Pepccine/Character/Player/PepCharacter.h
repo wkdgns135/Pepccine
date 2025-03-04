@@ -44,6 +44,7 @@ public:
 	bool bIsMoving = false;
 	bool bIsZooming = false;
 	bool bIsSprinting = false;
+	bool bIsClimbing = false;
 	
 	bool bIsCrouching = false;
 	bool bIsSprintable = true;
