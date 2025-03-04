@@ -12,11 +12,11 @@ class UBoxComponent;
 UENUM()
 enum class EDoorDirection : uint8
 {
-	ENone UMETA(DisplayName = "None"),
+	EUp UMETA(DisplayName = "Up"),
+	EDown UMETA(DisplayName = "Down"),
 	ELeft UMETA(DisplayName = "Left"),
 	ERight UMETA(DisplayName = "Right"),
-	EUp UMETA(DisplayName = "Up"),
-	EDown UMETA(DisplayName = "Down")
+	ENone UMETA(DisplayName = "None"),
 };
 
 UCLASS()
@@ -33,7 +33,7 @@ private:
 	UBoxComponent* TriggerVolume;
 	UPROPERTY(EditAnywhere, Category = "Components")
 	UStaticMeshComponent* SpawnPosition;
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(VisibleInstanceOnly, Category = "Components")
 	EDoorDirection Direction;
 
 	bool bIsLocked;
@@ -66,4 +66,5 @@ public:
 	FORCEINLINE FVector GetSpawnPosition() const { return SpawnPosition->GetComponentLocation(); }
 	FORCEINLINE FRotator GetSpawnRotation() const { return GetActorRotation(); }
 	FORCEINLINE EDoorDirection GetDirection() const { return Direction; }
+	FORCEINLINE void SetDirection(const EDoorDirection DoorDirection) { Direction = DoorDirection; }
 };

@@ -67,6 +67,8 @@ public:
 	
 private:
 	FRoomData* NewRoom(const ERoomType RoomType);
+	FRoomData* NewDefaultRoom(const TArray<TArray<int>>& Grid, const FIntPoint RoomPoint);
+	bool GetCheckRoomGrid(const TArray<TArray<int>>& Grid, const FIntPoint Point) const;
 	void PrintFloor() const;
 	
 public:
