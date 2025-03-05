@@ -624,7 +624,8 @@ void APepCharacter::Interactive()
 	{
 		UE_LOG(LogTemp, Display, TEXT("Interact CurrentDropItem : %s"), *CurrentDropItem->GetDropItemData()->GetDisplayName());
 		
-		CurrentDropItem->PickUpItem(ItemManagerComponent);
+		if (!CurrentDropItem->PickUpItem(ItemManagerComponent)) return;
+		
 		if (UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 패시브 아이템
