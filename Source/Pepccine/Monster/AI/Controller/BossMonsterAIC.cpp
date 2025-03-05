@@ -78,3 +78,12 @@ void ABossMonsterAIC::SetIsInAttackRange(bool InRange)
         BlackboardComponent->SetValueAsBool("IsInAttackRange", InRange);
     }
 }
+
+void ABossMonsterAIC::SetCanBerserk(bool bCanBerserk)
+{
+    if (BlackboardComponent)
+    {
+        BlackboardComponent->SetValueAsBool("bCanBerserk", bCanBerserk);
+        UE_LOG(LogTemp, Warning, TEXT("bCanBerserk = True!"));
+    }
+}

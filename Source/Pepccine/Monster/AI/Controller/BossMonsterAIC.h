@@ -24,7 +24,7 @@ public:
 	void StopAI();
 	void SetTarget(AActor* Target);
 	void SetIsInAttackRange(bool InRange);
-	
+	void SetCanBerserk(bool bCanBerserk);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")

@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "MonsterStatComponent.generated.h"
 
+class ABaseMonster;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PEPCCINE_API UMonsterStatComponent : public UActorComponent
@@ -35,4 +36,7 @@ protected:
     float Defense = 5.0f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
     float Speed = 300.0f;
+
+private:
+    void CheckHealth(ABaseMonster* OwnerMonster);
 };
