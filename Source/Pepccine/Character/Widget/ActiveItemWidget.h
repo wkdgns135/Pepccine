@@ -19,8 +19,12 @@ public:
 	UTextBlock* ActiveButton;
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* ActiveProgressBar;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* CoinsText;
 
 	UFUNCTION(BlueprintCallable, Category = "UI|Active")
 	void UpdateActiveItemUI(UTexture2D* ActiveImage, const FString& ActiveName, const FString& Button, const float Cooldown, const float MaxCooldown);
+	UFUNCTION(BlueprintCallable, Category = "UI|Active")
+	void UpdateCoinUI(int Coins);
 };
 

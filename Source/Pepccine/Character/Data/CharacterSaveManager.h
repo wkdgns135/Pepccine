@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "PlayerStats.h"
-#include "StatModifier.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "CharacterSaveManager.generated.h"
 
