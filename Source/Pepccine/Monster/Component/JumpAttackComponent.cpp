@@ -1,6 +1,13 @@
 #include "Monster/Component/JumpAttackComponent.h"
+
+#include "Character/Components/BattleComponent.h"
+#include "Character/Player/PepCharacter.h"
 #include "GameFramework/Character.h"
-#include "Kismet/GameplayStatics.h" // UGameplayStatics ÇÊ¿ä
+
+UJumpAttackComponent::UJumpAttackComponent()
+{
+    PrimaryComponentTick.bCanEverTick = false;
+}
 
 void UJumpAttackComponent::ActivateSkill()
 {
@@ -12,7 +19,10 @@ void UJumpAttackComponent::ActivateSkill()
 
     StartCooldown();
     PlaySkillMontage();
+}
 
+void UJumpAttackComponent::LaunchMonster()
+{
     ACharacter* OwnerMonster = Cast<ACharacter>(GetOwner());
     if (OwnerMonster)
     {
@@ -25,27 +35,77 @@ void UJumpAttackComponent::ActivateSkill()
             APawn* PlayerPawn = PlayerController->GetPawn();
             if (PlayerPawn)
             {
-                // ÇÃ·¹ÀÌ¾î¿Í ¸ó½ºÅÍÀÇ ÇöÀç À§Ä¡¸¦ °è»ê
+                // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½
                 FVector PlayerLocation = PlayerPawn->GetActorLocation();
                 FVector MonsterLocation = OwnerMonster->GetActorLocation();
 
-                // ¸ñÇ¥ À§Ä¡±îÁöÀÇ Â÷ÀÌ °è»ê
+                // ï¿½ï¿½Ç¥ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
                 FVector DirectionToPlayer = (PlayerLocation - MonsterLocation).GetSafeNormal();
 
-                // Á¡ÇÁÇÒ ¹æÇâ°ú ¼¼±â °è»ê
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
                 FVector LaunchDirection = DirectionToPlayer * JumpPower;
 
-                // Á¡ÇÁ ³ôÀÌµµ ¼³Á¤ (ZÃà)
+                // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½ (Zï¿½ï¿½)
                 LaunchDirection.Z = JumpHeight;
 
-                // Á¡ÇÁ Àû¿ë
+                // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                 OwnerMonster->LaunchCharacter(LaunchDirection, true, true);
 
                 UE_LOG(LogTemp, Warning, TEXT("Jump launched towards player at: %s"), *PlayerLocation.ToString());
             }
-            
         }
-        
     }
+}
+
+void UJumpAttackComponent::SkillTrace()
+{
+    const AActor* Owner = GetOwner();
     
+    if (!Owner)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("JumpAttackComponent: No Owner found!"));
+        return;
+    }
+
+    FVector Center = Owner->GetActorLocation();
+    TArray<FHitResult> HitResults;
+    
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(Owner);
+
+    FCollisionObjectQueryParams ObjectQueryParams;
+    ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+
+    bool bHit = GetWorld()->SweepMultiByObjectType(
+        HitResults,
+        Center,
+        Center,
+        FQuat::Identity,
+        ObjectQueryParams, 
+        FCollisionShape::MakeSphere(AttackRadius),
+        QueryParams
+    );
+
+    DrawDebugSphere(GetWorld(), Center, AttackRadius, 12, FColor::Green, false, 2.0f);
+    
+    if (bHit)
+    {
+        for (const FHitResult& Hit : HitResults)
+        {
+            AActor* HitActor = Hit.GetActor();
+            
+            if (APepCharacter* Player = Cast<APepCharacter>(HitActor))
+            {
+                UE_LOG(LogTemp, Log, TEXT("Hit Actor: %s"), *HitActor->GetName());
+
+                DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10.0f, FColor::Red, false, 2.0f);
+                
+                if (UBattleComponent* TargetBattleComponent = Player->FindComponentByClass<UBattleComponent>())
+                {
+                    TargetBattleComponent->SendHitResult(Player, Damage, Hit, EMonsterSkill::JumpAttack);
+                    return;
+                }
+            }
+        }
+    }
 }

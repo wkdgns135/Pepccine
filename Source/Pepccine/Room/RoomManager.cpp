@@ -71,6 +71,7 @@ void URoomManager::NextFloor()
 
 void URoomManager::ChangeRoom(FRoomData* RoomData)
 {
+	CurrentRoom->bIsCleared = true;
 	const TSoftObjectPtr<UWorld> Level = RoomData->RoomLevel;
 	const FString LevelPath = Level.ToSoftObjectPath().GetLongPackageName();
 	UE_LOG(LogTemp, Log, TEXT("Loading Level by Path: %s"), *LevelPath);

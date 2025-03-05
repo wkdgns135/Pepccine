@@ -79,7 +79,6 @@ void UMonsterAttackComponent::ExecuteTrace(ABaseMonster* OwnerMonster, float Ran
 
     if (bHit)
     {
-        // �浹 ��ġ�� ��(����� ��)
         FVector HitLocation = HitResult.Location;
         DrawDebugPoint(GetWorld(), HitLocation, 10.0f, FColor::Red, false, 2.0f);
 

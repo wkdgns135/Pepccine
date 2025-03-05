@@ -10,8 +10,11 @@ class PEPCCINE_API UBaseSkillComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	UBaseSkillComponent();
     virtual void ActivateSkill() PURE_VIRTUAL(UBaseSkillComponent::ActivateSkill, );
+ 
+    virtual void SkillTrace() {};
+
+    UBaseSkillComponent();
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
@@ -22,8 +25,8 @@ protected:
     UAnimMontage* SkillMontage;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     float Damage;
+    
 
-    // �ִϸ��̼� ��Ÿ�� ��� �Լ�
     void PlaySkillMontage();
     bool IsCooldownOver() const;
     void StartCooldown();
