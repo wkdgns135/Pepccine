@@ -72,6 +72,13 @@ private:
 	void PrintFloor() const;
 	
 public:
+	UFUNCTION(BlueprintCallable, Category = "RoomManager")
+	FORCEINLINE void AddItemData(UPepccineItemDataBase* ItemData, const FVector& Location) { CurrentRoom->ItemData.Add(ItemData, Location);}
+	UFUNCTION(BlueprintPure, Category = "RoomManager")
+	FORCEINLINE TMap<UPepccineItemDataBase*, FVector> GetItemData() const {return CurrentRoom->ItemData;}
+	UFUNCTION(BlueprintPure, Category = "RoomManager")
+	FORCEINLINE bool GetIsRoomClear() const {return CurrentRoom ? CurrentRoom->bIsCleared : false;}
+	
 	FORCEINLINE TArray<TArray<FRoomData*>>& GetMap(){return Map;}
 	FORCEINLINE FIntPoint GetCurrentRoomPoint() const {return CurrentRoom ? CurrentRoom->RoomPoint : FIntPoint();}
 	FORCEINLINE int GetCurrentFloorIndex() const {return CurrentFloorIndex + 1;}
@@ -79,4 +86,5 @@ public:
 	FORCEINLINE FRoomData* GetPointRoomData(const FIntPoint& Point){return GetCheckRoom(Point) ? Map[Point.Y][Point.X] : NewRoom(ERoomType::ENone);}
 	FORCEINLINE FRoomData* GetPreviousRoomData() const {return PreviousRoom;}
 	FORCEINLINE UFloorRoomData* GetCurrentFloorRoomData() const {return FloorRoomData[CurrentFloorIndex];}
+	
 };
