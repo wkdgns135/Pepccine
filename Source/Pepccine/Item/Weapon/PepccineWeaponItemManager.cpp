@@ -4,7 +4,7 @@
 #include "GameFramework/Character.h"
 #include "Item/PepccineItemDataAssetBase.h"
 #include "Item/Manager/PepccineItemManagerComponent.h"
-#include "Item/PepccineItemSpawnerSubSystem.h"
+#include "Item/ItemSpawn/PepccineItemSpawnerSubSystem.h"
 
 void UPepccineWeaponItemManager::SetWeaponItemComponent(ACharacter* OwnerCharacter)
 {

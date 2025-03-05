@@ -2,10 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "PepccineItemQualityWeightData.h"
+#include "Item/PepccineItemDataAssetBase.h"
 #include "Subsystems/WorldSubsystem.h"
 
 #include "PepccineItemSpawnerSubSystem.generated.h"
 
+class UPepccineWeaponItemData;
 class UPepccineItemSpawnWeightData;
 class UPepccineItemDataAssetBase;
 class UPepccineItemDataBase;
@@ -35,16 +37,19 @@ public:
 	void InitSpawner(UPepccineItemDataAssetBase* InItemDataAsset, const TSubclassOf<APepccineDropItem>& InSpawnedActor);
 	// 아이템 스폰
 	UFUNCTION(BlueprintCallable, Category = "Item|Spawner")
-	void SpawnItem(const FVector& SpawnLocation, const UPepccineItemDataBase* DropItemData);
+	UPepccineItemDataBase* SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData, bool bIsShopItem = false);
 	// 확률로 아이템 스폰
 	UFUNCTION(BlueprintPure, Category = "Item|Spawner")
 	UPepccineItemDataBase* GetRandomItemFromWeightDataAsset(const UPepccineItemSpawnWeightData* SpawnWeightData) const;
 
 	// getter
+	// 기본 무기 데이터 가져오기
+	UFUNCTION(BlueprintPure, Category = "Item|Spawner")
+	UPepccineWeaponItemData* GetDefaultWeaponItemData() const;
+	
 	// 아이템 데이터 에셋 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item|Spawner")
 	FORCEINLINE UPepccineItemDataAssetBase* GetItemDataAsset() const { return ItemDataAsset; }
-
 
 protected:
 	// 전체 아이템 데이터 에셋
@@ -52,5 +57,4 @@ protected:
 	UPepccineItemDataAssetBase* ItemDataAsset;
 	// 스폰 엑터
 	TSubclassOf<APepccineDropItem> SpawnedActor;
-	// 이전에 스폰된 아이템 아이디 목록
 };

@@ -2,7 +2,7 @@
 
 #include "Item/PepccineItemDataAssetBase.h"
 #include "Item/PepccineItemSaveData.h"
-#include "Item/PepccineItemSpawnerSubSystem.h"
+#include "Item/ItemSpawn/PepccineItemSpawnerSubSystem.h"
 #include "Item/Active/PepccineActiveItemData.h"
 #include "GameFramework/Character.h"
 #include "Item/Active/PepccineActiveItemDataAsset.h"
@@ -222,12 +222,24 @@ void UPepccineItemManagerComponent::SaveItemSaveData()
 	}
 }
 
-bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemData, const bool bIsPlayPickUpSound)
+bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemData, const bool bIsPlayPickUpSound,
+                                               const bool bIsShopItem)
 {
 	if (!DropItemData)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("아이템 데이터가 없습니다."));
 		return false;
+	}
+
+	// 상점 아이템일 경우
+	if (bIsShopItem)
+	{
+		const int32 Price = (DropItemData->GetItemRarity() + 1) * 4;
+		// 구매 확인 후 구매 못하면 false 리턴
+		if (!UseCoin(Price))
+		{
+			return false;
+		}
 	}
 
 	// 무기 아이템
@@ -407,15 +419,16 @@ void UPepccineItemManagerComponent::UseActiveItem() const
 	ActiveItemManager->UseActiveItem();
 }
 
-bool UPepccineItemManagerComponent::UseCoin(const int32 Count)
+bool UPepccineItemManagerComponent::UseCoin(const int32 Price)
 {
-	if (Count > CoinCount)
+	if (Price > CoinCount)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("코인이 부족합니다."));
+		UE_LOG(LogTemp, Warning, TEXT("코인이 부족 합니다."));
+		UE_LOG(LogTemp, Warning, TEXT("필요 : %d / 보유 : %d"), Price, CoinCount);
 		return false;
 	}
 
-	CoinCount -= Count;
+	CoinCount -= Price;
 
 	return true;
 }
@@ -458,7 +471,6 @@ FVector UPepccineItemManagerComponent::GetShootDirection() const
 	{
 		// 충돌한 위치
 		HitLocation = HitResult.Location;
-		UE_LOG(LogTemp, Warning, TEXT("Camera Ray Hit! : %s"), *HitResult.GetActor()->GetName());
 	}
 	else
 	{
@@ -468,51 +480,3 @@ FVector UPepccineItemManagerComponent::GetShootDirection() const
 
 	return (HitLocation - MuzzleLocation).GetSafeNormal();
 }
-
-
-// FPepccineItemSaveData UPepccineItemManagerComponent::GetSaveItemData() const
-// {
-// 	int32 MainWeaponItemId = -1;
-// 	FPepccineSaveWeaponAmmo MainWeaponAmmo;
-// 	if (const UPepccineWeaponItemData* MainWeaponItemData = WeaponItemManager->GetWeaponItemData(
-// 		EPepccineWeaponItemType::EPWIT_Main))
-// 	{
-// 		MainWeaponItemId = MainWeaponItemData->GetItemId();
-// 		MainWeaponAmmo.MagazinesAmmo = MainWeaponItemData->GetWeaponItemStats().MagazineAmmo;
-// 		MainWeaponAmmo.SpareAmmo = MainWeaponItemData->GetWeaponItemStats().SpareAmmo;
-// 	}
-// 	int32 SubWeaponItemId = -1;
-// 	FPepccineSaveWeaponAmmo SubWeaponAmmo;
-// 	if (const UPepccineWeaponItemData* SubWeaponItemData = WeaponItemManager->GetWeaponItemData(
-// 		EPepccineWeaponItemType::EPWIT_Sub))
-// 	{
-// 		SubWeaponItemId = SubWeaponItemData->GetItemId();
-// 		SubWeaponAmmo.MagazinesAmmo = SubWeaponItemData->GetWeaponItemStats().MagazineAmmo;
-// 		SubWeaponAmmo.SpareAmmo = SubWeaponItemData->GetWeaponItemStats().SpareAmmo;
-// 	}
-// 	const EPepccineWeaponItemType EquippedWeaponItemType = GetEquippedWeaponItemData()
-// 		                                                       ? GetEquippedWeaponItemData()->GetWeaponItemType()
-// 		                                                       : EPepccineWeaponItemType::EPWIT_Sub;
-// 	TArray<int32> PassiveItemIds;
-// 	for (auto PassiveItem : PassiveItemManager->GetPassiveItemDatas())
-// 	{
-// 		PassiveItemIds.Add(PassiveItem.Key);
-// 	}
-// 	int32 ActiveItemId = -1;
-// 	if (const UPepccineActiveItemData* ActiveItemData = ActiveItemManager->GetActiveItemData())
-// 	{
-// 		ActiveItemId = ActiveItemData->GetItemId();
-// 	}
-//
-// 	return FPepccineItemSaveData(MainWeaponItemId,
-// 	                             MainWeaponAmmo,
-// 	                             SubWeaponItemId,
-// 	                             SubWeaponAmmo,
-// 	                             EquippedWeaponItemType,
-// 	                             PassiveItemIds, ActiveItemId, CoinCount);
-// }
-
-// void UPepccineItemManagerComponent::LoadItemData(const FPepccineItemSaveData& SaveData)
-// {
-
-// }

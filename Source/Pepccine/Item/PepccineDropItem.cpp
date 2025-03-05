@@ -54,11 +54,13 @@ void APepccineDropItem::Tick(float DeltaTime)
 	AddActorLocalRotation(FRotator(0, DeltaTime * 45.0f, 0));
 }
 
-void APepccineDropItem::InitializeDropItem(const UPepccineItemDataBase* InDropItemData)
+void APepccineDropItem::InitializeDropItem(const UPepccineItemDataBase* InDropItemData, const bool bInIsShopItem)
 {
 	// 데이터 복사 저장
 	DropItemData = DuplicateObject<UPepccineItemDataBase>(InDropItemData, this);
 
+	bIsShopItem = bInIsShopItem;
+	
 	if (DropItemData)
 	{
 		// 스폰 메시 설정
@@ -139,7 +141,7 @@ void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 		}
 
 		// 아이템 획득
-		if (!ItemManagerComponent->PickUpItem(DropItemData))
+		if (!ItemManagerComponent->PickUpItem(DropItemData, true, bIsShopItem))
 		{
 			return;
 		}
