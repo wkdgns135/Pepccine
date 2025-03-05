@@ -17,7 +17,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Item")
 	FORCEINLINE TArray<UPepccineActiveItemData*> GetActiveItemDatas() { return ActiveItemDatas; };
 	UFUNCTION(BlueprintPure, Category = "Item")
-	FORCEINLINE UPepccineActiveItemData* GetActiveItem(const int32 Id) { return ActiveItemDatas[Id]; };
+	FORCEINLINE UPepccineActiveItemData* GetActiveItemById(const int32 Id) { return ActiveItemDatas[Id]; };
 	
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
