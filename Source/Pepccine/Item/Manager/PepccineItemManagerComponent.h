@@ -194,6 +194,6 @@ private:
 	UPepccineActiveItemManager* ActiveItemManager;
 
 	// 코인
-	UPROPERTY(VisibleInstanceOnly, Category = "Item|Resource", meta = (DisplayName = "코인 수"))
+	UPROPERTY(EditAnywhere, Category = "Item|Resource", meta = (DisplayName = "코인 수"))
 	int32 CoinCount = 0;
 };
