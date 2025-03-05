@@ -605,7 +605,7 @@ void APepCharacter::Reload()
 	ItemManagerComponent->ReloadWeapon();
 
 	const float WeaponReloadSpeed = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().ReloadSpeed;
-	PepccineMontageComponent->Reloading(WeaponReloadSpeed);
+	PepccineMontageComponent->Reloading(WeaponReloadSpeed / 1.5);
 
 	UpdateWeaponUI();
 }
