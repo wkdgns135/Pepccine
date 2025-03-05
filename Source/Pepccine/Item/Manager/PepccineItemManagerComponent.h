@@ -122,12 +122,14 @@ public:
 	// 스탯 이름으로 무기 스탯 합연산 총합 가져오기
 	FORCEINLINE float GetTotalSumByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
 	{
+		if (!GetEquippedWeaponItemData()) return 0;
 		return TotalWeaponStatSum.FindOrAdd({GetEquippedWeaponItemData()->GetWeaponItemType(), WeaponItemStatName});
 	}
 
 	// 스탯 이름으로 무기 스탯 곱연산 총합 가져오기
 	FORCEINLINE float GetTotalProductByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
 	{
+		if (!GetEquippedWeaponItemData()) return 0;
 		return TotalWeaponStatProduct.FindOrAdd({GetEquippedWeaponItemData()->GetWeaponItemType(), WeaponItemStatName},
 		                                        1.0f);
 	}

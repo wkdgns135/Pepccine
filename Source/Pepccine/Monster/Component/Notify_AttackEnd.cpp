@@ -10,13 +10,15 @@ void UNotify_AttackEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
         AActor* Owner = MeshComp->GetOwner();
         if (Owner)
         {
-            // 1. 일반 공격인 경우 MonsterAttackComponent 처리
             UMonsterAttackComponent* AttackComp = Owner->FindComponentByClass<UMonsterAttackComponent>();
             if (AttackComp)
             {
                 UE_LOG(LogTemp, Log, TEXT("Monster Normal Attack!"));
                 AttackComp->AttackTrace();
             }
+
+            else
+                UE_LOG(LogTemp, Log, TEXT("No Attack Comp!"));
         }
     }
 }

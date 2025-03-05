@@ -10,6 +10,9 @@ class PEPCCINE_API USpawnSkillComponent : public UBaseSkillComponent
 	GENERATED_BODY()
 	
 public:
+	UFUNCTION(BlueprintCallable, Category = "Skill|Spawn")
+	void SetNumberOfMonsters(int number) { NumberOfMonsters = number; }
+
 	virtual void ActivateSkill() override;
 
 protected:
