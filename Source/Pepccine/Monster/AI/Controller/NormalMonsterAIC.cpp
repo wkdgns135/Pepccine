@@ -31,9 +31,6 @@ void ANormalMonsterAIC::InitializeBehaviorTree(APawn* InPawn)
         if (UseBlackboard(BehaviorTree->BlackboardAsset, BlackboardComponent))
         {
             RunBehaviorTree(BehaviorTree);
-
-            // 1. 맵이 바로 전환될때 타이머 람다 함수 내에서 예외 발생 (GetWorld()가 nullptr)
-            // 2. 람다 함수 자체가 레벨이 전환될때 캡쳐로 넘긴 this 포인터의 유효성을 검사하지 못함.
             GetWorldTimerManager().SetTimerForNextTick(this, &ANormalMonsterAIC::SetTarget);
             
         }
