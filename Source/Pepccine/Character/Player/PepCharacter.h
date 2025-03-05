@@ -62,6 +62,10 @@ public:
 	bool bIsLoaded = false;
 	// 내부 & 애니매이션 사용
 
+	// 마우스 민감도
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float MouseSensitivity = 0.5f;
+
 	// UE delegate
 	UFUNCTION()
 	void OnHealthChanged(const float NewHealth, const float MaxHealth);
@@ -71,6 +75,7 @@ public:
 	void OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType);
 	
 	void TriggerCameraShake(float Strength, float ShakeTime);
+	void PauseGame(bool bIsPaused);
 	
 	// inline
 	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }

@@ -23,6 +23,7 @@
 #include "Item/PepccineDropItem.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
 #include "Item/Resource/PepccineResourceItemData.h"
+#include "Kismet/GameplayStatics.h"
 #include "Monster/Class/ZombieGirl.h"
 
 APepCharacter::APepCharacter()
@@ -232,6 +233,7 @@ void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const 
 	}
 
 	PlayerStatComponent->DecreaseHealth(DamageAmount);
+	if (PlayerStatComponent->GetCurrentHealth() <= 0) return;
 
 	FVector HitDirection = HitResult.ImpactNormal;
 
@@ -244,7 +246,8 @@ void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const 
 		Stumble(DamageCauser);
 		break;
 	case EMonsterSkill::JumpAttack:
-		// 레그돌
+		Stumble(DamageCauser);
+		// 레그돌로 변경
 		break;
 	case EMonsterSkill::GunShot:
 		// 총맞는 모션 필요
@@ -349,11 +352,10 @@ void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
 #pragma region
 void APepCharacter::Dead()
 {
-	if (!bIsPlayerAlive)
-	{
-		return;
-	}
+	if (!bIsPlayerAlive) return;
 	bIsPlayerAlive = false;
+
+	PepccineMontageComponent->Death();
 
 	if (APepccinePlayerController* PepccinePlayerController = Cast<APepccinePlayerController>(PlayerController))
 	{
@@ -378,8 +380,6 @@ void APepCharacter::Dead()
 		GetCharacterMovement()->DisableMovement();
 		GetCharacterMovement()->SetComponentTickEnabled(false);
 	}
-
-	PepccineMontageComponent->Death();
 }
 
 void APepCharacter::Move(const FInputActionValue& Value)
@@ -474,8 +474,8 @@ void APepCharacter::Look(const FInputActionValue& value)
 
 	ShotStack = 0;
 
-	AddControllerYawInput(LookInput.X);
-	AddControllerPitchInput(LookInput.Y);
+	AddControllerYawInput(LookInput.X * MouseSensitivity);
+	AddControllerPitchInput(LookInput.Y * MouseSensitivity);
 }
 
 void APepCharacter::StartSprint(const FInputActionValue& value)
@@ -934,7 +934,20 @@ void APepCharacter::ShowMenu()
 	{
 		return;
 	}
+	
+	PauseGame(true);
 	PlayerController->ToggleExitMenu();
+}
+
+void APepCharacter::PauseGame(bool bIsPaused)
+{
+	if (bIsPaused)
+	{
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		return;
+	}
+
+	UGameplayStatics::SetGamePaused(GetWorld(), false);
 }
 #pragma endregion
 
