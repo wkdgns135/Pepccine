@@ -23,6 +23,7 @@ public:
 
 	void SetActiveItem(UTexture2D* ActiveImage, const FString& ActiveName, const FString& ActiveButton, const int32 Cooldown, const int32 MaxCooldown);
 	void SetWeaponItem(UTexture2D* MainWeaponImage, UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 SpareAmmo, bool bIsMainWeapon);
+	void SetCoins(int Coins);
 
 protected:
 	virtual void BeginPlay() override;

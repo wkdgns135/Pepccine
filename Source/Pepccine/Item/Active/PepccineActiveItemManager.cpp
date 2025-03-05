@@ -38,6 +38,7 @@ void UPepccineActiveItemManager::UseActiveItem()
 	// 이미 해당 버프를 받고 있다면 시간만 갱신
 	if (GetAppliedPotionItemDataById(ActiveItemData->GetItemId()))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("버프 갱신!"));
 		ActiveItemRemainingCooldown = ActiveItemData->GetCooldown();
 		bIsActiveItemCooldown = true;
 		return;
@@ -48,22 +49,22 @@ void UPepccineActiveItemManager::UseActiveItem()
 	{
 		ActivatePotionItem(PotionItemData);
 
+		TimerDelegate.BindUFunction(this, FName("DeactivatePotionItem"), PotionItemData);
 		// 지속시간 이후 버프 해제
-		FTimerHandle TimerHandle;
-		FTimerDelegate TimerDelegate;
-		TimerDelegate.BindUFunction(this, FName("DeactivatePotionItem"), PotionItemData, ItemManager);
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, PotionItemData->GetDuration(), false);
 	}
 }
 
 void UPepccineActiveItemManager::ActivatePotionItem(const UPepccinePotionItemData* PotionItemData) const
 {
+	UE_LOG(LogTemp, Warning, TEXT("버프 적용!"));
 	ItemManager->IncreaseStatsOperations(PotionItemData->GetWeaponStatModifiers());
 	ItemManager->IncreaseStatsOperations(PotionItemData->GetCharacterStatModifiers());
 }
 
 void UPepccineActiveItemManager::DeactivatePotionItem(const UPepccinePotionItemData* PotionItemData) const
 {
+	UE_LOG(LogTemp, Warning, TEXT("버프 해제!"));
 	ItemManager->DecreaseStatsOperations(PotionItemData->GetWeaponStatModifiers());
 	ItemManager->DecreaseStatsOperations(PotionItemData->GetCharacterStatModifiers());
 }

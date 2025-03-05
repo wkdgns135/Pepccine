@@ -133,7 +133,7 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 
 	UE_LOG(LogTemp, Warning, TEXT("아이템 타입 : %s"), *ItemTypeString);
 	UE_LOG(LogTemp, Warning, TEXT("ItemName: %s"), *ItemData->GetDisplayName());
-
+	
 	return ItemData;
 }
 

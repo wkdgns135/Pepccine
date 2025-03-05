@@ -84,6 +84,9 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage, const FVector
 			World->GetTimerManager().ClearTimer(RecoilResetTimer);
 			World->GetTimerManager().SetTimer(RecoilResetTimer, this,
 											  &UPepccineWeaponItemComponent::ResetShotsFired, 0.5f,false);
+
+			// 탄 소모
+			EquippedWeaponData->GetWeaponItemStatsPointer()->MagazineAmmo--;
 			
 			for (int32 i = 0; i < ProjectileCount; i++)
 			{
@@ -93,6 +96,7 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage, const FVector
 				APepccinePoolable* Poolable;
 				PoolSubSystem->SpawnFromPool(ProjectileClass, GetSocketLocation(SoketName),
 				                             GetSocketRotation(SoketName), Poolable);
+				
 				if (Poolable)
 				{
 					if (APepccineProjectile* SpawnedProjectile = Cast<APepccineProjectile>(Poolable))
@@ -120,8 +124,6 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage, const FVector
 						                                  &UPepccineWeaponItemComponent::CanFire,
 						                                  1.0f / EquippedWeaponData->GetWeaponItemStats().FireRate,
 						                                  false);
-
-						EquippedWeaponData->GetWeaponItemStatsPointer()->MagazineAmmo--;
 					}
 				}
 			}

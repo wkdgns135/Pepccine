@@ -6,7 +6,7 @@ void UActiveItemWidget::UpdateActiveItemUI(UTexture2D* ActiveImage, const FStrin
 {
     ActiveText->SetText(FText::FromString(ActiveName));
     ActiveButton->SetText(FText::FromString(Button));
-
+    
     if (ActiveImage)
     {
         FSlateBrush Brush;
@@ -19,4 +19,10 @@ void UActiveItemWidget::UpdateActiveItemUI(UTexture2D* ActiveImage, const FStrin
         ActiveProgressBar->SetWidgetStyle(Style);
         ActiveProgressBar->SetPercent(Cooldown / MaxCooldown);
     }
+}
+
+void UActiveItemWidget::UpdateCoinUI(const int Coins)
+{
+    CoinsText->SetVisibility(ESlateVisibility::Visible);
+    CoinsText->SetText(FText::Format(FText::FromString(TEXT("Coins: {0}")), FText::AsNumber(Coins)));
 }

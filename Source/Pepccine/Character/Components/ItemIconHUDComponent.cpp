@@ -1,5 +1,7 @@
 #include "ItemIconHUDComponent.h"
 
+#include "Components/TextBlock.h"
+
 UItemIconHUDComponent::UItemIconHUDComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -12,7 +14,12 @@ void UItemIconHUDComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (ActiveItemWidget) ActiveItemWidget->AddToViewport();
+	if (ActiveItemWidget)
+	{
+		ActiveItemWidget->AddToViewport();
+		ActiveItemWidget->CoinsText->SetVisibility(ESlateVisibility::Hidden);
+	}
+	
 	if (WeaponWidget) WeaponWidget->AddToViewport();
 }
 
@@ -26,6 +33,12 @@ void UItemIconHUDComponent::SetActiveItem(UTexture2D* ActiveImage, const FString
 {
 	if (!ActiveItemWidget) return;
 	ActiveItemWidget->UpdateActiveItemUI(ActiveImage, ActiveName, ActiveButton, Cooldown, MaxCooldown);
+}
+
+void UItemIconHUDComponent::SetCoins(int Coins)
+{
+	if (!ActiveItemWidget) return;
+	ActiveItemWidget->UpdateCoinUI(Coins);
 }
 
 void UItemIconHUDComponent::TickComponent(float DeltaTime, ELevelTick TickType,
