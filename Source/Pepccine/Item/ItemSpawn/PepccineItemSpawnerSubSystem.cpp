@@ -74,10 +74,7 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 	if (ItemTypeRandomValue <= ItemTypeWeights[0])
 	{
 		// 무기 데이터 목록
-		for (UPepccineWeaponItemData* WeaponItemData : ItemDataAsset->GetWeaponItemDataAsset()->GetWeaponItemDatas())
-		{
-			ItemDatas.Add(WeaponItemData);
-		}
+		ItemDatas.Append(ItemDataAsset->GetWeaponItemDataAsset()->GetWeaponItemDatas());
 
 		// 랜덤 등급으로 랜덤 아이템 가져오기
 		ItemData = GetRandomItemDataByRandomRarity(ItemDatas, SpawnWeightData->GetItemRarityWeightData());
@@ -87,10 +84,7 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 	else if (ItemTypeRandomValue <= ItemTypeWeights[1])
 	{
 		// 패시브 데이터 목록
-		for (UPepccinePassiveItemData* PassiveItemData : ItemDataAsset->GetPassiveItemDataAsset()->GetPassiveItemDatas())
-		{
-			ItemDatas.Add(PassiveItemData);
-		}
+		ItemDatas.Append(ItemDataAsset->GetPassiveItemDataAsset()->GetPassiveItemDatas());
 
 		// 랜덤 등급으로 랜덤 아이템 가져오기
 		ItemData = GetRandomItemDataByRandomRarity(ItemDatas, SpawnWeightData->GetItemRarityWeightData());
@@ -100,10 +94,7 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 	else if (ItemTypeRandomValue <= ItemTypeWeights[2])
 	{
 		// 액티브 데이터 목록
-		for (UPepccineActiveItemData* ActiveItemData : ItemDataAsset->GetActiveItemDataAsset()->GetActiveItemDatas())
-		{
-			ItemDatas.Add(ActiveItemData);
-		}
+		ItemDatas.Append(ItemDataAsset->GetActiveItemDataAsset()->GetActiveItemDatas());
 
 		// 랜덤 등급으로 랜덤 아이템 가져오기
 		ItemData = GetRandomItemDataByRandomRarity(ItemDatas, SpawnWeightData->GetItemRarityWeightData());
