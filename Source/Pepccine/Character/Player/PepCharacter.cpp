@@ -243,11 +243,10 @@ void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const 
 		HitReactionComponent->HitReaction("Spine", HitDirection);
 		break;
 	case EMonsterSkill::Charge:
-		Stumble(DamageCauser);
+		HitReactionComponent->EnterRagdoll(3);
 		break;
 	case EMonsterSkill::JumpAttack:
 		Stumble(DamageCauser);
-		// 레그돌로 변경
 		break;
 	case EMonsterSkill::GunShot:
 		// 총맞는 모션 필요
@@ -591,8 +590,6 @@ void APepCharacter::Reload()
 	{
 		return;
 	}
-
-	//HitReactionComponent->EnterRagdoll(5);
 
 	if (ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineSize
 		== ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineAmmo)
