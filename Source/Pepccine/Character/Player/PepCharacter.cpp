@@ -517,6 +517,13 @@ void APepCharacter::Roll()
 		return;
 	}
 
+	if (bIsFirstPersonView)
+	{
+		bIsZooming = false;
+		CrosshairComponent->HideCrosshair();
+		ToggleCameraView();
+	}
+
 	bIsRolling = true;
 	RollDirection = GetRollDirection();
 
