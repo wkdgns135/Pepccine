@@ -11,6 +11,7 @@ UChargeAttackComponent::UChargeAttackComponent()
     PrimaryComponentTick.bCanEverTick = true;  // Tick 활성화
     bIsCharging = false;
     ChargeStartTime = 0.0f;
+    OriginalSpeed = 0.0f;
 }
 
 void UChargeAttackComponent::BeginPlay()
@@ -36,6 +37,7 @@ void UChargeAttackComponent::StartCharge()
     if (OwnerMonster)
     {
         // 돌진 시작 시 속도 설정
+        OriginalSpeed = OwnerMonster->GetCharacterMovement()->MaxWalkSpeed;  // 기존 속도 저장
         OwnerMonster->GetCharacterMovement()->MaxWalkSpeed = ChargeSpeed;
 
         bIsCharging = true;
@@ -52,7 +54,7 @@ void UChargeAttackComponent::StopCharge()
     if (OwnerCharacter)
     {
         OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
-        OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = 400.0f;
+        OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = OriginalSpeed;
     }
 
     // 애니메이션 끝내기 (차지 종료 후 종료 애니메이션 재생)

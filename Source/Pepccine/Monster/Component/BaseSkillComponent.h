@@ -4,14 +4,6 @@
 #include "Components/ActorComponent.h"
 #include "BaseSkillComponent.generated.h"
 
-UENUM(BlueprintType)
-enum class ESkillType : uint8
-{
-    None            UMETA(DisplayName = "None"),
-    Passive         UMETA(DisplayName = "Passive"),
-    Active    UMETA(DisplayName = "Active"),
-};
-
 UCLASS(Abstract)
 class PEPCCINE_API UBaseSkillComponent : public UActorComponent
 {
@@ -25,8 +17,6 @@ public:
     UBaseSkillComponent();
 
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Skill")
-    ESkillType SkillType;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     FString SkillName;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
