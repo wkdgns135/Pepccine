@@ -27,18 +27,20 @@ class PEPCCINE_API UPepccineItemManagerComponent : public UActorComponent
 public:
 	UPepccineItemManagerComponent();
 
+	virtual void InitializeComponent() override;
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	
+
 	// 데이터 로드
 	bool LoadItemSaveData();
 	// 데이터 세이브
 	void SaveItemSaveData() const;
-	
+
 	// 아이템 획득
-	bool PickUpItem(UPepccineItemDataBase* DropItemData, bool bIsPlayPickUpSound = true, bool bIsShopItem = false, int32 Price = 0);
+	bool PickUpItem(const UPepccineItemDataBase* DropItemData, bool bIsPlayPickUpSound = true, bool bIsShopItem = false,
+	                int32 Price = 0, float MagazineAmmo = -1, float SpareAmmo = -1);
 	// 무기 교체
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
 	void SwapWeapon(EPepccineWeaponItemType WeaponType) const;
@@ -62,7 +64,11 @@ public:
 	void DecreaseStatsOperations(TArray<FPepccineCharacterStatModifier> Modifiers);
 
 	// 액티브 아이템 사용
+	UFUNCTION(BlueprintCallable, Category = "Item|ActiveItem")
 	void UseActiveItem() const;
+
+	// 버프 제거
+	void RemoveBuffEffect();
 
 	// 코인 사용
 	UFUNCTION(BlueprintCallable, Category = "Item|Resource")
@@ -85,12 +91,14 @@ public:
 	{
 		return WeaponItemManager->GetWeaponItemData(WeaponItemType);
 	}
+
 	// 장착 중인 무기 데이터 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
 	FORCEINLINE UPepccineWeaponItemData* GetEquippedWeaponItemData() const
 	{
 		return WeaponItemManager->GetEquippedWeaponItemData();
 	}
+
 	// 현재 장착중인 무기가 메인 무기인지 확인
 	FORCEINLINE bool IsMainWeaponEquipped() const
 	{
@@ -101,11 +109,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Item|Passive")
 	FORCEINLINE TMap<int32, UPepccinePassiveItemData*> GetPassiveItemDatas() const
 	{
-		if (PassiveItemManager == nullptr)
-		{
-			return TMap<int32, UPepccinePassiveItemData*>();
-		}
-		
 		return PassiveItemManager->GetPassiveItemDatas();
 	}
 
@@ -119,20 +122,12 @@ public:
 	// 스탯 이름으로 무기 스탯 합연산 총합 가져오기
 	FORCEINLINE float GetTotalSumByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
 	{
-		if (!GetEquippedWeaponItemData())
-		{
-			return 0.0f;
-		}
 		return TotalWeaponStatSum.FindOrAdd({GetEquippedWeaponItemData()->GetWeaponItemType(), WeaponItemStatName});
 	}
 
 	// 스탯 이름으로 무기 스탯 곱연산 총합 가져오기
 	FORCEINLINE float GetTotalProductByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
 	{
-		if (!GetEquippedWeaponItemData())
-		{
-			return 1.0f;
-		}
 		return TotalWeaponStatProduct.FindOrAdd({GetEquippedWeaponItemData()->GetWeaponItemType(), WeaponItemStatName},
 		                                        1.0f);
 	}
@@ -198,8 +193,8 @@ private:
 	// 액티브 아이템 매니저
 	UPROPERTY(VisibleInstanceOnly, Category = "Item|Manager")
 	UPepccineActiveItemManager* ActiveItemManager;
-
+	
 	// 코인
-	UPROPERTY(EditAnywhere, Category = "Item|Resource", meta = (DisplayName = "코인 수"))
+	UPROPERTY(EditDefaultsOnly, Category = "Item|Resource", meta = (DisplayName = "코인 수"))
 	int32 CoinCount = 0;
 };

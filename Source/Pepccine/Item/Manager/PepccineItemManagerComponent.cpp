@@ -12,16 +12,17 @@
 #include "Item/Passive/PepccineStatModifier.h"
 #include "Item/Resource/PepccineResourceItemData.h"
 
-UPepccineItemManagerComponent::UPepccineItemManagerComponent()
-	: WeaponItemManager(nullptr), PassiveItemManager(nullptr), ActiveItemManager(nullptr)
+UPepccineItemManagerComponent::UPepccineItemManagerComponent(): WeaponItemManager(nullptr), PassiveItemManager(nullptr),
+                                                                ActiveItemManager(nullptr)
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
+	bWantsInitializeComponent = true;
 }
 
-void UPepccineItemManagerComponent::BeginPlay()
+void UPepccineItemManagerComponent::InitializeComponent()
 {
-	Super::BeginPlay();
-
+	Super::InitializeComponent();
+	
 	// 무기 아이템 매니저 생성
 	WeaponItemManager = NewObject<UPepccineWeaponItemManager>(this);
 	WeaponItemManager->InitializeManager(this);
@@ -31,6 +32,14 @@ void UPepccineItemManagerComponent::BeginPlay()
 	// 액티브 아이템 매니저 생성
 	ActiveItemManager = NewObject<UPepccineActiveItemManager>(this);
 	ActiveItemManager->InitializeManager(this);
+}
+
+void UPepccineItemManagerComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// 틱 사용
+	SetComponentTickEnabled(true);
 
 	if (WeaponItemManager && PassiveItemManager && ActiveItemManager)
 	{
@@ -56,11 +65,12 @@ void UPepccineItemManagerComponent::TickComponent(float DeltaTime, enum ELevelTi
                                                   FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	
 	if (IsActiveItemCooldown())
 	{
 		const float ActiveItemCooldown = ActiveItemManager->GetActiveItemRemainingCooldown();
 		ActiveItemManager->SetActiveItemRemainingCooldown(FMath::Max(ActiveItemCooldown - DeltaTime, 0.0f));
+		UE_LOG(LogTemp, Warning, TEXT("%.2f"), ActiveItemManager->GetActiveItemRemainingCooldown());
 		if (FMath::IsNearlyZero(ActiveItemCooldown))
 		{
 			ActiveItemManager->SetIsActiveItemCooldown(false);
@@ -109,13 +119,8 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 		->GetWeaponItemDatas().Num())
 	{
 		PickUpItem(ItemDataBase->GetWeaponItemDataAsset()->GetWeaponItemDatasById(SaveDataStruct.MainWeaponItemId),
-		           false);
-		if (UPepccineWeaponItemData* MainWeaponItemData = WeaponItemManager->GetWeaponItemData(
-			EPepccineWeaponItemType::EPWIT_Main))
-		{
-			MainWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = SaveDataStruct.MainWeaponAmmo.MagazinesAmmo;
-			MainWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SaveDataStruct.MainWeaponAmmo.SpareAmmo;
-		}
+		           false, false, 0, SaveDataStruct.MainWeaponAmmo.MagazinesAmmo,
+		           SaveDataStruct.MainWeaponAmmo.SpareAmmo);
 	}
 
 	// 보조 무기
@@ -123,13 +128,8 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 		GetWeaponItemDatas().Num())
 	{
 		PickUpItem(ItemDataBase->GetWeaponItemDataAsset()->GetWeaponItemDatasById(SaveDataStruct.SubWeaponItemId),
-		           false);
-		if (UPepccineWeaponItemData* SubWeaponItemData = WeaponItemManager->GetWeaponItemData(
-			EPepccineWeaponItemType::EPWIT_Sub))
-		{
-			SubWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = SaveDataStruct.SubWeaponAmmo.MagazinesAmmo;
-			SubWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SaveDataStruct.SubWeaponAmmo.SpareAmmo;
-		}
+		           false, false, 0, SaveDataStruct.SubWeaponAmmo.MagazinesAmmo,
+		           SaveDataStruct.SubWeaponAmmo.SpareAmmo);
 	}
 
 	// 무기 장착
@@ -144,7 +144,7 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 	{
 		if (Id >= 0 && Id < ItemDataBase->GetWeaponItemDataAsset()->GetWeaponItemDatas().Num())
 		{
-			if (UPepccinePassiveItemData* PassiveItemData = ItemDataBase->GetPassiveItemDataAsset()->
+			if (const UPepccinePassiveItemData* PassiveItemData = ItemDataBase->GetPassiveItemDataAsset()->
 			                                                              GetPassiveItemById(Id))
 			{
 				PickUpItem(PassiveItemData);
@@ -156,7 +156,7 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 	if (SaveDataStruct.ActiveItemId >= 0 && SaveDataStruct.ActiveItemId < ItemDataBase->GetWeaponItemDataAsset()->
 		GetWeaponItemDatas().Num())
 	{
-		if (UPepccineActiveItemData* ActiveItemData = ItemDataBase->GetActiveItemDataAsset()->
+		if (const UPepccineActiveItemData* ActiveItemData = ItemDataBase->GetActiveItemDataAsset()->
 		                                                            GetActiveItemById(SaveDataStruct.ActiveItemId))
 		{
 			PickUpItem(ActiveItemData);
@@ -192,13 +192,11 @@ void UPepccineItemManagerComponent::SaveItemSaveData() const
 			SaveData->ItemSaveData.SubWeaponAmmo.MagazinesAmmo = SubWeaponItemData->GetWeaponItemStats().MagazineAmmo;
 			SaveData->ItemSaveData.SubWeaponAmmo.SpareAmmo = SubWeaponItemData->GetWeaponItemStats().SpareAmmo;
 		}
-
 		// 현재 장착 중인 무기
 		if (GetEquippedWeaponItemData())
 		{
 			SaveData->ItemSaveData.EquippedWeaponItemType = GetEquippedWeaponItemData()->GetWeaponItemType();
 		}
-
 		// 패시브
 		GetPassiveItemDatas().GenerateKeyArray(SaveData->ItemSaveData.PassiveItemIds);
 		// 액티브
@@ -206,10 +204,8 @@ void UPepccineItemManagerComponent::SaveItemSaveData() const
 		{
 			SaveData->ItemSaveData.ActiveItemId = ActiveItemData->GetItemId();
 		}
-		
 		// 코인
 		SaveData->ItemSaveData.CoinCount = CoinCount;
-
 		if (UGameplayStatics::SaveGameToSlot(SaveData, "ItemSaveData", 0))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("아이템 데이터 저장 성공!"));
@@ -217,8 +213,9 @@ void UPepccineItemManagerComponent::SaveItemSaveData() const
 	}
 }
 
-bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemData, const bool bIsPlayPickUpSound,
-                                               const bool bIsShopItem, const int32 Price)
+bool UPepccineItemManagerComponent::PickUpItem(const UPepccineItemDataBase* DropItemData, bool bIsPlayPickUpSound,
+                                               bool bIsShopItem,
+                                               int32 Price, float MagazineAmmo, float SpareAmmo)
 {
 	if (!DropItemData)
 	{
@@ -236,23 +233,34 @@ bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemDa
 		}
 	}
 
+	// 복사해서 사용
+	UPepccineItemDataBase* NewDropItemData = DuplicateObject<UPepccineItemDataBase>(DropItemData, this);
+
 	// 무기 아이템
-	if (const UPepccineWeaponItemData* WeaponItemData = Cast<UPepccineWeaponItemData>(DropItemData))
+	if (UPepccineWeaponItemData* WeaponItemData = Cast<UPepccineWeaponItemData>(NewDropItemData))
 	{
+		if (MagazineAmmo != -1)
+		{
+			WeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = MagazineAmmo;
+		}
+		if (SpareAmmo != -1)
+		{
+			WeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SpareAmmo;
+		}
 		WeaponItemManager->PickUpItem(WeaponItemData);
 	}
 	// 패시브 아이템
-	else if (const UPepccinePassiveItemData* PassiveItemData = Cast<UPepccinePassiveItemData>(DropItemData))
+	else if (const UPepccinePassiveItemData* PassiveItemData = Cast<UPepccinePassiveItemData>(NewDropItemData))
 	{
 		PassiveItemManager->PickUpItem(PassiveItemData);
 	}
 	// 액티브 아이템
-	else if (const UPepccineActiveItemData* ActiveItemData = Cast<UPepccineActiveItemData>(DropItemData))
+	else if (const UPepccineActiveItemData* ActiveItemData = Cast<UPepccineActiveItemData>(NewDropItemData))
 	{
 		ActiveItemManager->PickUpItem(ActiveItemData);
 	}
 	// 자원 아이템(탄약, 코인)
-	else if (const UPepccineResourceItemData* ResourceItemData = Cast<UPepccineResourceItemData>(DropItemData))
+	else if (const UPepccineResourceItemData* ResourceItemData = Cast<UPepccineResourceItemData>(NewDropItemData))
 	{
 		if (ResourceItemData->GetResourceItemType() == EPepccineResourceItemType::EPRIT_AmmoBox)
 		{
@@ -267,7 +275,7 @@ bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemDa
 
 	if (bIsPlayPickUpSound)
 	{
-		if (USoundBase* PickUpSound = DropItemData->GetPickUpSound())
+		if (USoundBase* PickUpSound = NewDropItemData->GetPickUpSound())
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, PickUpSound, GetOwner()->GetActorLocation());
 		}
@@ -411,6 +419,11 @@ void UPepccineItemManagerComponent::DecreaseStatsOperations(TArray<FPepccineChar
 void UPepccineItemManagerComponent::UseActiveItem() const
 {
 	ActiveItemManager->UseActiveItem();
+}
+
+void UPepccineItemManagerComponent::RemoveBuffEffect()
+{
+	// ActiveItemManager->
 }
 
 bool UPepccineItemManagerComponent::UseCoin(const int32 Price)

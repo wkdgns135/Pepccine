@@ -5,6 +5,7 @@
 
 #include "PepccineDropItem.generated.h"
 
+class UPepccineActiveItemData;
 class UPepccineItemPriceWidget;
 class UPepccineWeaponItemData;
 class UPepccineItemManagerComponent;
@@ -24,7 +25,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	// 아이템 초기화
-	void InitializeDropItem(const UPepccineItemDataBase* InDropItemData, bool bInIsShopItem);
+	void InitializeDropItem(UPepccineItemDataBase* InDropItemData, bool bInIsShopItem);
 
 	// 아이템 위젯 on / off (show = true, hidden = false)
 	UFUNCTION(BlueprintCallable, Category = "DropItem")
@@ -32,10 +33,12 @@ public:
 
 	// 아이템 획득
 	UFUNCTION(BlueprintCallable)
-	void PickUpItem(UPepccineItemManagerComponent* ItemManagerComponent);
+	bool PickUpItem(UPepccineItemManagerComponent* ItemManagerComponent);
 
-	// 무기 데이터 변경
-	void ChangeWeaponItemData(UPepccineWeaponItemData* WeaponItemData) const;
+	// 무기 아이템 데이터 변경
+	void ChangeWeaponItemData(UPepccineWeaponItemData* BeforeWeaponItemData);
+	// 액티브 아이템 데이터 변경
+	void ChangeActiveItemData(UPepccineActiveItemData* BeforeActiveItemData);
 
 	// getter
 	// 스태틱 메시 컴포넌트 가져오기
@@ -73,6 +76,10 @@ private:
 	// 드랍 아이템 데이터
 	UPROPERTY(VisibleAnywhere, Category = "DropItem|Data")
 	UPepccineItemDataBase* DropItemData;
+	// 드랍 아이템 현재 탄약 수
+	float MagazineAmmo;
+	// 드랍 아이템 예비 탄약 수
+	float SpareAmmo;
 
 	// 상점 아이템 여부
 	UPROPERTY(VisibleAnywhere, Category = "DropItem|Data")

@@ -75,7 +75,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RoomManager")
 	FORCEINLINE void AddItemData(UPepccineItemDataBase* ItemData, const FVector& Location) { if (CurrentRoom)CurrentRoom->ItemData.Add(ItemData, Location);}
 	UFUNCTION(BlueprintPure, Category = "RoomManager")
-	FORCEINLINE TMap<UPepccineItemDataBase*, FVector> GetItemData() const {return CurrentRoom->ItemData;}
+	FORCEINLINE TMap<UPepccineItemDataBase*, FVector>& GetItemData() const {return CurrentRoom->ItemData;}
 	UFUNCTION(BlueprintPure, Category = "RoomManager")
 	FORCEINLINE bool GetIsRoomClear() const {return CurrentRoom ? CurrentRoom->bIsCleared : false;}
 	
