@@ -1,6 +1,14 @@
 #include "Monster/Component/JumpAttackComponent.h"
+#include "Character/Components/BattleComponent.h"
+#include "Character/Player/PepCharacter.h"
 #include "GameFramework/Character.h"
-#include "Kismet/GameplayStatics.h" // UGameplayStatics 필요
+
+UJumpAttackComponent::UJumpAttackComponent()
+{
+    SkillType = ESkillType::Active;
+
+    PrimaryComponentTick.bCanEverTick = false;
+}
 
 void UJumpAttackComponent::ActivateSkill()
 {
@@ -49,3 +57,48 @@ void UJumpAttackComponent::ActivateSkill()
     }
     
 }
+
+void UJumpAttackComponent::SkillTrace()
+{
+    AActor* Owner = GetOwner();
+    if (!Owner)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("JumpAttackComponent: No Owner found!"));
+        return;
+    }
+
+    FVector Center = Owner->GetActorLocation(); // 몬스터 중심
+    FHitResult HitResult;
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(Owner); // 자기 자신 제외
+
+    bool bHit = GetWorld()->SweepSingleByChannel(
+        HitResult,
+        Center, // 시작 위치 (몬스터 중심)
+        Center, // 종료 위치 (같은 위치에서 반경만 체크)
+        FQuat::Identity, // 회전 없음
+        ECC_GameTraceChannel1, // 충돌 채널
+        FCollisionShape::MakeSphere(AttackRadius), // 범위 (구체)
+        QueryParams
+    );
+
+    DrawDebugSphere(GetWorld(), Center, AttackRadius, 12, FColor::Green, false, 2.0f);
+
+    if (bHit)
+    {
+        AActor* HitActor = HitResult.GetActor();
+        if (HitActor)
+        {
+            UE_LOG(LogTemp, Log, TEXT("Hit Actor: %s"), *HitActor->GetName());
+
+            DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.0f, FColor::Red, false, 2.0f);
+
+            UBattleComponent* TargetBattleComponent = HitActor->FindComponentByClass<UBattleComponent>();
+            if (TargetBattleComponent)
+            {
+                TargetBattleComponent->SendHitResult(HitActor, Damage, HitResult, EMonsterSkill::None);
+            }
+        }
+    }
+}
+
