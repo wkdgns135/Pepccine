@@ -1,7 +1,6 @@
 #include "CharacterSaveManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "PlayerStatSaveGame.h"
-#include "Character/Data/StatModifier.h"
 
 void UCharacterSaveManager::Initialize(FSubsystemCollectionBase& Collection)
 {
