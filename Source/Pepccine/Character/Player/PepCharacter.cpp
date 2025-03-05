@@ -172,7 +172,7 @@ void APepCharacter::SetCharacterMovement()
 
 void APepCharacter::SetWeight()
 {
-	if (!PlayerStatComponent)
+	if (!PlayerStatComponent || !ItemManagerComponent->GetEquippedWeaponItemData())
 	{
 		return;
 	}
@@ -227,10 +227,8 @@ void APepCharacter::AddObservers()
 void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult,
                                 EMonsterSkill SkillType)
 {
-	if (bIsRolling || !HitReactionComponent || !PepccineMontageComponent)
-	{
-		return;
-	}
+	if (bIsRolling || !HitReactionComponent || !PepccineMontageComponent) return;
+	if (bIsZooming) ZoomOut();
 
 	PlayerStatComponent->DecreaseHealth(DamageAmount);
 	if (PlayerStatComponent->GetCurrentHealth() <= 0) return;
@@ -243,11 +241,10 @@ void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const 
 		HitReactionComponent->HitReaction("Spine", HitDirection);
 		break;
 	case EMonsterSkill::Charge:
-		Stumble(DamageCauser);
+		HitReactionComponent->EnterRagdoll(3);
 		break;
 	case EMonsterSkill::JumpAttack:
 		Stumble(DamageCauser);
-		// 레그돌로 변경
 		break;
 	case EMonsterSkill::GunShot:
 		// 총맞는 모션 필요
@@ -518,6 +515,11 @@ void APepCharacter::Roll()
 		return;
 	}
 
+	if (bIsZooming)
+	{
+		ZoomOut();
+	}
+
 	bIsRolling = true;
 	RollDirection = GetRollDirection();
 
@@ -592,8 +594,6 @@ void APepCharacter::Reload()
 		return;
 	}
 
-	//HitReactionComponent->EnterRagdoll(5);
-
 	if (ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineSize
 		== ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().MagazineAmmo)
 	{
@@ -622,6 +622,8 @@ void APepCharacter::Interactive()
 	// 아이템 인벤토리에 추가
 	if (CurrentDropItem)
 	{
+		UE_LOG(LogTemp, Display, TEXT("Interact CurrentDropItem : %s"), *CurrentDropItem->GetDropItemData()->GetDisplayName());
+		
 		CurrentDropItem->PickUpItem(ItemManagerComponent);
 		if (UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
@@ -881,6 +883,11 @@ void APepCharacter::ZoomIn()
 
 void APepCharacter::ZoomOut()
 {
+	if (!ItemManagerComponent->GetEquippedWeaponItemData())
+	{
+		return;
+	}
+	
 	bIsZooming = false;
 
 	ToggleCameraView();
@@ -898,10 +905,9 @@ void APepCharacter::ToggleCameraView()
 	{
 		return;
 	}
-	bIsFirstPersonView = !bIsFirstPersonView;
 
-	FirstPersonCamera->SetActive(bIsFirstPersonView);
-	ThirdPersonCamera->SetActive(!bIsFirstPersonView);
+	FirstPersonCamera->SetActive(bIsZooming);
+	ThirdPersonCamera->SetActive(!bIsZooming);
 }
 
 void APepCharacter::TriggerCameraShake(float Strength, float ShakeTime)
