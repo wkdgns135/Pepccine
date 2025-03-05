@@ -58,7 +58,6 @@ void UJumpAttackComponent::LaunchMonster()
                 FVector LaunchDirection = DirectionToPlayer * JumpPower;
 
                 LaunchDirection.Z = JumpHeight;
-
                 OwnerMonster->LaunchCharacter(LaunchDirection, true, true);
 
                 UE_LOG(LogTemp, Warning, TEXT("Jump launched towards player at: %s"), *PlayerLocation.ToString());
