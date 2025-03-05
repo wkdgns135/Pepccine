@@ -17,5 +17,6 @@ private:
 	URoomManager *RoomManager;
 	
 public:
+	UFUNCTION(BlueprintPure, Category = "RoomManager")
 	FORCEINLINE URoomManager* GetRoomManager() const { return RoomManager; }
 };
