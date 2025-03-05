@@ -17,7 +17,6 @@
 #include "Character/Animation/PepccineMontageComponent.h"
 #include "Character/Animation/PepccineHitReactionComponent.h"
 #include "Character/Components/BattleComponent.h"
-#include "Character/Controller/PepccineCameraShake.h"
 #include "Character/Data/ActorInfo.h"
 #include "Character/Data/CharacterSaveManager.h"
 #include "Item/PepccineDropItem.h"
@@ -612,25 +611,22 @@ void APepCharacter::Reload()
 
 void APepCharacter::Interactive()
 {
-	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing)
+	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing || !ItemManagerComponent)
 	{
 		return;
 	}
-
-	float ItemWeight = ItemManagerComponent->GetEquippedWeaponItemData()->GetWeaponItemStats().Weight;
 
 	// 아이템 인벤토리에 추가
 	if (CurrentDropItem)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Interact CurrentDropItem : %s"), *CurrentDropItem->GetDropItemData()->GetDisplayName());
-		
-		if (!CurrentDropItem->PickUpItem(ItemManagerComponent)) return;
+
+		CurrentDropItem->PickUpItem(ItemManagerComponent);
+		//if (!CurrentDropItem->PickUpItem(ItemManagerComponent)) return;
 		
 		if (UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 패시브 아이템
-			UE_LOG(LogTemp, Warning, TEXT("패시브 아이템 [%s]"), *PlayerStatComponent->PrintStats());
-
 			TArray<FPepccineCharacterStatModifier> CharacterStatModifiers = PassiveItem->GetCharacterStatModifiers();
 			for (const FPepccineCharacterStatModifier& Modifier : CharacterStatModifiers)
 			{
@@ -663,8 +659,6 @@ void APepCharacter::Interactive()
 					}
 				}
 			}
-
-			UE_LOG(LogTemp, Warning, TEXT("패시브 아이템 먹은 후 [%s]"), *PlayerStatComponent->PrintStats());
 			// 인벤토리에 추가
 			InventoryComponent->AddItem(PassiveItem->GetIconTexture(), PassiveItem->GetDisplayName(),
 			                            PassiveItem->GetDescription(), PlayerStatComponent->PrintStats());
@@ -707,6 +701,7 @@ void APepCharacter::Interactive()
 		}
 
 		PepccineMontageComponent->Pick();
+		ItemIconComponent->SetCoins(ItemManagerComponent->GetCoinCount());
 	}
 
 	// Delay 있는 상호작용 전용
