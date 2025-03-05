@@ -3,7 +3,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include "EnhancedInputComponent.h"
-#include "Item/PepccineItemManagerComponent.h"
+#include "Item/Manager/PepccineItemManagerComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Character/Components/CrosshairHUDComponent.h"
 #include "Character/Components/PrograssBarHUDComponent.h"

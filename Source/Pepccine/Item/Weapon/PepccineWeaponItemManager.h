@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "PepccineWeaponItemComponent.h"
 #include "PepccineWeaponStat.h"
-#include "Item/PepccineItemSubManager.h"
+#include "Item/Manager/PepccineItemSubManager.h"
 #include "Item/PepccineStatName.h"
 #include "UObject/Object.h"
 

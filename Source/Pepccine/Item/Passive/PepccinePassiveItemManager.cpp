@@ -1,6 +1,6 @@
 ﻿#include "PepccinePassiveItemManager.h"
 
-#include "Item/PepccineItemManagerComponent.h"
+#include "Item/Manager/PepccineItemManagerComponent.h"
 
 void UPepccinePassiveItemManager::PickUpItem(const UPepccinePassiveItemData* PassiveItemData)
 {

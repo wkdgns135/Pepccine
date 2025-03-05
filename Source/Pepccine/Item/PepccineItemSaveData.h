@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "GameFramework/SaveGame.h"
 #include "Weapon/PepccineWeaponStat.h"
 
 #include "PepccineItemSaveData.generated.h"
@@ -26,7 +27,7 @@ struct FPepccineSaveWeaponAmmo
 };
 
 USTRUCT(BlueprintType)
-struct FPepccineItemSaveData
+struct FPepccineItemSaveDataStruct
 {
 	GENERATED_BODY()
 
@@ -48,21 +49,27 @@ struct FPepccineItemSaveData
 	// 패시브 아이템 아이디 목록
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (DesplayName = "패시브 아이템 아이디 목록"))
 	TArray<int32> PassiveItemIds;
+	// 액티브 아이템 아이디
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (DesplayName = "액티브 아이템 아이디"))
+	int32 ActiveItemId;
+	// 코인 개수
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (DesplayName = "코인 개수"))
+	int32 CoinCount;
 
-	FPepccineItemSaveData(): MainWeaponItemId(-1), SubWeaponItemId(-1),
-	                         EquippedWeaponItemType(EPepccineWeaponItemType::EPWIT_Main)
+	FPepccineItemSaveDataStruct(): MainWeaponItemId(-1), SubWeaponItemId(-1),
+	                         EquippedWeaponItemType(EPepccineWeaponItemType::EPWIT_Main), ActiveItemId(-1), CoinCount(0)
 	{
 	}
+};
 
-	FPepccineItemSaveData(const int32 InMainWeaponId, const FPepccineSaveWeaponAmmo InMainWeaponAmmo,const int32 InSubWeaponId, const FPepccineSaveWeaponAmmo InSubWeaponAmmo,
-	                      const EPepccineWeaponItemType InEquippedWeaponItemType,
-	                      const TArray<int32>& InPassiveItemIds)
-	{
-		MainWeaponItemId = InMainWeaponId;
-		MainWeaponAmmo = InMainWeaponAmmo;
-		SubWeaponItemId = InSubWeaponId;
-		SubWeaponAmmo = InSubWeaponAmmo;
-		EquippedWeaponItemType = InEquippedWeaponItemType;
-		PassiveItemIds = InPassiveItemIds;
-	}
+UCLASS(BlueprintType)
+class PEPCCINE_API UPepccineItemSaveData : public USaveGame
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	FPepccineItemSaveDataStruct ItemSaveData;
+
+	UPepccineItemSaveData();
 };
