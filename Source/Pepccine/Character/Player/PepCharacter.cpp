@@ -172,7 +172,7 @@ void APepCharacter::SetCharacterMovement()
 
 void APepCharacter::SetWeight()
 {
-	if (!PlayerStatComponent)
+	if (!PlayerStatComponent || !ItemManagerComponent->GetEquippedWeaponItemData())
 	{
 		return;
 	}
@@ -227,10 +227,8 @@ void APepCharacter::AddObservers()
 void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult,
                                 EMonsterSkill SkillType)
 {
-	if (bIsRolling || !HitReactionComponent || !PepccineMontageComponent)
-	{
-		return;
-	}
+	if (bIsRolling || !HitReactionComponent || !PepccineMontageComponent) return;
+	if (bIsZooming) ZoomOut();
 
 	PlayerStatComponent->DecreaseHealth(DamageAmount);
 	if (PlayerStatComponent->GetCurrentHealth() <= 0) return;
@@ -517,11 +515,9 @@ void APepCharacter::Roll()
 		return;
 	}
 
-	if (bIsFirstPersonView)
+	if (bIsZooming)
 	{
-		bIsZooming = false;
-		CrosshairComponent->HideCrosshair();
-		ToggleCameraView();
+		ZoomOut();
 	}
 
 	bIsRolling = true;
@@ -626,6 +622,8 @@ void APepCharacter::Interactive()
 	// 아이템 인벤토리에 추가
 	if (CurrentDropItem)
 	{
+		UE_LOG(LogTemp, Display, TEXT("Interact CurrentDropItem : %s"), *CurrentDropItem->GetDropItemData()->GetDisplayName());
+		
 		CurrentDropItem->PickUpItem(ItemManagerComponent);
 		if (UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
@@ -885,6 +883,11 @@ void APepCharacter::ZoomIn()
 
 void APepCharacter::ZoomOut()
 {
+	if (!ItemManagerComponent->GetEquippedWeaponItemData())
+	{
+		return;
+	}
+	
 	bIsZooming = false;
 
 	ToggleCameraView();
@@ -902,10 +905,9 @@ void APepCharacter::ToggleCameraView()
 	{
 		return;
 	}
-	bIsFirstPersonView = !bIsFirstPersonView;
 
-	FirstPersonCamera->SetActive(bIsFirstPersonView);
-	ThirdPersonCamera->SetActive(!bIsFirstPersonView);
+	FirstPersonCamera->SetActive(bIsZooming);
+	ThirdPersonCamera->SetActive(!bIsZooming);
 }
 
 void APepCharacter::TriggerCameraShake(float Strength, float ShakeTime)

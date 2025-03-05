@@ -40,7 +40,6 @@ public:
 
 	// 내부 & 애니매이션 사용
 	bool bIsFiring = false;
-	bool bIsFirstPersonView = false;
 	bool bIsInventoryOpened = false;
 	
 	bool bIsMoving = false;
