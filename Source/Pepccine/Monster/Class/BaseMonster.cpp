@@ -88,7 +88,7 @@ void ABaseMonster::OnHitReceived(AActor* DamageCauser, float DamageAmount, const
 	{
 		if (HitResult.BoneName == FName(TEXT("Head")))
 		{
-			StatComponent->DecreaseHealth(DamageAmount * 20000);
+			StatComponent->DecreaseHealth(DamageAmount * 2);
 		}
 		else
 		{
