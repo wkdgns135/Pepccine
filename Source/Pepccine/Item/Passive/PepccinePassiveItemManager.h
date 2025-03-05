@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "PepccinePassiveItemData.h"
-#include "Item/PepccineItemSubManager.h"
+#include "Item/Manager/PepccineItemSubManager.h"
 #include "UObject/Object.h"
 #include "PepccinePassiveItemManager.generated.h"
 

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Item/PepccineItemSubManager.h"
+#include "Item/Manager/PepccineItemSubManager.h"
 #include "UObject/Object.h"
 #include "PepccineActiveItemManager.generated.h"
 

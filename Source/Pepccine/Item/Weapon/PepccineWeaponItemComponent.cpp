@@ -29,13 +29,13 @@ void UPepccineWeaponItemComponent::InitWeaponComponent(ACharacter* InOwnerCharac
 		UE_LOG(LogTemp, Error, TEXT("PoolSubSystem이 설정되어있지 않습니다."));
 		return;
 	}
-	
+
 	if (!ProjectileClass)
 	{
 		UE_LOG(LogTemp, Error, TEXT("투사체 클래스가 설정되어있지 않습니다."));
 		return;
 	}
-	
+
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	// 프로젝타일을 생성한 주체 설정
@@ -73,30 +73,55 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage, const FVector
 			const float SpreadAngle = CalculateSpreadAngle(0.0f, 45.0f);
 			// 각도를 라디안으로 변환
 			const float SpreadAngleRadians = FMath::DegreesToRadians(SpreadAngle);
+
+			// 발사 횟수 증가
+			ShotsFired++;
+
+			// 반동 적용
+			ApplyRecoil(EquippedWeaponData->GetWeaponItemStats().Recoil, 2.0f, 1.0f);
+
+			// // 반동 초기화 타이머 리셋
+			World->GetTimerManager().ClearTimer(RecoilResetTimer);
+			World->GetTimerManager().SetTimer(RecoilResetTimer, this,
+											  &UPepccineWeaponItemComponent::ResetShotsFired, 0.5f,false);
 			
 			for (int32 i = 0; i < ProjectileCount; i++)
 			{
 				FVector NewShootDirection = FMath::VRandCone(ShootDirection, SpreadAngleRadians);
-				
+
 				// 투사체 생성
 				APepccinePoolable* Poolable;
-				PoolSubSystem->SpawnFromPool(ProjectileClass, GetSocketLocation(SoketName), GetSocketRotation(SoketName), Poolable);
+				PoolSubSystem->SpawnFromPool(ProjectileClass, GetSocketLocation(SoketName),
+				                             GetSocketRotation(SoketName), Poolable);
 				if (Poolable)
 				{
 					if (APepccineProjectile* SpawnedProjectile = Cast<APepccineProjectile>(Poolable))
 					{
 						SpawnedProjectile->SetOwnerCharacter(OwnerCharacter);
-						SpawnedProjectile->SetWeaponDamage(WeaponDamage);
+						SpawnedProjectile->SetWeaponDamage(
+							WeaponDamage * EquippedWeaponData->GetWeaponItemStats().AttackMultiplier);
 
 						if (SpawnedProjectile->GetCollisionComp())
 						{
 							SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(OwnerCharacter, true);
 							SpawnedProjectile->GetCollisionComp()->IgnoreActorWhenMoving(GetOwner(), true);
 						}
-					
+
 						SpawnedProjectile->InitProjectile(NewShootDirection,
-														  EquippedWeaponData->GetWeaponItemStats().BulletSpeed,
-														  EquippedWeaponData->GetWeaponItemStats().AttackRange);
+						                                  EquippedWeaponData->GetWeaponItemStats().BulletSpeed,
+						                                  EquippedWeaponData->GetWeaponItemStats().AttackRange);
+
+						// UE_LOG(LogTemp, Warning, TEXT("연사 속도 : %.2f발/초"),
+						// 	   EquippedWeaponData->GetWeaponItemStats().FireRate);
+
+						bCanFire = false;
+						// 무기 재사용 대기시간 적용
+						World->GetTimerManager().SetTimer(EquippedWeaponData->GetFireRateTimerHandle(), this,
+						                                  &UPepccineWeaponItemComponent::CanFire,
+						                                  1.0f / EquippedWeaponData->GetWeaponItemStats().FireRate,
+						                                  false);
+
+						EquippedWeaponData->GetWeaponItemStatsPointer()->MagazineAmmo--;
 					}
 				}
 			}
@@ -105,33 +130,6 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage, const FVector
 			{
 				UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwnerCharacter->GetActorLocation());
 			}
-
-			//// Try and play a firing animation if specified
-			//if (FireAnimation != nullptr)
-			//{
-			//	// Get the animation object for the arms mesh
-			//	UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
-			//	if (AnimInstance != nullptr)
-			//	{
-			//		AnimInstance->Montage_Play(FireAnimation, 1.f);
-			//	}
-			//}
-
-			UE_LOG(LogTemp, Warning, TEXT("연사 속도 : %.2f발/초"),
-				   EquippedWeaponData->GetWeaponItemStats().FireRate);
-
-			bCanFire = false;
-			// 무기 재사용 대기시간 적용
-			World->GetTimerManager().SetTimer(EquippedWeaponData->GetFireRateTimerHandle(), this,
-											  &UPepccineWeaponItemComponent::CanFire,
-											  1.0f / EquippedWeaponData->GetWeaponItemStats().FireRate, false);
-
-			EquippedWeaponData->GetWeaponItemStatsPointer()->MagazineAmmo--;
-
-			UE_LOG(LogTemp, Warning, TEXT("%s 발사! %.0f / %.0f"),
-				   *EquippedWeaponData->GetDisplayName(),
-				   EquippedWeaponData->GetWeaponItemStats().MagazineAmmo,
-				   EquippedWeaponData->GetWeaponItemStats().SpareAmmo);
 		}
 	}
 }
@@ -194,6 +192,11 @@ void UPepccineWeaponItemComponent::EquipWeapon(UPepccineWeaponItemData* WeaponIt
 {
 	EquippedWeaponData = WeaponItemData;
 
+	GetWorld()->GetTimerManager().ClearTimer(RecoilResetTimer);
+	ResetShotsFired();
+
+	UE_LOG(LogTemp,Warning,TEXT("%s"), *EquippedWeaponData->GetDisplayName());
+
 	if (bIsPlayEquipSound)
 	{
 		if (USoundBase* ReloadSound = EquippedWeaponData->GetReloadSound())
@@ -209,6 +212,29 @@ float UPepccineWeaponItemComponent::CalculateSpreadAngle(const float BaseAngle, 
 	const float ProjectileCount = EquippedWeaponData->GetWeaponItemStats().ProjectileCount;
 
 	// 제곱근 함수를 활용하여 스프레드 각도 계산
-	const float SpreadAngle = BaseAngle + (FMath::Sqrt(ProjectileCount) - 1) * (MaxAngle - BaseAngle) / (FMath::Sqrt(100.0f) - 1);
+	const float SpreadAngle = BaseAngle + (FMath::Sqrt(ProjectileCount) - 1) * (MaxAngle - BaseAngle) / (
+		FMath::Sqrt(100.0f) - 1);
 	return FMath::Clamp(SpreadAngle, BaseAngle, MaxAngle);
+}
+
+void UPepccineWeaponItemComponent::CanFire()
+{
+	UE_LOG(LogTemp, Warning, TEXT("발사 가능!"));
+	bCanFire = true;
+}
+
+void UPepccineWeaponItemComponent::ApplyRecoil(const float RecoilAmount, const float MaxRecoilPitch,
+                                               const float MaxRecoilYaw) const
+{
+	if (!OwnerCharacter || !OwnerCharacter->GetController())
+	{
+		return;
+	}
+	
+	// 반동 값 계산 (ShotsFired가 증가할수록 반동 증가)
+	const float RandomPitch = RecoilAmount * ShotsFired * 0.05f;
+	const float RandomYaw = FMath::RandRange(-MaxRecoilYaw, MaxRecoilYaw) * ShotsFired * 0.05f;
+
+	OwnerCharacter->AddControllerPitchInput(-RandomPitch);
+	OwnerCharacter->AddControllerYawInput(RandomYaw);
 }

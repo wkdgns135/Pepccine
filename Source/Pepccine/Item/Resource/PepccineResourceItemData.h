@@ -19,12 +19,13 @@ class PEPCCINE_API UPepccineResourceItemData : public UPepccineItemDataBase
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Item|Resource")
-	FORCEINLINE EPepccineResourceItemType GetResourceItemType() const { return ResourceItemType; };
-
+	FORCEINLINE EPepccineResourceItemType GetResourceItemType() const { return ResourceItemType; }
+	
 	UFUNCTION(BlueprintPure, Category = "Item|Resource")
-	FORCEINLINE int32 GetResourceAmount() const { return ResourceAmount; };
-
-	FORCEINLINE void SetResourceAmount(const int32 InResourceCount) { ResourceAmount = InResourceCount; };
+	FORCEINLINE int32 GetResourceAmount() const { return ResourceAmount; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Item|Resource")
+	FORCEINLINE void SetResourceAmount(const int32 InResourceCount) { ResourceAmount = InResourceCount; }
 
 protected:
 	// 자원 타입
