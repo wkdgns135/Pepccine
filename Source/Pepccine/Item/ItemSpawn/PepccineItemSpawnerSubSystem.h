@@ -57,4 +57,6 @@ protected:
 	UPepccineItemDataAssetBase* ItemDataAsset;
 	// 스폰 엑터
 	TSubclassOf<APepccineDropItem> SpawnedActor;
+
+	// 스폰된 
 };

@@ -38,16 +38,15 @@ public:
 	// 무기 스탯 초기 설정
 	void UpdateWeaponItemStats(EPepccineWeaponItemType WeaponItemType) const;
 
-	
+
 	// getter
 
 	// 스탯 계산
-	float CalculateTotalValueFromDefault(EPepccineWeaponStatName WeaponItemStatName, float WeaponItemStat) const;
+	float CalculateTotalValue(EPepccineWeaponStatName WeaponItemStatName, float WeaponItemStat,
+	                                     float ClampMin, float ClampMax) const;
 
-	// 스탯 이름으로 스탯 참조 가져오기
-	static float& GetWeaponItemStatRefByName(UPepccineWeaponItemData* InWeaponItemData,
-	                                         EPepccineWeaponStatName WeaponItemStatName);
-
+	static float& GetWeaponItemStatRefByName(UPepccineWeaponItemData* WeaponItemData, EPepccineWeaponStatName WeaponItemStatName);
+	
 	// 무기 컴포넌트 가져오기
 	FORCEINLINE UPepccineWeaponItemComponent* GetWeaponItemComp() const { return WeaponItemComp; };
 	// 무기 데이터 가져오기
