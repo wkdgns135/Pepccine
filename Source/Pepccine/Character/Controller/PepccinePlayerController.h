@@ -7,6 +7,7 @@
 class UInputMappingContext;
 class UInputAction;
 class UMenuWidget;
+class UMouseSensitivityWidget;
 
 UCLASS()
 class PEPCCINE_API APepccinePlayerController : public APlayerController
@@ -72,9 +73,14 @@ private:
 
   UPROPERTY()
   UMenuWidget* MenuInstance;
+
+  UPROPERTY(EditDefaultsOnly, Category = "UI")
+  TSubclassOf<class UMouseSensitivityWidget> MouseSensitivityClass;
+
+  UPROPERTY()
+  UMouseSensitivityWidget* MouseSensitivityInstance;
   
   void AddMappingContext();
-  void AddCrosshairHUD();
 
   UFUNCTION()
   void OnExitButtonClicked();
@@ -82,5 +88,12 @@ private:
   UFUNCTION()
   void OnBackButtonClicked();
 
+  UFUNCTION()
+  void OnMouseBackButtonClicked();
+
+  UFUNCTION()
+  void OnSettingButtonClicked();
+
   void SetMenu();
+  void SetWidget();
 };

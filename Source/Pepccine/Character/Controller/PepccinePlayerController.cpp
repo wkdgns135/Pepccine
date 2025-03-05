@@ -3,9 +3,11 @@
 #include "EnhancedInputComponent.h"
 #include "Character/Widget/MenuWidget.h"
 #include "Character/Components/CrosshairHUDComponent.h"
+#include "Character/Player/PepCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Character/Widget/MouseSensitivityWidget.h"
 
 APepccinePlayerController::APepccinePlayerController()
 {
@@ -24,6 +26,8 @@ APepccinePlayerController::APepccinePlayerController()
   FireAction = nullptr;
   ZoomAction = nullptr;
 
+  MouseSensitivityClass = nullptr;
+  MouseSensitivityInstance = nullptr;
   MenuInstance = nullptr;
   MenuClass = nullptr;
 }
@@ -34,6 +38,21 @@ void APepccinePlayerController::BeginPlay()
 
   AddMappingContext();
   SetMenu();
+  SetWidget();
+}
+
+void APepccinePlayerController::SetWidget()
+{
+  if (!MouseSensitivityClass) return;
+
+  if (!MouseSensitivityInstance && MouseSensitivityClass)
+  {
+    MouseSensitivityInstance = CreateWidget<UMouseSensitivityWidget>(this, MouseSensitivityClass);
+  }
+
+  MouseSensitivityInstance->MouseBackButton->OnClicked.AddDynamic(this, &APepccinePlayerController::OnMouseBackButtonClicked);
+  MouseSensitivityInstance->AddToViewport();
+  MouseSensitivityInstance->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void APepccinePlayerController::SetMenu()
@@ -56,6 +75,11 @@ void APepccinePlayerController::SetMenu()
   if (UButton* BackButton = MenuInstance->BackButton)
   {
     BackButton->OnClicked.AddDynamic(this, &APepccinePlayerController::OnBackButtonClicked);
+  }
+
+  if (UButton* SettingButton = MenuInstance->SettingButton)
+  {
+    SettingButton->OnClicked.AddDynamic(this, &APepccinePlayerController::OnSettingButtonClicked);
   }
 
   if (UTextBlock* GameOver = MenuInstance->GameOver)
@@ -84,16 +108,42 @@ void APepccinePlayerController::ShowGameOver(bool IsVisible)
   }
 }
 
+void APepccinePlayerController::OnMouseBackButtonClicked()
+{
+  MouseSensitivityInstance->SetVisibility(ESlateVisibility::Hidden);
+  MenuInstance->SetVisibility(ESlateVisibility::Visible);
+}
+
 void APepccinePlayerController::OnBackButtonClicked()
 {
+  if (!MouseSensitivityInstance || !MenuInstance) return;
+  
+  MouseSensitivityInstance->SetVisibility(ESlateVisibility::Hidden);
   MenuInstance->SetVisibility(ESlateVisibility::Hidden);
   bShowMouseCursor = false;
   SetInputMode(FInputModeGameOnly());
+
+  if (APepCharacter* User = Cast<APepCharacter>(GetCharacter()))
+  {
+    User->PauseGame(false);
+  }
 }
 
 void APepccinePlayerController::OnExitButtonClicked()
 {
   UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, false);
+}
+
+void APepccinePlayerController::OnSettingButtonClicked()
+{
+  if (!MouseSensitivityInstance || !MenuInstance) return;
+
+  UE_LOG(LogTemp, Display, TEXT("OnSettingButtonClicked"));
+  
+  MenuInstance->SetVisibility(ESlateVisibility::Hidden);
+  MouseSensitivityInstance->SetVisibility(ESlateVisibility::Visible);
+  bShowMouseCursor = true;
+  SetInputMode(FInputModeUIOnly());
 }
 
 void APepccinePlayerController::ToggleExitMenu()

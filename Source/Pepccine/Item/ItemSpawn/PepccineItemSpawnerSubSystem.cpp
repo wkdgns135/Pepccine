@@ -1,12 +1,15 @@
 ﻿#include "PepccineItemSpawnerSubSystem.h"
 
 #include "PepccineItemSpawnWeightData.h"
-#include "PepccineDropItem.h"
-#include "PepccineItemDataAssetBase.h"
-#include "Active/PepccineActiveItemDataAsset.h"
+#include "Item/PepccineDropItem.h"
+#include "Item/PepccineItemDataAssetBase.h"
 #include "Algo/MaxElement.h"
-#include "Passive/PepccinePassiveItemDataAsset.h"
-#include "Resource/PepccineResourceItemData.h"
+#include "Item/Active/PepccineActiveItemDataAsset.h"
+#include "Item/Passive/PepccinePassiveItemDataAsset.h"
+#include "Item/Resource/PepccineResourceItemData.h"
+#include "Item/Weapon/PepccineWeaponItemData.h"
+#include "Item/Passive/PepccinePassiveItemData.h"
+#include "Item/Active/PepccineActiveItemData.h"
 
 void UPepccineItemSpawnerSubSystem::InitSpawner(UPepccineItemDataAssetBase* InItemDataAsset,
                                                 const TSubclassOf<APepccineDropItem>& InSpawnedActor)
@@ -15,12 +18,12 @@ void UPepccineItemSpawnerSubSystem::InitSpawner(UPepccineItemDataAssetBase* InIt
 	SpawnedActor = InSpawnedActor;
 }
 
-void UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData)
+UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData, const bool bIsShopItem)
 {
 	if (!ItemDataAsset)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("아이템 데이터 에셋이 설정되지 않았습니다."));
-		return;
+		return nullptr;
 	}
 
 	if (UWorld* World = GetWorld())
@@ -34,9 +37,13 @@ void UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& SpawnLocation, UPep
 			SpawnedActor, SpawnLocation, FRotator::ZeroRotator, SpawnParams))
 		{
 			// 아이템 초기화
-			DropItem->InitializeDropItem(DropItemData);
+			DropItem->InitializeDropItem(DropItemData, bIsShopItem);
+
+			return DropItemData;
 		}
 	}
+
+	return nullptr;
 }
 
 UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDataAsset(
@@ -86,7 +93,7 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 	// 액티브 아이템
 	else if (ItemTypeRandomValue <= ItemTypeWeights[2])
 	{
-		// 무기 데이터 목록
+		// 액티브 데이터 목록
 		ItemDatas.Append(ItemDataAsset->GetActiveItemDataAsset()->GetActiveItemDatas());
 
 		// 랜덤 등급으로 랜덤 아이템 가져오기
@@ -128,6 +135,18 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 	UE_LOG(LogTemp, Warning, TEXT("ItemName: %s"), *ItemData->GetDisplayName());
 
 	return ItemData;
+}
+
+UPepccineWeaponItemData* UPepccineItemSpawnerSubSystem::GetDefaultWeaponItemData() const
+{
+	if (!ItemDataAsset
+		|| !ItemDataAsset->GetWeaponItemDataAsset()
+		|| ItemDataAsset->GetWeaponItemDataAsset()->GetWeaponItemDatas().IsEmpty())
+	{
+		return nullptr;
+	}
+
+	return ItemDataAsset->GetWeaponItemDataAsset()->GetWeaponItemDatasById(0);
 }
 
 void UPepccineItemSpawnerSubSystem::ApplyCumulativeWeights(TArray<int32>& Weights)
