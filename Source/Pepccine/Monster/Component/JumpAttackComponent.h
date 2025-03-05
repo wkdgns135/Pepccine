@@ -14,6 +14,7 @@ public:
 
 	virtual void ActivateSkill() override;
 	void SkillTrace() override;
+	void LaunchMonster();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")

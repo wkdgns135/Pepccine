@@ -5,8 +5,6 @@
 
 UJumpAttackComponent::UJumpAttackComponent()
 {
-    SkillType = ESkillType::Active;
-
     PrimaryComponentTick.bCanEverTick = false;
 }
 
@@ -20,7 +18,10 @@ void UJumpAttackComponent::ActivateSkill()
 
     StartCooldown();
     PlaySkillMontage();
+}
 
+void UJumpAttackComponent::LaunchMonster()
+{
     ACharacter* OwnerMonster = Cast<ACharacter>(GetOwner());
     if (OwnerMonster)
     {
@@ -51,11 +52,8 @@ void UJumpAttackComponent::ActivateSkill()
 
                 UE_LOG(LogTemp, Warning, TEXT("Jump launched towards player at: %s"), *PlayerLocation.ToString());
             }
-            
         }
-        
     }
-    
 }
 
 void UJumpAttackComponent::SkillTrace()
@@ -71,6 +69,7 @@ void UJumpAttackComponent::SkillTrace()
     FHitResult HitResult;
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(Owner); // 자기 자신 제외
+
 
     bool bHit = GetWorld()->SweepSingleByChannel(
         HitResult,
@@ -96,7 +95,7 @@ void UJumpAttackComponent::SkillTrace()
             UBattleComponent* TargetBattleComponent = HitActor->FindComponentByClass<UBattleComponent>();
             if (TargetBattleComponent)
             {
-                TargetBattleComponent->SendHitResult(HitActor, Damage, HitResult, EMonsterSkill::None);
+                TargetBattleComponent->SendHitResult(HitActor, Damage, HitResult, EMonsterSkill::JumpAttack);
             }
         }
     }
