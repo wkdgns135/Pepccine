@@ -62,6 +62,10 @@ public:
 	bool bIsLoaded = false;
 	// 내부 & 애니매이션 사용
 
+	// 마우스 민감도
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float MouseSensitivity = 0.5f;
+
 	// UE delegate
 	UFUNCTION()
 	void OnHealthChanged(const float NewHealth, const float MaxHealth);
@@ -70,7 +74,8 @@ public:
 	UFUNCTION()
 	void OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType);
 	
-	void TriggerCameraShake(float Amplitude, float Frequency, float Duration);
+	void TriggerCameraShake(float Strength, float ShakeTime);
+	void PauseGame(bool bIsPaused);
 	
 	// inline
 	FORCEINLINE_DEBUGGABLE bool IsRolling() const { return bIsRolling; }
@@ -119,18 +124,14 @@ private:
 	void Move(const FInputActionValue& Value);
 	UFUNCTION()
 	void OnMovementStopped();
-
 	UFUNCTION()
 	void JumpStart();
 	UFUNCTION()
 	void JumpStop();
-
 	UFUNCTION()
 	void UseItem();
-
 	UFUNCTION()
 	void Look(const FInputActionValue& value);
-
 	UFUNCTION()
 	void StartSprint(const FInputActionValue& value);
 	UFUNCTION()
@@ -139,38 +140,28 @@ private:
 	void Roll();
 	UFUNCTION()
 	void EndRoll();
-
 	UFUNCTION()
 	void Crouching();
-
 	UFUNCTION()
 	void Reload();
-
 	UFUNCTION()
 	void Interactive();
-
 	UFUNCTION()
 	void UpdateWeaponUI();
-
 	UFUNCTION()
 	void OpenInventory();
-
 	UFUNCTION()
 	void SwapItem(const FInputActionValue& value);
-
 	UFUNCTION()
 	void Fire();
 	UFUNCTION()
 	void StopFire();
-	
 	UFUNCTION()
 	void ZoomIn();
 	UFUNCTION()
 	void ZoomOut();
-
 	UFUNCTION()
 	void Dead();
-
 	UFUNCTION()
 	void ShowMenu();
 

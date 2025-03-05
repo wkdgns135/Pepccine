@@ -10,7 +10,11 @@ class PEPCCINE_API UJumpAttackComponent : public UBaseSkillComponent
 	GENERATED_BODY()
 
 public:
+	UJumpAttackComponent();
+
 	virtual void ActivateSkill() override;
+	void SkillTrace() override;
+	void LaunchMonster();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
