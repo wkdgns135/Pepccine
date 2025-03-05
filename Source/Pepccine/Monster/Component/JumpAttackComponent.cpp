@@ -58,7 +58,6 @@ void UJumpAttackComponent::LaunchMonster()
                 FVector LaunchDirection = DirectionToPlayer * JumpPower;
 
                 LaunchDirection.Z = JumpHeight;
-
                 OwnerMonster->LaunchCharacter(LaunchDirection, true, true);
 
                 UE_LOG(LogTemp, Warning, TEXT("Jump launched towards player at: %s"), *PlayerLocation.ToString());
@@ -70,7 +69,6 @@ void UJumpAttackComponent::LaunchMonster()
 void UJumpAttackComponent::SkillTrace()
 {
     const AActor* Owner = GetOwner();
-
     if (!Owner)
     {
         UE_LOG(LogTemp, Warning, TEXT("JumpAttackComponent: No Owner found!"));
@@ -79,7 +77,6 @@ void UJumpAttackComponent::SkillTrace()
 
     FVector Center = Owner->GetActorLocation();
     TArray<FHitResult> HitResults;
-
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(Owner);
 
@@ -97,13 +94,12 @@ void UJumpAttackComponent::SkillTrace()
     );
 
     DrawDebugSphere(GetWorld(), Center, AttackRadius, 12, FColor::Green, false, 2.0f);
-
+    
     if (bHit)
     {
         for (const FHitResult& Hit : HitResults)
         {
             AActor* HitActor = Hit.GetActor();
-
             if (APepCharacter* Player = Cast<APepCharacter>(HitActor))
             {
                 UE_LOG(LogTemp, Log, TEXT("Hit Actor: %s"), *HitActor->GetName());

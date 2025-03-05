@@ -1,22 +1,21 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "PepccineItemSpawnerSubSystem.h"
-#include "PepccineStatName.h"
-#include "Active/PepccineActiveItemData.h"
-#include "Active/PepccineActiveItemManager.h"
+#include "Item/ItemSpawn/PepccineItemSpawnerSubSystem.h"
+#include "Item/PepccineStatName.h"
+#include "Item/Active/PepccineActiveItemData.h"
+#include "Item/Active/PepccineActiveItemManager.h"
 #include "Components/ActorComponent.h"
 #include "Item/Weapon/PepccineWeaponItemData.h"
 #include "Item/Weapon/PepccineWeaponItemComponent.h"
-#include "Passive/PepccinePassiveItemManager.h"
-#include "Weapon/PepccineWeaponItemManager.h"
+#include "Item/Passive/PepccinePassiveItemManager.h"
+#include "Item/Weapon/PepccineWeaponItemManager.h"
 
 #include "PepccineItemManagerComponent.generated.h"
 
 class UPepccineActiveItemManager;
 class UPepccinePassiveItemManager;
 class UPepccineActiveItemData;
-struct FPepccineItemSaveData;
 class UPepccinePassiveItemData;
 class UPepccineItemDataAssetBase;
 
@@ -31,22 +30,15 @@ public:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
+	// 데이터 로드
+	bool LoadItemSaveData();
+	// 데이터 세이브
+	void SaveItemSaveData();
+	
 	// 아이템 획득
-	bool PickUpItem(UPepccineItemDataBase* DropItemData, bool bIsPlayPickUpSound = true);
-
-	//////////////////////////////////////////////////////////////////////////
-	// 데이터 저장 관련
-
-	// // 아이템 세이브 데이터 구조체 가져오기
-	// UFUNCTION(BlueprintCallable)
-	// FPepccineItemSaveData GetSaveItemData() const;
-	//
-	// // 아이템 세이브 데이터 불러오기
-	// UFUNCTION(BlueprintCallable)
-	// void LoadItemData(const FPepccineItemSaveData& SaveData);
-	//////////////////////////////////////////////////////////////////////////
-
+	bool PickUpItem(UPepccineItemDataBase* DropItemData, bool bIsPlayPickUpSound = true, bool bIsShopItem = false);
 	// 무기 교체
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
 	void SwapWeapon(EPepccineWeaponItemType WeaponType) const;
@@ -74,7 +66,7 @@ public:
 
 	// 코인 사용
 	UFUNCTION(BlueprintCallable, Category = "Item|Resource")
-	bool UseCoin(int32 Count);
+	bool UseCoin(int32 Price);
 
 	// getter
 	// 발사 방향 가져오기
@@ -127,12 +119,14 @@ public:
 	// 스탯 이름으로 무기 스탯 합연산 총합 가져오기
 	FORCEINLINE float GetTotalSumByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
 	{
+		if (!GetEquippedWeaponItemData()) return 0;
 		return TotalWeaponStatSum.FindOrAdd({GetEquippedWeaponItemData()->GetWeaponItemType(), WeaponItemStatName});
 	}
 
 	// 스탯 이름으로 무기 스탯 곱연산 총합 가져오기
 	FORCEINLINE float GetTotalProductByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
 	{
+		if (!GetEquippedWeaponItemData()) return 0;
 		return TotalWeaponStatProduct.FindOrAdd({GetEquippedWeaponItemData()->GetWeaponItemType(), WeaponItemStatName},
 		                                        1.0f);
 	}
@@ -200,6 +194,6 @@ private:
 	UPepccineActiveItemManager* ActiveItemManager;
 
 	// 코인
-	UPROPERTY(VisibleInstanceOnly, Category = "Item|Resource", meta = (DisplayName = "코인 수"))
+	UPROPERTY(EditAnywhere, Category = "Item|Resource", meta = (DisplayName = "코인 수"))
 	int32 CoinCount = 0;
 };

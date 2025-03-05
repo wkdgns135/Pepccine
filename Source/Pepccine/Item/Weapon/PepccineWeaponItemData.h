@@ -17,19 +17,21 @@ class PEPCCINE_API UPepccineWeaponItemData : public UPepccineItemDataBase
 public:
 	// getter
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
-	FORCEINLINE EPepccineWeaponItemType GetWeaponItemType() const { return WeaponItemType; };
-	FORCEINLINE TObjectPtr<USkeletalMesh> GetEquippedMesh() const { return EquippedMesh; };
-	FORCEINLINE FTimerHandle& GetFireRateTimerHandle() { return FireRateTimerHandle; };
+	FORCEINLINE EPepccineWeaponItemType GetWeaponItemType() const { return WeaponItemType; }
+
+	FORCEINLINE TObjectPtr<USkeletalMesh> GetEquippedMesh() const { return EquippedMesh; }
+	FORCEINLINE FTimerHandle& GetFireRateTimerHandle() { return FireRateTimerHandle; }
 
 	UFUNCTION(BlueprintPure, Category = "Item|Weapon")
-	FORCEINLINE FPepccineWeaponStat GetWeaponItemStats() const { return WeaponStats; };
-	FORCEINLINE FPepccineWeaponStat* GetWeaponItemStatsPointer() { return &WeaponStats; };
-	FORCEINLINE TObjectPtr<USoundBase> GetFireSound() const { return FireSound; };
-	FORCEINLINE TObjectPtr<USoundBase> GetReloadSound() const { return ReloadSound; };
+	FORCEINLINE FPepccineWeaponStat GetWeaponItemStats() const { return WeaponStats; }
+
+	FORCEINLINE FPepccineWeaponStat* GetWeaponItemStatsPointer() { return &WeaponStats; }
+	FORCEINLINE TObjectPtr<USoundBase> GetFireSound() const { return FireSound; }
+	FORCEINLINE TObjectPtr<USoundBase> GetReloadSound() const { return ReloadSound; }
 
 	// setter
 	// 무기 스탯 설정
-	FORCEINLINE void SetWeaponStats(const FPepccineWeaponStat& InWeaponStats) { WeaponStats = InWeaponStats; };
+	FORCEINLINE void SetWeaponStats(const FPepccineWeaponStat& InWeaponStats) { WeaponStats = InWeaponStats; }
 
 protected:
 	// 무기 타입(주 무기, 보조 무기)

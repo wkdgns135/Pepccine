@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Misc/MapErrors.h"
 
 #include "PepccineDropItem.generated.h"
 
@@ -24,7 +23,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	// 아이템 초기화
-	void InitializeDropItem(const UPepccineItemDataBase* InDropItemData);
+	void InitializeDropItem(const UPepccineItemDataBase* InDropItemData, bool bInIsShopItem);
 
 	// 아이템 위젯 on / off (show = true, hidden = false)
 	UFUNCTION(BlueprintCallable, category = "DropItem")
@@ -61,6 +60,9 @@ private:
 	// 드랍 아이템 데이터
 	UPROPERTY(VisibleAnywhere, category = "DropItem|Data")
 	UPepccineItemDataBase* DropItemData;
+
+	// 상점 아이템 여부
+	bool bIsShopItem = false;
 	
 	// 상하 이동 액션에 사용
 	// 시작 위치
