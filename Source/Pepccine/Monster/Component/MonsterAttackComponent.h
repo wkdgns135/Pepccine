@@ -5,6 +5,7 @@
 #include "Character/Components/BattleComponent.h"
 #include "MonsterAttackComponent.generated.h"
 
+class ABaseMonster;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PEPCCINE_API UMonsterAttackComponent : public UBattleComponent
@@ -20,6 +21,7 @@ public:
 	void AttackTrace();
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void PlayTransitionMontage();
+	FORCEINLINE float GetAttackRange() { return AttackRange; }
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
@@ -32,5 +34,5 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	
+	void ExecuteTrace(ABaseMonster* OwnerMonster, float Range, float CapsuleRadius, float CapsuleHalfHeight);
 };

@@ -14,7 +14,7 @@ public:
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Spawn")
-	void FadeInMonster(AActor* SpawnedMonster);
+	void FadeInMonsters(const TArray<ABaseMonster*>& SpawnedMonsters);
 
 	void SpawnMonster();
 private:
@@ -22,4 +22,5 @@ private:
 	int NumberOfMonsters = 3;  // 몬스터
 	UPROPERTY(EditAnywhere, Category = "Skill|Spawn")
 	TSubclassOf<class ABaseMonster> MonsterToSpawn;  // 소환할 몬스터 클래스
+    TArray<ABaseMonster*> SpawnedMonsterList;  // 클래스 멤버 변수
 };

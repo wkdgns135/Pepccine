@@ -7,5 +7,5 @@ ABossParasite::ABossParasite()
 	AIControllerClass = ABossParasiteAIC::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	SpawnSkillComponent = CreateDefaultSubobject<USpawnSkillComponent>(TEXT("SpawnSkillComponent"));
+	/*SpawnSkillComponent = CreateDefaultSubobject<USpawnSkillComponent>(TEXT("SpawnSkillComponent"));*/
 }

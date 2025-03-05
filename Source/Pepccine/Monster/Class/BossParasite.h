@@ -14,6 +14,6 @@ public:
 	ABossParasite();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill|Spwan")
-	USpawnSkillComponent* SpawnSkillComponent;
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill|Spwan")
+	USpawnSkillComponent* SpawnSkillComponent;*/
 };
