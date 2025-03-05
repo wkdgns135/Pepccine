@@ -7,5 +7,6 @@ ABossWarZombie::ABossWarZombie()
 	AIControllerClass = ABossWarZombieAIC::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
+	MonsterType = EMonsterType::LongRange;
 	//StealthModeComponent = CreateDefaultSubobject<UStealthModeSkillComponent>(TEXT("StealthModeComponent"));
 }

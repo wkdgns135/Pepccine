@@ -315,14 +315,15 @@ void ARoomGenerator::ShuffleArray(TArray<FIntPoint>& Array)
 void ARoomGenerator::AssignEndRooms()
 {
 	InitializeGrid();
-	
+
+	// End방에서 맨해튼 거리가 가장 먼 두 방이 각각 시작방, 보스방으로 지정
 	int MaxDistance = 0;
 	FIntPoint StartRoom, BossRoom;
 	for (int i = 0; i < EndRooms.Num(); i++)
 	{
 		for (int j = i + 1; j < EndRooms.Num(); j++)
 		{
-			const int Distance = FindShortestPath(EndRooms[i], EndRooms[j]).Num();
+			const int Distance = GetLengthBetweenPoint(EndRooms[i], EndRooms[j]);
 			if (Distance > MaxDistance)
 			{
 				MaxDistance = Distance;
