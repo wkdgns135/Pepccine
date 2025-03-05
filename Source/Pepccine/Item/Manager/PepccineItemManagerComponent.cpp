@@ -39,22 +39,16 @@ void UPepccineItemManagerComponent::BeginPlay()
 			// 무기 컴포넌트 등록
 			WeaponItemManager->SetWeaponItemComponent(OwnerCharacter);
 
-			// if (const UPepccineWeaponItemData* WeaponItemData = GetWorld()
-			//                                                     ->GetSubsystem<UPepccineItemSpawnerSubSystem>()
-			//                                                     ->GetItemDataAsset()
-			//                                                     ->GetWeaponItemDataAsset()
-			//                                                     ->GetWeaponItemDatasById(0))
-			// {
-			// 	// 기본 무기 장착
-			// 	WeaponItemManager->EquipDefaultWeapon(WeaponItemData);
-			// }
-		}
-	}
+			// 기본 무기 장착
+			// WeaponItemManager->EquipDefaultWeapon(
+			// 	GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->GetDefaultWeaponItemData());
 
-	// 데이터 로드
-	if (LoadItemSaveData())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("아이템 데이터 로드 성공!"));
+			// 데이터 로드
+			if (LoadItemSaveData())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("아이템 데이터 로드 성공!"));
+			}
+		}
 	}
 }
 
@@ -175,7 +169,7 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 	return true;
 }
 
-void UPepccineItemManagerComponent::SaveItemSaveData()
+void UPepccineItemManagerComponent::SaveItemSaveData() const
 {
 	UPepccineItemSaveData* SaveData = Cast<UPepccineItemSaveData>(
 		UGameplayStatics::LoadGameFromSlot(TEXT("ItemSaveData"), 0));
@@ -212,8 +206,9 @@ void UPepccineItemManagerComponent::SaveItemSaveData()
 		{
 			SaveData->ItemSaveData.ActiveItemId = ActiveItemData->GetItemId();
 		}
+		
 		// 코인
-		CoinCount = SaveData->ItemSaveData.CoinCount;
+		SaveData->ItemSaveData.CoinCount = CoinCount;
 
 		if (UGameplayStatics::SaveGameToSlot(SaveData, "ItemSaveData", 0))
 		{
@@ -223,7 +218,7 @@ void UPepccineItemManagerComponent::SaveItemSaveData()
 }
 
 bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemData, const bool bIsPlayPickUpSound,
-                                               const bool bIsShopItem)
+                                               const bool bIsShopItem, const int32 Price)
 {
 	if (!DropItemData)
 	{
@@ -234,7 +229,6 @@ bool UPepccineItemManagerComponent::PickUpItem(UPepccineItemDataBase* DropItemDa
 	// 상점 아이템일 경우
 	if (bIsShopItem)
 	{
-		const int32 Price = (DropItemData->GetItemRarity() + 1) * 4;
 		// 구매 확인 후 구매 못하면 false 리턴
 		if (!UseCoin(Price))
 		{

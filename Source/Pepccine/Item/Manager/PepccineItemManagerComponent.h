@@ -35,10 +35,10 @@ public:
 	// 데이터 로드
 	bool LoadItemSaveData();
 	// 데이터 세이브
-	void SaveItemSaveData();
+	void SaveItemSaveData() const;
 	
 	// 아이템 획득
-	bool PickUpItem(UPepccineItemDataBase* DropItemData, bool bIsPlayPickUpSound = true, bool bIsShopItem = false);
+	bool PickUpItem(UPepccineItemDataBase* DropItemData, bool bIsPlayPickUpSound = true, bool bIsShopItem = false, int32 Price = 0);
 	// 무기 교체
 	UFUNCTION(BlueprintCallable, Category = "Item|Weapon")
 	void SwapWeapon(EPepccineWeaponItemType WeaponType) const;
@@ -119,12 +119,20 @@ public:
 	// 스탯 이름으로 무기 스탯 합연산 총합 가져오기
 	FORCEINLINE float GetTotalSumByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
 	{
+		if (!GetEquippedWeaponItemData())
+		{
+			return 0.0f;
+		}
 		return TotalWeaponStatSum.FindOrAdd({GetEquippedWeaponItemData()->GetWeaponItemType(), WeaponItemStatName});
 	}
 
 	// 스탯 이름으로 무기 스탯 곱연산 총합 가져오기
 	FORCEINLINE float GetTotalProductByWeaponItemStatName(const EPepccineWeaponStatName WeaponItemStatName)
 	{
+		if (!GetEquippedWeaponItemData())
+		{
+			return 1.0f;
+		}
 		return TotalWeaponStatProduct.FindOrAdd({GetEquippedWeaponItemData()->GetWeaponItemType(), WeaponItemStatName},
 		                                        1.0f);
 	}
@@ -192,6 +200,6 @@ private:
 	UPepccineActiveItemManager* ActiveItemManager;
 
 	// 코인
-	UPROPERTY(VisibleInstanceOnly, Category = "Item|Resource", meta = (DisplayName = "코인 수"))
+	UPROPERTY(EditAnywhere, Category = "Item|Resource", meta = (DisplayName = "코인 수"))
 	int32 CoinCount = 0;
 };

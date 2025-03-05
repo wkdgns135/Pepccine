@@ -2,8 +2,10 @@
 
 #include "PepccineItemDataAssetBase.h"
 #include "PepccineItemDataBase.h"
+#include "PepccineItemPriceWidget.h"
 #include "Item/Manager/PepccineItemManagerComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/TextBlock.h"
 #include "Components/WidgetComponent.h"
 #include "Passive/PepccinePassiveItemData.h"
 #include "Resource/PepccineResourceItemData.h"
@@ -28,6 +30,10 @@ APepccineDropItem::APepccineDropItem()
 	// 상호작용 위젯 생성
 	InteractWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractWidgetComp"));
 	InteractWidgetComp->SetupAttachment(GetRootComponent());
+
+	// 가격 위젯 생성
+	PriceWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("PriceWidgetComp"));
+	PriceWidgetComp->SetupAttachment(GetRootComponent());
 }
 
 void APepccineDropItem::BeginPlay()
@@ -35,6 +41,16 @@ void APepccineDropItem::BeginPlay()
 	Super::BeginPlay();
 
 	StartLocation = StaticMeshComp->GetRelativeLocation();
+
+	if (PriceWidgetComp->GetWidget())
+	{
+		// 가격 위젯 설정
+		PriceWidget = Cast<UPepccineItemPriceWidget>(PriceWidgetComp->GetWidget());
+	}
+	else
+	{
+		UE_LOG(LogTemp,	Error, TEXT("가격 위젯이 설정되지 않았습니다."));
+	}
 }
 
 void APepccineDropItem::Tick(float DeltaTime)
@@ -60,9 +76,24 @@ void APepccineDropItem::InitializeDropItem(const UPepccineItemDataBase* InDropIt
 	DropItemData = DuplicateObject<UPepccineItemDataBase>(InDropItemData, this);
 
 	bIsShopItem = bInIsShopItem;
-	
+
 	if (DropItemData)
 	{
+		// 상점 아이템일 경우
+		if (bIsShopItem)
+		{
+			// 가격 설정
+			ItemPrice = (DropItemData->GetItemRarity() + 1) * 4;
+			// 위젯 표시
+			PriceWidgetComp->SetHiddenInGame(false);
+			
+			if (PriceWidget)
+			{
+				const FString PriceString = FString::Printf(TEXT("가격: %d"), ItemPrice);
+				PriceWidget->PriceText->SetText(FText::FromString(PriceString));
+			}
+		}
+
 		// 스폰 메시 설정
 		StaticMeshComp->SetStaticMesh(DropItemData->GetMeshToSpawn());
 
@@ -141,7 +172,7 @@ void APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 		}
 
 		// 아이템 획득
-		if (!ItemManagerComponent->PickUpItem(DropItemData, true, bIsShopItem))
+		if (!ItemManagerComponent->PickUpItem(DropItemData, true, bIsShopItem, ItemPrice))
 		{
 			return;
 		}
@@ -174,7 +205,8 @@ void APepccineDropItem::ChangeWeaponItemData(UPepccineWeaponItemData* WeaponItem
 		DropWeaponItemData->SetWeaponStats(DefaultWeaponItemData->GetWeaponItemStats());
 
 		// 현재 탄약 수, 예비 탄약 수는 이전 무기에서 가져오기
-		DropWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = WeaponItemData->GetWeaponItemStats().MagazineAmmo;
+		DropWeaponItemData->GetWeaponItemStatsPointer()->MagazineAmmo = WeaponItemData->GetWeaponItemStats().
+			MagazineAmmo;
 		DropWeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = WeaponItemData->GetWeaponItemStats().SpareAmmo;
 
 		// 스태틱 메시 설정
