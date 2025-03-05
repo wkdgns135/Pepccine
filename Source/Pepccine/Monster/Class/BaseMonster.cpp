@@ -1,5 +1,4 @@
 #include "Monster/Class/BaseMonster.h"
-
 #include "MovieSceneObjectBindingID.h"
 #include "PepccineGameState.h"
 #include "Monster/Component/MonsterStatComponent.h"
@@ -8,12 +7,14 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Room/Controller/BaseRoomController.h"
 #include "Components/WidgetComponent.h"
+#include "Components/AudioComponent.h"
 
 ABaseMonster::ABaseMonster()
 {
 	StatComponent = CreateDefaultSubobject<UMonsterStatComponent>(TEXT("StatComponent"));
 	AttackComponent = CreateDefaultSubobject<UMonsterAttackComponent>(TEXT("AttackComponent"));
 	HitReactionComponent = CreateDefaultSubobject<UHitReactionComponent>(TEXT("HitReactionComponent"));
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("BaseAudio"));
 	HealthBarWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
 	
 	HealthBarWidgetComp->SetupAttachment(RootComponent);
@@ -26,6 +27,8 @@ ABaseMonster::ABaseMonster()
 	{
 		HealthBarWidgetComp->SetWidgetClass(HealthWidgetClass.Class);
 	}
+
+	AudioComponent->SetupAttachment(RootComponent);
 }
 
 void ABaseMonster::BeginPlay()
@@ -40,6 +43,13 @@ void ABaseMonster::BeginPlay()
 	UE_LOG(LogTemp, Warning, TEXT("Monster Spawned!"));
 
 	InitializeHealthBar();
+
+	if (BaseSound)
+	{
+		AudioComponent->SetSound(BaseSound);
+		AudioComponent->SetBoolParameter(FName("Loop"), true);
+		AudioComponent->Play();
+	}
 }
 
 void ABaseMonster::EndPlay(const EEndPlayReason::Type EndPlayReason)
