@@ -16,17 +16,16 @@ public:
 
     FORCEINLINE void IncreaseATK(float amount) { Attack = Attack * amount; }
     FORCEINLINE void IncreaseDEF(float amount) { Defense = Defense * amount; }
-    FORCEINLINE void IncreaseSPD(float amount) { Speed = Speed * amount; }
-    
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
     float Attack = 10.0f;
+    void SetDefaultSpeed(float amount);
+    void IncreaseSPD(float amount);
     void DecreaseHealth(float Amount);
     void IncreaseHealth(float Amount);
     bool IsDead() const;
 
 protected:
-	virtual void BeginPlay() override;
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
     float MaxHealth = 100.0f;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat")
@@ -37,6 +36,7 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
     float Speed = 300.0f;
 
+    virtual void BeginPlay() override;
 private:
     void CheckHealth(ABaseMonster* OwnerMonster);
 };

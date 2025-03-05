@@ -2,18 +2,19 @@
 #include "Monster/AI/Controller/BossMonsterAIC.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Monster/Class/BaseMonster.h"
 
 UMonsterStatComponent::UMonsterStatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	CurrentHealth = MaxHealth;  // �ʱ� ü�� = �ִ� ü��
 }
 
 void UMonsterStatComponent::BeginPlay()
 {
     Super::BeginPlay();
-    UE_LOG(LogTemp, Warning, TEXT("Monster Stat On!"));
+    CurrentHealth = MaxHealth;
+    SetDefaultSpeed(Speed);
 }
 
 
@@ -28,7 +29,6 @@ void UMonsterStatComponent::DecreaseHealth(float Amount)
         OwnerMonster->UpdateHealthBar(CurrentHealth, MaxHealth);
         OwnerMonster->HealthBarWidgetComp->SetHiddenInGame(false);
 
-        // CheckHealth 호출
         CheckHealth(OwnerMonster);
     }
 }
@@ -63,6 +63,30 @@ void UMonsterStatComponent::CheckHealth(ABaseMonster* OwnerMonster)
             // CanBerserk를 True로 설정
             BossAIController->SetCanBerserk(true);
             UE_LOG(LogTemp, Warning, TEXT("Boss is in Berserk Mode!"));
+        }
+    }
+}
+
+void UMonsterStatComponent::IncreaseSPD(float amount)
+{
+    Speed = Speed * amount;
+
+    if (ABaseMonster* OwnerMonster = Cast<ABaseMonster>(GetOwner()))
+    {
+        if (UCharacterMovementComponent* MovementComp = OwnerMonster->GetCharacterMovement())
+        {
+            MovementComp->MaxWalkSpeed = Speed;
+        }
+    }
+}
+
+void UMonsterStatComponent::SetDefaultSpeed(float amount)
+{
+    if (ABaseMonster* OwnerMonster = Cast<ABaseMonster>(GetOwner()))
+    {
+        if (UCharacterMovementComponent* MovementComp = OwnerMonster->GetCharacterMovement())
+        {
+            MovementComp->MaxWalkSpeed = Speed;
         }
     }
 }

@@ -1,5 +1,5 @@
 #include "Monster/Component/JumpAttackComponent.h"
-
+#include "Monster/Component/MonsterStatComponent.h"
 #include "Character/Components/BattleComponent.h"
 #include "Character/Player/PepCharacter.h"
 #include "GameFramework/Character.h"
@@ -7,6 +7,21 @@
 UJumpAttackComponent::UJumpAttackComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
+}
+
+void UJumpAttackComponent::BeginPlay()
+{
+    Super::BeginPlay();
+
+    SetSkillDamage();
+}
+
+
+void UJumpAttackComponent::SetSkillDamage()
+{
+    ACharacter* OwnerMonster = Cast<ACharacter>(GetOwner());
+    UMonsterStatComponent* MonsterStatComponent = OwnerMonster->FindComponentByClass<UMonsterStatComponent>();
+    SkillDamage = MonsterStatComponent->Attack * DamageMultiplier;
 }
 
 void UJumpAttackComponent::ActivateSkill()
@@ -97,7 +112,7 @@ void UJumpAttackComponent::SkillTrace()
 
                 if (UBattleComponent* TargetBattleComponent = Player->FindComponentByClass<UBattleComponent>())
                 {
-                    TargetBattleComponent->SendHitResult(Player, Damage, Hit, EMonsterSkill::JumpAttack);
+                    TargetBattleComponent->SendHitResult(Player, SkillDamage, Hit, EMonsterSkill::JumpAttack);
                     return;
                 }
             }

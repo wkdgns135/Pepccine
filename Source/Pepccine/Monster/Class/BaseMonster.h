@@ -10,6 +10,7 @@ class UWidgetComponent;
 class UMonsterStatComponent;
 class UMonsterAttackComponent;
 class UHitReactionComponent;
+class UAudioComponent;
 class UMonsterHealthWidget;
 
 UENUM(BlueprintType)
@@ -33,7 +34,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
 	UWidgetComponent* HealthBarWidgetComp;
-	
 	UPROPERTY()
 	UMonsterHealthWidget* HealthInstance;
 	
@@ -42,7 +42,11 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* BaseSound;
+	UPROPERTY(VisibleAnywhere)
+	UAudioComponent* AudioComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UMonsterAttackComponent* AttackComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
