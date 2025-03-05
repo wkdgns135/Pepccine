@@ -27,7 +27,6 @@ private:
     UPROPERTY(EditAnywhere, Category = "Skill")
     float ChargeDuration = 3.0f;  // 돌진 지속 시간
 
-    
     void StartCharge();
     void StopCharge();
     void PlayEndAnimation();
@@ -37,4 +36,5 @@ private:
 
     bool bIsCharging;  // Charging 상태 추적
     float ChargeStartTime;  // Charge 시작 시간 추적
+    float OriginalSpeed;
 };

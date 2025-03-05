@@ -18,6 +18,9 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* BackButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* SettingButton;
 	
 protected:
 	virtual bool Initialize() override;
