@@ -59,6 +59,7 @@ public:
 	bool bIsPlayerAlive = true;
 	bool bIsMainWeaponEquipped = false;
 	bool bIsLoaded = false;
+	bool bIsActiveItemUse = false;
 	// 내부 & 애니매이션 사용
 
 	int HitStack = 0;

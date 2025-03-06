@@ -458,12 +458,16 @@ void APepCharacter::JumpStop()
 
 void APepCharacter::UseItem()
 {
-	if (!bIsPlayerAlive || bIsStunning)
+	if (!bIsPlayerAlive || bIsStunning || bIsActiveItemUse)
 	{
 		return;
 	}
 
+	bIsActiveItemUse = true;
+
+	
 	UE_LOG(LogTemp, Log, TEXT("UseItem!"));
+	
 	UpdateWeaponUI();
 }
 
@@ -568,7 +572,7 @@ FVector APepCharacter::GetRollDirection()
 
 void APepCharacter::Crouching()
 {
-	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive || bIsStunning || bIsClimbing)
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive || bIsStunning || bIsClimbing || bIsActiveItemUse)
 	{
 		return;
 	}
@@ -591,7 +595,7 @@ void APepCharacter::Crouching()
 
 void APepCharacter::Reload()
 {
-	if (!bIsPlayerAlive || bIsStunning || bIsClimbing || bIsReloading || !ItemManagerComponent->GetEquippedWeaponItemData())
+	if (!bIsPlayerAlive || bIsStunning || bIsClimbing || bIsReloading || !ItemManagerComponent->GetEquippedWeaponItemData()|| bIsActiveItemUse)
 	{
 		return;
 	}
@@ -614,7 +618,7 @@ void APepCharacter::Reload()
 
 void APepCharacter::Interactive()
 {
-	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing || !ItemManagerComponent)
+	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing || !ItemManagerComponent || bIsActiveItemUse)
 	{
 		return;
 	}
@@ -802,7 +806,7 @@ void APepCharacter::OpenInventory()
 
 void APepCharacter::SwapItem(const FInputActionValue& value)
 {
-	if (!bIsPlayerAlive || bIsReloading || bIsStunning || bIsClimbing)
+	if (!bIsPlayerAlive || bIsReloading || bIsStunning || bIsClimbing || bIsActiveItemUse)
 	{
 		return;
 	}
@@ -837,7 +841,7 @@ void APepCharacter::StopFire()
 void APepCharacter::Fire()
 {
 	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent || bIsReloading || bIsStunning || bIsClimbing ||
-		bIsSprinting)
+		bIsSprinting || bIsActiveItemUse)
 	{
 		return;
 	}
