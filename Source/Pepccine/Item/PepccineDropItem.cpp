@@ -75,8 +75,10 @@ void APepccineDropItem::Tick(float DeltaTime)
 
 void APepccineDropItem::InitializeDropItem(UPepccineItemDataBase* InDropItemData, const bool bInIsShopItem)
 {
-	// 데이터 저장
-	DropItemData = InDropItemData;
+	// 원본 데이터 저장
+	DefaultDropItemData = InDropItemData;
+	// 복사본 저장
+	DropItemData = DuplicateObject<UPepccineItemDataBase>(InDropItemData, this);
 
 	bIsShopItem = bInIsShopItem;
 
@@ -206,7 +208,7 @@ bool APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 			TMap<UPepccineItemDataBase*, FVector>& ItemData = RoomManager->GetItemData();
 			if (!ItemData.IsEmpty())
 			{
-				ItemData.Remove(DropItemData);
+				ItemData.Remove(DefaultDropItemData);
 			}
 		}
 	}
@@ -221,9 +223,18 @@ bool APepccineDropItem::PickUpItem(UPepccineItemManagerComponent* ItemManagerCom
 	// 이전 액티브 아이템이 있을 경우
 	if (BeforeActiveItemData)
 	{
-		// ItemManagerComponent->get
 		IsDestroy = false;
 		ChangeActiveItemData(BeforeActiveItemData);
+
+		if (const UPepccinePotionItemData* PotionItemData = Cast<UPepccinePotionItemData>(BeforeActiveItemData))
+		{
+			// 버프 적용 중인 경우
+			if (ItemManagerComponent->IsAppliedBuff())
+			{
+				// 버프 제거
+				ItemManagerComponent->RemoveBuffEffect(PotionItemData);
+			}
+		}
 	}
 
 	if (IsDestroy)
@@ -240,12 +251,11 @@ void APepccineDropItem::ChangeWeaponItemData(UPepccineWeaponItemData* BeforeWeap
 	if (DropItemData)
 	{
 		// 원본 데이터
-		UPepccineWeaponItemData* DefaultWeaponItemData = GetWorld()->
-		                                                 GetSubsystem<UPepccineItemSpawnerSubSystem>()->
-		                                                 GetItemDataAsset()->GetWeaponItemDataAsset()->
-		                                                 GetWeaponItemDatasById(BeforeWeaponItemData->GetItemId());
+		DefaultDropItemData = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->
+		                                  GetItemDataAsset()->GetWeaponItemDataAsset()->
+		                                  GetWeaponItemDatasById(BeforeWeaponItemData->GetItemId());
 		// 드랍 아이템 원본 데이터로 설정
-		DropItemData = DefaultWeaponItemData;
+		DropItemData = DefaultDropItemData;
 
 		// 현재 탄약 수, 예비 탄약 수는 이전 무기에서 가져오기
 		MagazineAmmo = BeforeWeaponItemData->GetWeaponItemStats().MagazineAmmo;
@@ -272,12 +282,11 @@ void APepccineDropItem::ChangeActiveItemData(UPepccineActiveItemData* BeforeActi
 	if (DropItemData)
 	{
 		// 원본 데이터
-		UPepccineActiveItemData* DefaultActiveItemData = GetWorld()->
-		                                                 GetSubsystem<UPepccineItemSpawnerSubSystem>()->
-		                                                 GetItemDataAsset()->GetActiveItemDataAsset()->
-		                                                 GetActiveItemById(BeforeActiveItemData->GetItemId());
+		DefaultDropItemData = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->
+		                                  GetItemDataAsset()->GetActiveItemDataAsset()->
+		                                  GetActiveItemById(BeforeActiveItemData->GetItemId());
 		// 드랍 아이템 원본 데이터로 설정
-		DropItemData = DefaultActiveItemData;
+		DropItemData = DefaultDropItemData;
 
 		// 스태틱 메시 설정
 		StaticMeshComp->SetStaticMesh(BeforeActiveItemData->GetMeshToSpawn());

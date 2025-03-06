@@ -73,6 +73,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "DropItem|Widget",
 		meta = (AllowPrivateAccess = "true"))
 	UPepccineItemPriceWidget* PriceWidget;
+	// 원본 아이템 데이터
+	UPROPERTY(VisibleAnywhere, Category = "DropItem|Data")
+	UPepccineItemDataBase* DefaultDropItemData; 
 	// 드랍 아이템 데이터
 	UPROPERTY(VisibleAnywhere, Category = "DropItem|Data")
 	UPepccineItemDataBase* DropItemData;
