@@ -588,7 +588,7 @@ void APepCharacter::Crouching()
 
 void APepCharacter::Reload()
 {
-	if (!bIsPlayerAlive || bIsStunning || bIsClimbing || bIsReloading)
+	if (!bIsPlayerAlive || bIsStunning || bIsClimbing || bIsReloading || !ItemManagerComponent->GetEquippedWeaponItemData())
 	{
 		return;
 	}
