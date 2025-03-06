@@ -7,6 +7,8 @@
 
 #include "PepccineItemSpawnerSubSystem.generated.h"
 
+class UPepccineItemSaveDataManager;
+class UPepccineItemManagerComponent;
 class UPepccineWeaponItemData;
 class UPepccineItemSpawnWeightData;
 class UPepccineItemDataAssetBase;
@@ -37,16 +39,25 @@ public:
 	void InitSpawner(UPepccineItemDataAssetBase* InItemDataAsset, const TSubclassOf<APepccineDropItem>& InSpawnedActor);
 	// 아이템 스폰
 	UFUNCTION(BlueprintCallable, Category = "Item|Spawner")
-	UPepccineItemDataBase* SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData, bool bIsShopItem = false);
+	UPepccineItemDataBase* SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData,
+	                                 bool bIsShopItem = false);
 	// 확률로 아이템 스폰
 	UFUNCTION(BlueprintPure, Category = "Item|Spawner")
-	UPepccineItemDataBase* GetRandomItemFromWeightDataAsset(const UPepccineItemSpawnWeightData* SpawnWeightData) const;
+	UPepccineItemDataBase* GetRandomItemFromWeightDataAsset(const UPepccineItemSpawnWeightData* SpawnWeightData);
+
+	// 현재 스폰할 아이템 이미 스폰된 건지 확인(Resource Item은 제외, 플레이어가 가지고 있는 아이템 포함)
+	bool CanSpawnItemData(const UPepccineItemDataBase* ItemData) const;
+
+	// 스폰된 아이템 데이터 추가
+	void AddSpawnableItemDataId(UPepccineItemDataBase* ItemData);
+	// 스폰된 아이템 데이터 제거
+	void RemoveSpawnableItemDataId(UPepccineItemDataBase* ItemData);
 
 	// getter
 	// 기본 무기 데이터 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item|Spawner")
 	UPepccineWeaponItemData* GetDefaultWeaponItemData() const;
-	
+
 	// 아이템 데이터 에셋 가져오기
 	UFUNCTION(BlueprintPure, Category = "Item|Spawner")
 	FORCEINLINE UPepccineItemDataAssetBase* GetItemDataAsset() const { return ItemDataAsset; }
@@ -58,5 +69,10 @@ protected:
 	// 스폰 엑터
 	TSubclassOf<APepccineDropItem> SpawnedActor;
 
-	// 스폰된 
+	// 스폰가능한 무기 아이템 아이디 목록
+	TArray<int32> SpawnableWeaponItemDatas;
+	// 스폰가능한 패시브 아이템 아이디 목록
+	TArray<int32> SpawnablePassiveItemDataIds;
+	// 스폰가능한 액티브 아이템 아이디 목록
+	TArray<int32> SpawnableActiveItemDataIds;
 };

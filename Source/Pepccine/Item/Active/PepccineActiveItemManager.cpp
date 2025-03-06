@@ -11,6 +11,7 @@ void UPepccineActiveItemManager::PickUpItem(const UPepccineActiveItemData* InAct
 
 		// 획득시 바로 재사용 대기시간 적용
 		ActiveItemRemainingCooldown = ActiveItemData->GetCooldown();
+		UE_LOG(LogTemp, Warning, TEXT("액티브 아이템 재사용 대기시간 : %.2f"), ActiveItemRemainingCooldown);
 		bIsActiveItemCooldown = true;
 	}
 	else
@@ -27,7 +28,7 @@ void UPepccineActiveItemManager::UseActiveItem()
 		UE_LOG(LogTemp, Warning, TEXT("액티브 아이템이 없습니다."));
 		return;
 	}
-	
+
 	// 현재 액티브 아이템 재사용 대기 중일 경우
 	if (bIsActiveItemCooldown)
 	{
@@ -35,49 +36,42 @@ void UPepccineActiveItemManager::UseActiveItem()
 		return;
 	}
 
-	// 이미 해당 버프를 받고 있다면 시간만 갱신
-	if (GetAppliedPotionItemDataById(ActiveItemData->GetItemId()))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("버프 갱신!"));
-		ActiveItemRemainingCooldown = ActiveItemData->GetCooldown();
-		bIsActiveItemCooldown = true;
-		return;
-	}
-
 	// 포션(버프)
 	if (const UPepccinePotionItemData* PotionItemData = Cast<UPepccinePotionItemData>(ActiveItemData))
 	{
-		ActivatePotionItem(PotionItemData);
-
+		ActiveItemRemainingCooldown = ActiveItemData->GetCooldown();
+		
+		// 버프 적용 중일 경우
+		if (bIsAppliedBuff)
+		{
+			GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+			UE_LOG(LogTemp, Warning, TEXT("버프 갱신!"));
+		}
+		// 버프 적용 중이 아닐 경우
+		else
+		{
+			ActivatePotionItem(PotionItemData);
+		}
+		
+		bIsActiveItemCooldown = true;
 		TimerDelegate.BindUFunction(this, FName("DeactivatePotionItem"), PotionItemData);
 		// 지속시간 이후 버프 해제
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, PotionItemData->GetDuration(), false);
 	}
 }
 
-void UPepccineActiveItemManager::ActivatePotionItem(const UPepccinePotionItemData* PotionItemData) const
+void UPepccineActiveItemManager::ActivatePotionItem(const UPepccinePotionItemData* PotionItemData)
 {
-	UE_LOG(LogTemp, Warning, TEXT("버프 적용!"));
+	bIsAppliedBuff = true;
 	ItemManager->IncreaseStatsOperations(PotionItemData->GetWeaponStatModifiers());
 	ItemManager->IncreaseStatsOperations(PotionItemData->GetCharacterStatModifiers());
+	UE_LOG(LogTemp, Warning, TEXT("버프 적용!"));
 }
 
-void UPepccineActiveItemManager::DeactivatePotionItem(const UPepccinePotionItemData* PotionItemData) const
+void UPepccineActiveItemManager::DeactivatePotionItem(const UPepccinePotionItemData* PotionItemData)
 {
-	UE_LOG(LogTemp, Warning, TEXT("버프 해제!"));
+	bIsAppliedBuff = false;
 	ItemManager->DecreaseStatsOperations(PotionItemData->GetWeaponStatModifiers());
 	ItemManager->DecreaseStatsOperations(PotionItemData->GetCharacterStatModifiers());
-}
-
-UPepccinePotionItemData* UPepccineActiveItemManager::GetAppliedPotionItemDataById(const int32 Id) const
-{
-	for (UPepccinePotionItemData* PotionItemData : AppliedBuffPotionItemDatas)
-	{
-		if (PotionItemData->GetItemId() == Id)
-		{
-			return PotionItemData;
-		}
-	}
-
-	return nullptr;
+	UE_LOG(LogTemp, Warning, TEXT("버프 해제!"));
 }

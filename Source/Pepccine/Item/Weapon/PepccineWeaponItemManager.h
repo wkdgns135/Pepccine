@@ -24,7 +24,7 @@ public:
 	// 기본 무기 장착
 	void EquipDefaultWeapon(const UPepccineWeaponItemData* WeaponItemData);
 	// 무기 획득
-	void PickUpItem(const UPepccineWeaponItemData* WeaponItemData);
+	void PickUpItem(const UPepccineWeaponItemData* WeaponItemData, bool bIsPlayEquipSound = true);
 	// 무기 장착
 	void EquipWeapon(UPepccineWeaponItemData* Weapon, bool bIsPlayEquipSound = true) const;
 	// 무기 메시 교체

@@ -20,26 +20,18 @@ public:
 	// 액티브 아이템 사용
 	void UseActiveItem();
 	// 포션 사용
-	void ActivatePotionItem(const UPepccinePotionItemData* PotionItemData) const;
+	void ActivatePotionItem(const UPepccinePotionItemData* PotionItemData);
 	// 포션 효과 제거
 	UFUNCTION()
-	void DeactivatePotionItem(const UPepccinePotionItemData* PotionItemData) const;
-
-	// 아이디로 적용된 버프 포션 목록에서 찾기
-	UPepccinePotionItemData* GetAppliedPotionItemDataById(const int32 Id) const;
+	void DeactivatePotionItem(const UPepccinePotionItemData* PotionItemData);
 
 	// getter
 	// 액티브 아이템 가져오기
 	FORCEINLINE UPepccineActiveItemData* GetActiveItemData() const { return ActiveItemData; }
-	// 적용된 버프 포션 목록 가져오기
-	FORCEINLINE TArray<UPepccinePotionItemData*> GetAppliedBuffPotionItemDatas() const
-	{
-		return AppliedBuffPotionItemDatas;
-	}
-
+	// 버프 적용 중 확인
+	FORCEINLINE bool IsAppliedBuff() const { return bIsAppliedBuff; }
 	// 재사용 대기시간 타이머 가져오기
-	FORCEINLINE FTimerHandle* GetTimerHandle() { return &TimerHandle; }
-
+	FORCEINLINE FTimerHandle& GetTimerHandle() { return TimerHandle; }
 	// 현재 남은 재사용 대기시간 가져오기
 	FORCEINLINE float GetActiveItemRemainingCooldown() const { return ActiveItemRemainingCooldown; }
 	// 현재 재사용 대기 중 인지 확인
@@ -63,9 +55,8 @@ private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Item|Active", meta = (DisplayName = "액티브 아이템"))
 	TObjectPtr<UPepccineActiveItemData> ActiveItemData;
 
-	// 적용된 버프 포션 목록
-	UPROPERTY(VisibleInstanceOnly, Category = "Item|Active", meta = (DisplayName = "적용된 버프 포션 목록"))
-	TArray<TObjectPtr<UPepccinePotionItemData>> AppliedBuffPotionItemDatas;
+	// 버프 적용 중 확인 여부
+	bool bIsAppliedBuff = false;
 
 	// 재사용 대기시간 핸들러
 	FTimerHandle TimerHandle;
