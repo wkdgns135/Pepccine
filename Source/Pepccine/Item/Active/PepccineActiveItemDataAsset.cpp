@@ -1,7 +1,7 @@
 ﻿#include "PepccineActiveItemDataAsset.h"
 
 #include "PepccineActiveItemData.h"
-
+#if WITH_EDITOR
 void UPepccineActiveItemDataAsset::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -20,3 +20,4 @@ void UPepccineActiveItemDataAsset::PostEditChangeProperty(struct FPropertyChange
 		}
 	}
 }
+#endif

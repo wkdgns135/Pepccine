@@ -20,6 +20,7 @@ void ABaseRoomController::PostInitializeComponents()
 	}
 }
 
+#if WITH_EDITOR
 void ABaseRoomController::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -46,6 +47,7 @@ void ABaseRoomController::PostEditChangeProperty(FPropertyChangedEvent& Property
 		}
 	}
 }
+#endif
 
 void ABaseRoomController::BeginPlay()
 {
