@@ -101,6 +101,14 @@ void UPepccineMontageComponent::Climbing()
 	}
 }
 
+void UPepccineMontageComponent::GunHit()
+{
+	if (AnimInstance && GunHitMontage)
+	{
+		AnimInstance->Montage_Play(GunHitMontage);
+	}
+}
+
 void UPepccineMontageComponent::Roll(FVector Dir, FRotator ActorRotation)
 {
 	float ForwardDeltaDegree = 0;
@@ -173,27 +181,27 @@ void UPepccineMontageComponent::OnMontageBlendingOut(UAnimMontage* Montage, bool
 
 	if (Montage == ReloadMontage)
 	{
-		UE_LOG(LogTemp, Log, TEXT("EndReload!"));
+		UE_LOG(LogTemp, Warning, TEXT("EndReload!"));
 		Owner->bIsReloading = false;
 	}
 	else if (Montage == DrawMontage)
 	{
-		UE_LOG(LogTemp, Log, TEXT("EndDraw!"));
+		UE_LOG(LogTemp, Warning, TEXT("EndDraw!"));
 		Owner->bIsSwapping = false;
 	}
 	else if (Montage == GetUpMontage)
 	{
-		UE_LOG(LogTemp, Log, TEXT("EndGettingUp"));
+		UE_LOG(LogTemp, Warning, TEXT("EndGettingUp"));
+		Owner->bIsStunning = false;
+	}
+	else if (Montage == StumbleGetUpMontage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("EndStumbleGettingUp"));
 		Owner->bIsStunning = false;
 	}
 	else if (Montage == ClimbingMontage)
 	{
 		UE_LOG(LogTemp, Log, TEXT("EndClimb"));
 		Owner->bIsClimbing = false;
-	}
-	else if (Montage == DeathMontage)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Dead"));
-		Owner->Dead();
 	}
 }
