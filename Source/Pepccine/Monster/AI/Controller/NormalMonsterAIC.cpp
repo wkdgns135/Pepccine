@@ -24,7 +24,7 @@ void ANormalMonsterAIC::BeginPlay()
 void ANormalMonsterAIC::InitializeBehaviorTree(APawn* InPawn)
 {
     ABaseMonster* BaseMonster = Cast<ABaseMonster>(InPawn);
-    BehaviorTree = BaseMonster->GetBehaviorTree();
+    UBehaviorTree* BehaviorTree = BaseMonster->GetBehaviorTree();
 
     if (BaseMonster && BehaviorTree)
     {

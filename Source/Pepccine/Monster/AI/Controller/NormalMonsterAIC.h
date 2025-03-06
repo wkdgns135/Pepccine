@@ -21,8 +21,6 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UBlackboardComponent* BlackboardComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
-	UBehaviorTree* BehaviorTree;
 
 private:
 	void InitializeBehaviorTree(APawn* InPawn);
