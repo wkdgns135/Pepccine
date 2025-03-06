@@ -24,6 +24,7 @@ class PEPCCINE_API UPepccineItemSpawnerSubSystem : public UGameInstanceSubsystem
 public:
 	// 서브 시스템 무조건 생성
 	FORCEINLINE virtual bool ShouldCreateSubsystem(UObject* Outer) const override { return true; }
+	// 초기화
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	
 	// 누적 가중치 배열 반환
@@ -35,10 +36,6 @@ public:
 	static UPepccineItemDataBase* GetRandomItemDataByRandomRarity(const TArray<UPepccineItemDataBase*>& ItemDatas,
 	                                                              const UPepccineItemRarityWeightData*
 	                                                              RarityWeightData);
-
-	// 아이템 스포너 초기화
-	UFUNCTION(BlueprintCallable, Category = "Item|Spawner")
-	void InitSpawner(UPepccineItemDataAssetBase* InItemDataAsset, const TSubclassOf<APepccineDropItem>& InSpawnedActor);
 	// 스폰가능 아이템 데이터 초기화
 	void InitSpawnableItemData();
 	// 아이템 스폰
@@ -68,10 +65,11 @@ public:
 
 protected:
 	// 전체 아이템 데이터 에셋
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, Category = "Item|Spawner", meta = (AllowPrivateAccess = "true"))
 	UPepccineItemDataAssetBase* ItemDataAsset;
 	// 스폰 엑터
-	TSubclassOf<APepccineDropItem> SpawnedActor;
+	UPROPERTY(EditDefaultsOnly, Category = "Item|Spawner", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<APepccineDropItem> SpawnActor;
 
 	// 스폰가능한 무기 아이템 아이디 목록
 	TArray<int32> SpawnableWeaponItemDatas;

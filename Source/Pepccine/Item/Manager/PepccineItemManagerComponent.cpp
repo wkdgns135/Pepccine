@@ -77,6 +77,11 @@ void UPepccineItemManagerComponent::TickComponent(float DeltaTime, enum ELevelTi
 			ActiveItemManager->SetIsActiveItemCooldown(false);
 		}
 	}
+
+	if (PassiveItemManager && !PassiveItemManager->GetPassiveItemDatas().IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%d"), PassiveItemManager->GetPassiveItemDatas().Num());
+	}
 }
 
 void UPepccineItemManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
