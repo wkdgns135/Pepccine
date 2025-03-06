@@ -40,7 +40,6 @@ public:
 
 	FORCEINLINE EMonsterType GetMonsterType() const { return MonsterType; }
 	FORCEINLINE EMonsterClass GetMonsterClass() const { return MonsterClass; }
-	FORCEINLINE UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
 	UWidgetComponent* HealthBarWidgetComp;
@@ -62,11 +61,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UMonsterStatComponent* StatComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UHitReactionComponent* HitReactionComponent;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
-	UBehaviorTree* BehaviorTree;
-	
+	UHitReactionComponent* HitReactionComponent;	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster")
 	EMonsterType MonsterType;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster")
