@@ -45,8 +45,11 @@ private:
 
 protected:
 	virtual void PostInitializeComponents() override;
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void BeginPlay() override;
+	
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 	
 public:
 	void ClearRoom();
