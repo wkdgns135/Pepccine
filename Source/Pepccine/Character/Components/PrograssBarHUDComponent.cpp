@@ -11,6 +11,7 @@ UPrograssBarHUDComponent::UPrograssBarHUDComponent()
 void UPrograssBarHUDComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	InitPrograssBar();
 }
 
 void UPrograssBarHUDComponent::InitPrograssBar() const

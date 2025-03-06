@@ -26,7 +26,7 @@ public:
 	void SetWeaponItem(UTexture2D* MainWeaponImage, UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 SpareAmmo, bool bIsMainWeapon);
 	void SetCoins(int Coins);
 
-	void InitItemIcons();
+	void InitItemIcons() const;
 
 protected:
 	virtual void BeginPlay() override;
