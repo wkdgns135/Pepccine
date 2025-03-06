@@ -6,7 +6,7 @@ void UHealthWidget::UpdateHealthVolume(const float Health, const float MaxHealth
 
 	const float HealthPercent = Health / MaxHealth;
 
-	FLinearColor NewColor = FMath::Lerp(FLinearColor::Red, FLinearColor::Green, HealthPercent);
+	FLinearColor NewColor = FMath::Lerp(FLinearColor::Red, FLinearColor::Green, 0.7f);
 	HealthPrograssBar->SetFillColorAndOpacity(NewColor);
 	HealthPrograssBar->SetPercent(HealthPercent);
 }
