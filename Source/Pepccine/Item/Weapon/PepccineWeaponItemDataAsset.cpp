@@ -2,6 +2,7 @@
 
 #include "PepccineWeaponItemData.h"
 
+#if WITH_EDITOR
 void UPepccineWeaponItemDataAsset::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -20,3 +21,4 @@ void UPepccineWeaponItemDataAsset::PostEditChangeProperty(struct FPropertyChange
 		}
 	}
 }
+#endif

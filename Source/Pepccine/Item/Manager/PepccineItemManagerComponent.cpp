@@ -5,6 +5,7 @@
 #include "Item/ItemSpawn/PepccineItemSpawnerSubSystem.h"
 #include "Item/Active/PepccineActiveItemData.h"
 #include "GameFramework/Character.h"
+#include "Item/PepccineItemSaveDataManager.h"
 #include "Item/Active/PepccineActiveItemDataAsset.h"
 #include "Kismet/GameplayStatics.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
@@ -22,7 +23,7 @@ UPepccineItemManagerComponent::UPepccineItemManagerComponent(): WeaponItemManage
 void UPepccineItemManagerComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
-	
+
 	// 무기 아이템 매니저 생성
 	WeaponItemManager = NewObject<UPepccineWeaponItemManager>(this);
 	WeaponItemManager->InitializeManager(this);
@@ -49,8 +50,8 @@ void UPepccineItemManagerComponent::BeginPlay()
 			WeaponItemManager->SetWeaponItemComponent(OwnerCharacter);
 
 			// 기본 무기 장착
-			// WeaponItemManager->EquipDefaultWeapon(
-			// 	GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->GetDefaultWeaponItemData());
+			WeaponItemManager->EquipDefaultWeapon(
+				GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->GetDefaultWeaponItemData());
 
 			// 데이터 로드
 			if (LoadItemSaveData())
@@ -65,12 +66,12 @@ void UPepccineItemManagerComponent::TickComponent(float DeltaTime, enum ELevelTi
                                                   FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
+
 	if (IsActiveItemCooldown())
 	{
 		const float ActiveItemCooldown = ActiveItemManager->GetActiveItemRemainingCooldown();
 		ActiveItemManager->SetActiveItemRemainingCooldown(FMath::Max(ActiveItemCooldown - DeltaTime, 0.0f));
-		UE_LOG(LogTemp, Warning, TEXT("%.2f"), ActiveItemManager->GetActiveItemRemainingCooldown());
+		// UE_LOG(LogTemp, Warning, TEXT("%.2f"), ActiveItemManager->GetActiveItemRemainingCooldown());
 		if (FMath::IsNearlyZero(ActiveItemCooldown))
 		{
 			ActiveItemManager->SetIsActiveItemCooldown(false);
@@ -99,7 +100,7 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 
 	FPepccineItemSaveDataStruct SaveDataStruct = SaveData->ItemSaveData;
 
-	const UPepccineItemSpawnerSubSystem* ItemSpawnerSubSystem = GetWorld()->GetSubsystem<
+	UPepccineItemSpawnerSubSystem* ItemSpawnerSubSystem = GetWorld()->GetSubsystem<
 		UPepccineItemSpawnerSubSystem>();
 	if (!ItemSpawnerSubSystem)
 	{
@@ -114,22 +115,30 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 		return false;
 	}
 
+	UPepccineWeaponItemData* WeaponItemData;
 	// 주 무기
 	if (SaveDataStruct.MainWeaponItemId >= 0 && SaveDataStruct.MainWeaponItemId < ItemDataBase->GetWeaponItemDataAsset()
 		->GetWeaponItemDatas().Num())
 	{
-		PickUpItem(ItemDataBase->GetWeaponItemDataAsset()->GetWeaponItemDatasById(SaveDataStruct.MainWeaponItemId),
+		WeaponItemData = ItemDataBase->GetWeaponItemDataAsset()->
+		                               GetWeaponItemDatasById(SaveDataStruct.MainWeaponItemId);
+		PickUpItem(WeaponItemData,
 		           false, false, 0, SaveDataStruct.MainWeaponAmmo.MagazinesAmmo,
 		           SaveDataStruct.MainWeaponAmmo.SpareAmmo);
+		// 스폰 가능 목록에서 제거
+		ItemSpawnerSubSystem->RemoveSpawnableItemDataId(WeaponItemData);
 	}
 
 	// 보조 무기
 	if (SaveDataStruct.SubWeaponItemId >= 0 && SaveDataStruct.SubWeaponItemId < ItemDataBase->GetWeaponItemDataAsset()->
 		GetWeaponItemDatas().Num())
 	{
-		PickUpItem(ItemDataBase->GetWeaponItemDataAsset()->GetWeaponItemDatasById(SaveDataStruct.SubWeaponItemId),
+		WeaponItemData = ItemDataBase->GetWeaponItemDataAsset()->GetWeaponItemDatasById(SaveDataStruct.SubWeaponItemId);
+		PickUpItem(WeaponItemData,
 		           false, false, 0, SaveDataStruct.SubWeaponAmmo.MagazinesAmmo,
 		           SaveDataStruct.SubWeaponAmmo.SpareAmmo);
+		// 스폰 가능 목록에서 제거
+		ItemSpawnerSubSystem->RemoveSpawnableItemDataId(WeaponItemData);
 	}
 
 	// 무기 장착
@@ -144,10 +153,12 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 	{
 		if (Id >= 0 && Id < ItemDataBase->GetWeaponItemDataAsset()->GetWeaponItemDatas().Num())
 		{
-			if (const UPepccinePassiveItemData* PassiveItemData = ItemDataBase->GetPassiveItemDataAsset()->
+			if (UPepccinePassiveItemData* PassiveItemData = ItemDataBase->GetPassiveItemDataAsset()->
 			                                                              GetPassiveItemById(Id))
 			{
 				PickUpItem(PassiveItemData);
+				// 스폰 가능 목록에서 제거
+				ItemSpawnerSubSystem->RemoveSpawnableItemDataId(PassiveItemData);
 			}
 		}
 	}
@@ -156,10 +167,12 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 	if (SaveDataStruct.ActiveItemId >= 0 && SaveDataStruct.ActiveItemId < ItemDataBase->GetWeaponItemDataAsset()->
 		GetWeaponItemDatas().Num())
 	{
-		if (const UPepccineActiveItemData* ActiveItemData = ItemDataBase->GetActiveItemDataAsset()->
+		if (UPepccineActiveItemData* ActiveItemData = ItemDataBase->GetActiveItemDataAsset()->
 		                                                            GetActiveItemById(SaveDataStruct.ActiveItemId))
 		{
 			PickUpItem(ActiveItemData);
+			// 스폰 가능 목록에서 제거
+			ItemSpawnerSubSystem->RemoveSpawnableItemDataId(ActiveItemData);
 		}
 	}
 
@@ -213,9 +226,9 @@ void UPepccineItemManagerComponent::SaveItemSaveData() const
 	}
 }
 
-bool UPepccineItemManagerComponent::PickUpItem(const UPepccineItemDataBase* DropItemData, bool bIsPlayPickUpSound,
-                                               bool bIsShopItem,
-                                               int32 Price, float MagazineAmmo, float SpareAmmo)
+bool UPepccineItemManagerComponent::PickUpItem(const UPepccineItemDataBase* DropItemData, const bool bIsPlayPickUpSound,
+                                               const bool bIsShopItem,
+                                               const int32 Price, const float MagazineAmmo, const float SpareAmmo)
 {
 	if (!DropItemData)
 	{
@@ -269,7 +282,8 @@ bool UPepccineItemManagerComponent::PickUpItem(const UPepccineItemDataBase* Drop
 		}
 		else if (ResourceItemData->GetResourceItemType() == EPepccineResourceItemType::EPRIT_Coin)
 		{
-			CoinCount += ResourceItemData->GetResourceAmount();
+			const int32 RandomCoin = FMath::RandRange(1, ResourceItemData->GetResourceAmount());
+			CoinCount += RandomCoin;
 		}
 	}
 
@@ -421,9 +435,13 @@ void UPepccineItemManagerComponent::UseActiveItem() const
 	ActiveItemManager->UseActiveItem();
 }
 
-void UPepccineItemManagerComponent::RemoveBuffEffect()
+void UPepccineItemManagerComponent::RemoveBuffEffect(const UPepccinePotionItemData* PotionItemData) const
 {
-	// ActiveItemManager->
+	// 재사용 대기시간 즉시 초기화
+	GetWorld()->GetTimerManager().ClearTimer(ActiveItemManager->GetTimerHandle());
+	ActiveItemManager->SetIsActiveItemCooldown(false);
+	ActiveItemManager->SetActiveItemRemainingCooldown(0.0f);
+	ActiveItemManager->DeactivatePotionItem(PotionItemData);
 }
 
 bool UPepccineItemManagerComponent::UseCoin(const int32 Price)

@@ -68,7 +68,7 @@ public:
 	void UseActiveItem() const;
 
 	// 버프 제거
-	void RemoveBuffEffect();
+	void RemoveBuffEffect(const UPepccinePotionItemData* PotionItemData) const;
 
 	// 코인 사용
 	UFUNCTION(BlueprintCallable, Category = "Item|Resource")
@@ -152,11 +152,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Item|Active")
 	FORCEINLINE UPepccineActiveItemData* GetActiveItemData() const { return ActiveItemManager->GetActiveItemData(); }
 
-	// 적용된 버프 포션 목록 가져오기
+	// 버프 적용 여부 확인
 	UFUNCTION(BlueprintPure, Category = "Item|Active")
-	FORCEINLINE TArray<UPepccinePotionItemData*> GetAppliedBuffPotionItemDatas() const
+	FORCEINLINE bool IsAppliedBuff() const
 	{
-		return ActiveItemManager->GetAppliedBuffPotionItemDatas();
+		return ActiveItemManager->IsAppliedBuff();
 	}
 
 	// 현재 남은 재사용 대기시간 가져오기
@@ -198,5 +198,5 @@ private:
 	
 	// 코인
 	UPROPERTY(EditDefaultsOnly, Category = "Item|Resource", meta = (DisplayName = "코인 수"))
-	int32 CoinCount = 0;
+	int32 CoinCount = 100;
 };

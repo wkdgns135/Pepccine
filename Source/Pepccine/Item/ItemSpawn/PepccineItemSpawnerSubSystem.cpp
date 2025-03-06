@@ -16,13 +16,44 @@ void UPepccineItemSpawnerSubSystem::InitSpawner(UPepccineItemDataAssetBase* InIt
 {
 	ItemDataAsset = InItemDataAsset;
 	SpawnedActor = InSpawnedActor;
+
+	// 스폰가능 무기 아이템 추가
+	for (const UPepccineWeaponItemData* WeaponItemData : ItemDataAsset->GetWeaponItemDataAsset()->GetWeaponItemDatas())
+	{
+		SpawnableWeaponItemDatas.Add(WeaponItemData->GetItemId());
+	}
+	// 스폰가능 패시브 아이템 추가
+	for (const UPepccinePassiveItemData* PassiveItemData : ItemDataAsset->GetPassiveItemDataAsset()->
+	                                                                      GetPassiveItemDatas())
+	{
+		SpawnablePassiveItemDataIds.Add(PassiveItemData->GetItemId());
+	}
+	// 스폰가능 액티브 아이템 추가
+	for (const UPepccineActiveItemData* ActiveItemData : ItemDataAsset->GetActiveItemDataAsset()->GetActiveItemDatas())
+	{
+		SpawnableActiveItemDataIds.Add(ActiveItemData->GetItemId());
+	}
 }
 
-UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& SpawnLocation, UPepccineItemDataBase* DropItemData, const bool bIsShopItem)
+UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& SpawnLocation,
+                                                                UPepccineItemDataBase* DropItemData,
+                                                                const bool bIsShopItem)
 {
 	if (!ItemDataAsset)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("아이템 데이터 에셋이 설정되지 않았습니다."));
+		return nullptr;
+	}
+
+	if (!DropItemData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("스폰할 아이템 데이터가 없습니다."));
+		return nullptr;
+	}
+
+	if (!CanSpawnItemData(DropItemData))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("스폰 할 수 없는 아이템 입니다. : %s"), *DropItemData->GetDisplayName());
 		return nullptr;
 	}
 
@@ -38,6 +69,8 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& S
 		{
 			// 아이템 초기화
 			DropItem->InitializeDropItem(DropItemData, bIsShopItem);
+			// 스폰 가능 목록에서 제거
+			RemoveSpawnableItemDataId(DropItemData);
 
 			return DropItemData;
 		}
@@ -47,8 +80,15 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& S
 }
 
 UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDataAsset(
-	const UPepccineItemSpawnWeightData* SpawnWeightData) const
+	const UPepccineItemSpawnWeightData* SpawnWeightData)
 {
+	if (SpawnableWeaponItemDatas.IsEmpty() && SpawnablePassiveItemDataIds.
+		IsEmpty() && SpawnableActiveItemDataIds.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("더이상 스폰할 무기, 패시브, 액티브 아이템이 없습니다."));
+		return nullptr;
+	}
+
 	// 아이템 타입 가중치
 	TArray<int32> ItemTypeWeights = {
 		SpawnWeightData->GetWeaponItemWeight(),
@@ -104,9 +144,6 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 	else if (ItemTypeRandomValue <= ItemTypeWeights[3])
 	{
 		UPepccineResourceItemData* AmmoBoxData = ItemDataAsset->GetAmmoBoxItem();
-		// TODO[명관] : 탄약 랜덤으로 할지 고정값으로 할지 결정
-		// 임시로 고정값 입력
-		AmmoBoxData->SetResourceAmount(30);
 		ItemData = AmmoBoxData;
 		ItemTypeString = TEXT("탄약통");
 	}
@@ -114,9 +151,6 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 	else if (ItemTypeRandomValue <= ItemTypeWeights[4])
 	{
 		UPepccineResourceItemData* CoinData = ItemDataAsset->GetCoinItem();
-		// TODO[명관] : 코인 랜덤으로 할지 고정값으로 할지 결정
-		// 임시로 고정값 입력
-		CoinData->SetResourceAmount(10);
 		ItemData = CoinData;
 		ItemTypeString = TEXT("코인");
 	}
@@ -124,17 +158,95 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 	else
 	{
 		UPepccineResourceItemData* HealingPotion = ItemDataAsset->GetHealingPotion();
-		// TODO[명관] : 코인 랜덤으로 할지 고정값으로 할지 결정
-		// 임시로 고정값 입력
-		HealingPotion->SetResourceAmount(50);
 		ItemData = HealingPotion;
 		ItemTypeString = TEXT("회복 포션");
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("아이템 타입 : %s"), *ItemTypeString);
+	UE_LOG(LogTemp, Warning, TEXT("아이템 타입 : %s"), *ItemTypeString)
+
+	// 해당 아이템이 없을 경우 재귀로 탐색
+	if (!ItemData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("아이템이 없습니다. 재귀로 재탐색"));
+		ItemData = GetRandomItemFromWeightDataAsset(SpawnWeightData);
+	}
+
+	// 해당 아이템이 스폰 가능 아이템 목록에 없을 경우
+	if (!CanSpawnItemData(ItemData))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("스폰 가능 목록에 없습니다. 재귀로 재탐색"));
+		ItemData = GetRandomItemFromWeightDataAsset(SpawnWeightData);
+	}
+
 	UE_LOG(LogTemp, Warning, TEXT("ItemName: %s"), *ItemData->GetDisplayName());
-	
+
 	return ItemData;
+}
+
+bool UPepccineItemSpawnerSubSystem::CanSpawnItemData(const UPepccineItemDataBase* ItemData) const
+{
+	// 무기
+	if (Cast<UPepccineWeaponItemData>(ItemData))
+	{
+		return SpawnableWeaponItemDatas.Contains(ItemData->GetItemId());
+	}
+
+	// 패시브
+	if (Cast<UPepccinePassiveItemData>(ItemData))
+	{
+		return SpawnablePassiveItemDataIds.Contains(ItemData->GetItemId());
+	}
+
+	// 액티브
+	if (Cast<UPepccineActiveItemData>(ItemData))
+	{
+		return SpawnableActiveItemDataIds.Contains(ItemData->GetItemId());
+	}
+
+	return true;
+}
+
+void UPepccineItemSpawnerSubSystem::AddSpawnableItemDataId(UPepccineItemDataBase* ItemData)
+{
+	// 무기
+	if (Cast<UPepccineWeaponItemData>(ItemData))
+	{
+		SpawnableWeaponItemDatas.Add(ItemData->GetItemId());
+	}
+	// 패시브
+	else if (Cast<UPepccinePassiveItemData>(ItemData))
+	{
+		SpawnablePassiveItemDataIds.Add(ItemData->GetItemId());
+	}
+	// 액티브
+	else if (Cast<UPepccineActiveItemData>(ItemData))
+	{
+		SpawnableActiveItemDataIds.Add(ItemData->GetItemId());
+	}
+}
+
+void UPepccineItemSpawnerSubSystem::RemoveSpawnableItemDataId(UPepccineItemDataBase* ItemData)
+{
+	// 무기
+	if (Cast<UPepccineWeaponItemData>(ItemData))
+	{
+		SpawnableWeaponItemDatas.Remove(ItemData->GetItemId());
+		UE_LOG(LogTemp, Warning, TEXT("스폰 가능 무기 목록에서 제거 : %s"), *ItemData->GetDisplayName());
+	}
+	// 패시브
+	else if (Cast<UPepccinePassiveItemData>(ItemData))
+	{
+		SpawnablePassiveItemDataIds.Remove(ItemData->GetItemId());
+		UE_LOG(LogTemp, Warning, TEXT("스폰 가능 패시브 목록에서 제거 : %s"), *ItemData->GetDisplayName());
+	}
+	// 액티브
+	else if (Cast<UPepccineActiveItemData>(ItemData))
+	{
+		SpawnableActiveItemDataIds.Remove(ItemData->GetItemId());
+		UE_LOG(LogTemp, Warning, TEXT("스폰 가능 액티브 목록에서 제거 : %s"), *ItemData->GetDisplayName());
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("스폰된 아이템 : %s"), *ItemData->GetDisplayName());
 }
 
 UPepccineWeaponItemData* UPepccineItemSpawnerSubSystem::GetDefaultWeaponItemData() const
@@ -183,7 +295,7 @@ TArray<UPepccineItemDataBase*> UPepccineItemSpawnerSubSystem::GetItemDataByItemR
 UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemDataByRandomRarity(
 	const TArray<UPepccineItemDataBase*>& ItemDatas, const UPepccineItemRarityWeightData* RarityWeightData)
 {
-	UPepccineItemDataBase* ItemData;
+	UPepccineItemDataBase* ItemData = nullptr;
 
 	// 아이템 레어도 가중치
 	TArray<int32> ItemRarityWeights = {
@@ -210,13 +322,8 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemDataByRandomR
 
 	const TArray<UPepccineItemDataBase*> ItemDatasByRarity = GetItemDataByItemRarity(ItemDatas, ItemRarity);
 
-	// 해당 등급 아이템이 없을 경우 재귀로 탐색
-	if (ItemDatasByRarity.IsEmpty())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("재귀로 재탐색"));
-		ItemData = GetRandomItemDataByRandomRarity(ItemDatas, RarityWeightData);
-	}
-	else
+	// 해당 등급 아이템이 있을 경우
+	if (!ItemDatasByRarity.IsEmpty())
 	{
 		// 해당 등급 아이템 랜덤 인덱스
 		const int32 ItemIndex = FMath::RandRange(0, ItemDatasByRarity.Num() - 1);
