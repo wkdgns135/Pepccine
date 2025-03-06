@@ -88,7 +88,7 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 		UE_LOG(LogTemp, Error, TEXT("더이상 스폰할 무기, 패시브, 액티브 아이템이 없습니다."));
 		return nullptr;
 	}
-
+	if (!SpawnWeightData)return nullptr;
 	// 아이템 타입 가중치
 	TArray<int32> ItemTypeWeights = {
 		SpawnWeightData->GetWeaponItemWeight(),
