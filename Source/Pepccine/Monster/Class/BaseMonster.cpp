@@ -9,6 +9,7 @@
 #include "Components/WidgetComponent.h"
 #include "Components/AudioComponent.h"
 #include "Item/ItemSpawn/PepccineItemSpawnerSubSystem.h"
+#include "AIController.h"
 
 ABaseMonster::ABaseMonster()
 {
@@ -142,6 +143,12 @@ void ABaseMonster::OnHitReceived(AActor* DamageCauser, float DamageAmount, const
 void ABaseMonster::Die()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Monster Die!"));
+
+	AAIController* AIController = Cast<AAIController>(GetController());
+	if (AIController && AIController->BrainComponent)
+	{
+		AIController->BrainComponent->StopLogic(TEXT("Monster Died"));
+	}
 
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 	GetMesh()->Stop();
