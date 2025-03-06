@@ -189,4 +189,9 @@ void UPepccineMontageComponent::OnMontageBlendingOut(UAnimMontage* Montage, bool
 		UE_LOG(LogTemp, Log, TEXT("EndClimb"));
 		Owner->bIsClimbing = false;
 	}
+	else if (Montage == DeathMontage)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Dead"));
+		Owner->Dead();
+	}
 }

@@ -226,13 +226,19 @@ void APepCharacter::AddObservers()
 void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult,
                                 EMonsterSkill SkillType)
 {
-	if (bIsRolling || !HitReactionComponent || !PepccineMontageComponent) return;
+	if (bIsRolling || !HitReactionComponent || !PepccineMontageComponent || !bIsPlayerAlive) return;
 	if (bIsZooming) ZoomOut();
 
 	PlayerStatComponent->DecreaseHealth(DamageAmount);
 	if (PlayerStatComponent->GetCurrentHealth() <= 0) return;
 
 	FVector HitDirection = HitResult.ImpactNormal;
+	if (HitStack < 10)
+	{
+		FStatModifier AddStatModifier(EPepccineCharacterStatName::EPCSN_HealthDecelerationAmount, 0.1f, 1.0f);
+		PlayerStatComponent->ApplyStatModifier(AddStatModifier);
+		++HitStack;
+	}
 
 	switch (SkillType)
 	{
@@ -295,7 +301,7 @@ void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth
 
 	if (NewHealth == 0)
 	{
-		Dead();
+		PepccineMontageComponent->Death();
 	}
 
 	PrograssBarComponent->SetHealth(NewHealth, MaxHealth);
@@ -350,8 +356,6 @@ void APepCharacter::Dead()
 {
 	if (!bIsPlayerAlive) return;
 	bIsPlayerAlive = false;
-
-	PepccineMontageComponent->Death();
 
 	if (APepccinePlayerController* PepccinePlayerController = Cast<APepccinePlayerController>(PlayerController))
 	{

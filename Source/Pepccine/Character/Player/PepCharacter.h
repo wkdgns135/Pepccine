@@ -61,10 +61,15 @@ public:
 	bool bIsLoaded = false;
 	// 내부 & 애니매이션 사용
 
+	int HitStack = 0;
+
 	// 마우스 민감도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	float MouseSensitivity = 0.5f;
 
+	// Montage 에서 호출
+	UFUNCTION()
+	void Dead();
 	// UE delegate
 	UFUNCTION()
 	void OnHealthChanged(const float NewHealth, const float MaxHealth);
@@ -159,8 +164,6 @@ private:
 	void ZoomIn();
 	UFUNCTION()
 	void ZoomOut();
-	UFUNCTION()
-	void Dead();
 	UFUNCTION()
 	void ShowMenu();
 
