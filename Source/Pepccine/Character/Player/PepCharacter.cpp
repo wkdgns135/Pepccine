@@ -86,6 +86,8 @@ void APepCharacter::BeginPlay()
 	PrograssBarComponent->SetStamina(PlayerStatComponent->GetCurrentStamina(), PlayerStatComponent->GetMaxStamina());
 
 	// UE_LOG(LogTemp, Warning, TEXT("Player Stats Loaded [%s]"), *PlayerStatComponent->PrintStats());
+	if (!PrograssBarComponent) return;
+	PrograssBarComponent->InitPrograssBar();
 }
 
 void APepCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
