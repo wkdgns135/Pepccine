@@ -47,26 +47,8 @@ void UPepccineAnimInstance::NativeUpdateAnimation(float dt)
 	}
 }
 
-void UPepccineAnimInstance::AnimNotify_EndReloading()
+void UPepccineAnimInstance::AnimNotify_EndDeath()
 {
-	UE_LOG(LogTemp, Log, TEXT("EndReload!"));
-	Owner->bIsReloading = false;
-}
-
-void UPepccineAnimInstance::AnimNotify_EndDraw()
-{
-	UE_LOG(LogTemp, Log, TEXT("EndDraw!"));
-	Owner->bIsSwapping = false;
-}
-
-void UPepccineAnimInstance::AnimNotify_EndGettingUp()
-{
-	UE_LOG(LogTemp, Log, TEXT("EndGettingUp"));
-	Owner->bIsStunning = false;
-}
-
-void UPepccineAnimInstance::AnimNotify_EndClimb()
-{
-	UE_LOG(LogTemp, Log, TEXT("EndClimb"));
-	Owner->bIsClimbing = false;
+	UE_LOG(LogTemp, Log, TEXT("Dead"));
+	Owner->Dead();
 }

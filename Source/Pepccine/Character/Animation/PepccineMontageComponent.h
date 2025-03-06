@@ -39,6 +39,8 @@ public:
 	UFUNCTION()
 	void Climbing();
 	UFUNCTION()
+	void GunHit();
+	UFUNCTION()
 	void OnMontageBlendingOut(UAnimMontage* Montage, bool bInterrupted);
 
 	FTimerHandle GetUpTimerHandle;
@@ -74,4 +76,6 @@ protected:
 	UAnimMontage* StumbleGetUpMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* ClimbingMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* GunHitMontage;
 };
