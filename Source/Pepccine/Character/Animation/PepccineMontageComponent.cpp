@@ -109,6 +109,14 @@ void UPepccineMontageComponent::GunHit()
 	}
 }
 
+void UPepccineMontageComponent::UseActive(float PlayRate)
+{
+	if (AnimInstance && ActiveMontage)
+	{
+		AnimInstance->Montage_Play(ActiveMontage, PlayRate);
+	}
+}
+
 void UPepccineMontageComponent::Roll(FVector Dir, FRotator ActorRotation)
 {
 	float ForwardDeltaDegree = 0;
@@ -203,5 +211,9 @@ void UPepccineMontageComponent::OnMontageBlendingOut(UAnimMontage* Montage, bool
 	{
 		UE_LOG(LogTemp, Log, TEXT("EndClimb"));
 		Owner->bIsClimbing = false;
+	}
+	else if (Montage == ActiveMontage)
+	{
+		UE_LOG(LogTemp, Log, TEXT("EndActive"));
 	}
 }

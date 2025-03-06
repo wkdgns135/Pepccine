@@ -41,6 +41,8 @@ public:
 	UFUNCTION()
 	void GunHit();
 	UFUNCTION()
+	void UseActive(float PlayRate);
+	UFUNCTION()
 	void OnMontageBlendingOut(UAnimMontage* Montage, bool bInterrupted);
 
 	FTimerHandle GetUpTimerHandle;
@@ -78,4 +80,6 @@ protected:
 	UAnimMontage* ClimbingMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* GunHitMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* ActiveMontage;
 };
