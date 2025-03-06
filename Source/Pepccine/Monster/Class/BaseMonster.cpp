@@ -69,7 +69,7 @@ void ABaseMonster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	if (MonsterClass == EMonsterClass::Normal)
 	{
-		UPepccineItemSpawnerSubSystem* TestSub = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
+		UPepccineItemSpawnerSubSystem* TestSub = GetWorld()->GetGameInstance()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
 		if (SpawnWeightData)
 		{
 			UPepccineItemDataBase* Test = TestSub->GetRandomItemFromWeightDataAsset(SpawnWeightData);
