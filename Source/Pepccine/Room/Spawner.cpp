@@ -32,7 +32,11 @@ void ASpawner::BeginPlay()
 void ASpawner::SpawnMonster()
 {
 	const URoomManager* RoomManager = Cast<UPepccineGameInstance>(GetGameInstance())->GetRoomManager();
-	if (RoomManager->GetCurrentRoomData()->bIsCleared)return;
+	
+	if (const FRoomData* CurrentRoomData = RoomManager->GetCurrentRoomData())
+	{
+		if (CurrentRoomData->bIsCleared) return;
+	}
 	
 	if (SpawnMonsterClass)
 	{
