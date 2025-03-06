@@ -13,11 +13,15 @@ UItemIconHUDComponent::UItemIconHUDComponent()
 void UItemIconHUDComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	InitItemIcons();
+}
 
+void UItemIconHUDComponent::InitItemIcons() const
+{
 	if (ActiveItemWidget)
 	{
 		ActiveItemWidget->AddToViewport();
-		ActiveItemWidget->CoinsText->SetVisibility(ESlateVisibility::Hidden);
+		//ctiveItemWidget->CoinsText->SetVisibility(ESlateVisibility::Hidden);
 	}
 	
 	if (WeaponWidget) WeaponWidget->AddToViewport();

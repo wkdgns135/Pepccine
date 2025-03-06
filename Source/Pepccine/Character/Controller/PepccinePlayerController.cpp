@@ -82,7 +82,7 @@ void APepccinePlayerController::SetMenu()
     SettingButton->OnClicked.AddDynamic(this, &APepccinePlayerController::OnSettingButtonClicked);
   }
 
-  if (UTextBlock* GameOver = MenuInstance->GameOver)
+  if (UImage* GameOver = MenuInstance->GameOver)
   {
     GameOver->SetVisibility(ESlateVisibility::Hidden);
   }
@@ -90,7 +90,7 @@ void APepccinePlayerController::SetMenu()
 
 void APepccinePlayerController::ShowGameOver(bool IsVisible)
 {
-  UTextBlock* GameOver = MenuInstance->GameOver;
+  UImage* GameOver = MenuInstance->GameOver;
   UButton* BackButton = MenuInstance->BackButton;
   
   if (GameOver && BackButton)

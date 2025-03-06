@@ -9,6 +9,7 @@
 #include "Components/WidgetComponent.h"
 #include "Components/AudioComponent.h"
 #include "Item/ItemSpawn/PepccineItemSpawnerSubSystem.h"
+#include "AIController.h"
 
 ABaseMonster::ABaseMonster()
 {
@@ -51,6 +52,8 @@ void ABaseMonster::BeginPlay()
 		AudioComponent->SetBoolParameter(FName("Loop"), true);
 		AudioComponent->Play();
 	}
+
+	bIsDead = false;
 }
 
 void ABaseMonster::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -65,9 +68,18 @@ void ABaseMonster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		}
 	}
 
-	UPepccineItemSpawnerSubSystem* TestSub = GetWorld()->GetGameInstance()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
-	UPepccineItemDataBase* Test = TestSub->GetRandomItemFromWeightDataAsset(SpawnWeightData);
-	TestSub->SpawnItem(GetActorLocation(), Test, false);
+	if (MonsterClass == EMonsterClass::Normal)
+	{
+		UPepccineItemSpawnerSubSystem* TestSub = GetWorld()->GetGameInstance()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
+		if (SpawnWeightData)
+		{
+			UPepccineItemDataBase* Test = TestSub->GetRandomItemFromWeightDataAsset(SpawnWeightData);
+			if (Test)
+			{
+				TestSub->SpawnItem(GetActorLocation(), Test, false);
+			}
+		}
+	}
 }
 
 void ABaseMonster::InitializeHealthBar()
@@ -119,10 +131,11 @@ void ABaseMonster::OnHitReceived(AActor* DamageCauser, float DamageAmount, const
 			HitReactionComponent->HandleHitReaction(DamageAmount);
 		}
 
-		if (StatComponent->IsDead())
+		if (StatComponent->IsDead() && bIsDead == false)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Monster %s has died!"), *GetName());
 			Die();
+			bIsDead = true;
 		}
 	}
 }
@@ -130,6 +143,12 @@ void ABaseMonster::OnHitReceived(AActor* DamageCauser, float DamageAmount, const
 void ABaseMonster::Die()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Monster Die!"));
+
+	AAIController* AIController = Cast<AAIController>(GetController());
+	if (AIController && AIController->BrainComponent)
+	{
+		AIController->BrainComponent->StopLogic(TEXT("Monster Died"));
+	}
 
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 	GetMesh()->Stop();

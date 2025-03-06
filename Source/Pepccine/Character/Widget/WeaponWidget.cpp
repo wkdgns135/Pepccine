@@ -10,7 +10,10 @@ void UWeaponWidget::UpdateWeaponUI(UTexture2D* MainWeaponImage, UTexture2D* SubW
 	UE_LOG(LogTemp, Warning, TEXT("WeaponName: %s, Ammo: %d / %d, IsMainWeapon: %s"),
 	       *WeaponName, Ammo, SpareAmmo, bIsMainWeapon ? TEXT("True") : TEXT("False"));
 
-	WeaponText->SetText(FText::FromString(WeaponName));
+	if (!WeaponText)
+	{
+		WeaponText->SetText(FText::FromString(WeaponName));
+	}
 
 	if (bIsMainWeapon)
 	{

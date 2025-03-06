@@ -24,6 +24,9 @@ public:
 	void AddItem(UTexture2D* ItemImage, const FString& ItemName, const FString& ItemDetail, const FString& StatDetail);
 
 	UFUNCTION(BlueprintCallable)
+	void RemoveAllItem();
+
+	UFUNCTION(BlueprintCallable)
 	void ToggleInventory();
 protected:
 	UPROPERTY(EditAnywhere, Category = "UI")

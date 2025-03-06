@@ -6,7 +6,6 @@
 #include "Character/Widget/WeaponWidget.h"
 #include "ItemIconHUDComponent.generated.h"
 
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PEPCCINE_API UItemIconHUDComponent : public UActorComponent
 {
@@ -25,6 +24,8 @@ public:
 	void SetActiveItemCoolDown(const int32 Cooldown);
 	void SetWeaponItem(UTexture2D* MainWeaponImage, UTexture2D* SubWeaponImage, const FString& WeaponName, const int32 Ammo, const int32 SpareAmmo, bool bIsMainWeapon);
 	void SetCoins(int Coins);
+
+	void InitItemIcons() const;
 
 protected:
 	virtual void BeginPlay() override;
