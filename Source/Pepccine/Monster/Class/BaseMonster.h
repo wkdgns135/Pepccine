@@ -12,6 +12,7 @@ class UMonsterAttackComponent;
 class UHitReactionComponent;
 class UAudioComponent;
 class UMonsterHealthWidget;
+class UPepccineItemSpawnWeightData;
 
 UENUM(BlueprintType)
 enum class EMonsterType : uint8
@@ -59,6 +60,10 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster")
 	EMonsterType MonsterType;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	UPepccineItemSpawnWeightData* SpawnWeightData;
+
 private:
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")

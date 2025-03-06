@@ -34,5 +34,5 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	void ExecuteTrace(ABaseMonster* OwnerMonster, float Range, float CapsuleRadius, float CapsuleHalfHeight);
+	void ExecuteTrace(ABaseMonster* OwnerMonster, float Range, float CapsuleRadius, float CapsuleHalfHeight, EMonsterSkill AttackType);
 };
