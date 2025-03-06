@@ -102,7 +102,7 @@ public:
 	// 현재 장착중인 무기가 메인 무기인지 확인
 	FORCEINLINE bool IsMainWeaponEquipped() const
 	{
-		return GetEquippedWeaponItemData()->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Sub;
+		return GetEquippedWeaponItemData()->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main;
 	}
 
 	// 전체 패시브 데이터 가져오기

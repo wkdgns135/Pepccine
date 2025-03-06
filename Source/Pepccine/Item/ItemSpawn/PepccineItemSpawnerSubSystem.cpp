@@ -11,6 +11,7 @@
 #include "Item/Weapon/PepccineWeaponItemData.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
 #include "Item/Active/PepccineActiveItemData.h"
+#include "Room/RoomManager.h"
 
 void UPepccineItemSpawnerSubSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -117,7 +118,7 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& S
 }
 
 UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDataAsset(
-	const UPepccineItemSpawnWeightData* SpawnWeightData)
+	UPepccineItemSpawnWeightData* SpawnWeightData)
 {
 	if (SpawnableWeaponItemDatas.IsEmpty() && SpawnablePassiveItemDataIds.
 		IsEmpty() && SpawnableActiveItemDataIds.IsEmpty())
@@ -223,6 +224,20 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 
 	UE_LOG(LogTemp, Warning, TEXT("ItemName: %s"), *ItemData->GetDisplayName());
 
+	// 상점 아이템 중복 방지
+	if (const UPepccineGameInstance* GameInstance = Cast<UPepccineGameInstance>(GetWorld()->GetGameInstance()))
+	{
+		if (const URoomManager* RoomManager = GameInstance->GetRoomManager())
+		{
+			// 상점 배열에 이미 있다면
+			if (RoomManager->GetItemData().Contains(ItemData))
+			{
+				// 재귀로 재탐색
+				ItemData = GetRandomItemFromWeightDataAsset(SpawnWeightData);
+			}
+		}
+	}
+	
 	return ItemData;
 }
 

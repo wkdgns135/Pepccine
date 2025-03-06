@@ -51,7 +51,8 @@ void UPepccineItemManagerComponent::BeginPlay()
 
 			// 기본 무기 장착
 			WeaponItemManager->EquipDefaultWeapon(
-				GetWorld()->GetGameInstance()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->GetDefaultWeaponItemData());
+				GetWorld()->GetGameInstance()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->
+				            GetDefaultWeaponItemData());
 
 			// 데이터 로드
 			if (LoadItemSaveData())
@@ -161,7 +162,7 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 			if (UPepccinePassiveItemData* PassiveItemData = ItemDataBase->GetPassiveItemDataAsset()->
 			                                                              GetPassiveItemById(Id))
 			{
-				PickUpItem(PassiveItemData);
+				PickUpItem(PassiveItemData, false);
 				// 스폰 가능 목록에서 제거
 				ItemSpawnerSubSystem->RemoveSpawnableItemDataId(PassiveItemData);
 			}
@@ -175,7 +176,7 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 		if (UPepccineActiveItemData* ActiveItemData = ItemDataBase->GetActiveItemDataAsset()->
 		                                                            GetActiveItemById(SaveDataStruct.ActiveItemId))
 		{
-			PickUpItem(ActiveItemData);
+			PickUpItem(ActiveItemData, false);
 			// 스폰 가능 목록에서 제거
 			ItemSpawnerSubSystem->RemoveSpawnableItemDataId(ActiveItemData);
 		}
