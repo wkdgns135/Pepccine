@@ -65,9 +65,18 @@ void ABaseMonster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		}
 	}
 
-	UPepccineItemSpawnerSubSystem* TestSub = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
-	UPepccineItemDataBase* Test = TestSub->GetRandomItemFromWeightDataAsset(SpawnWeightData);
-	TestSub->SpawnItem(GetActorLocation(), Test, false);
+	if (MonsterClass == EMonsterClass::Normal)
+	{
+		UPepccineItemSpawnerSubSystem* TestSub = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
+		if (SpawnWeightData)
+		{
+			UPepccineItemDataBase* Test = TestSub->GetRandomItemFromWeightDataAsset(SpawnWeightData);
+			if (Test)
+			{
+				TestSub->SpawnItem(GetActorLocation(), Test, false);
+			}
+		}
+	}
 }
 
 void ABaseMonster::InitializeHealthBar()

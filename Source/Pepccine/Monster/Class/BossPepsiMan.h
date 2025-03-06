@@ -4,6 +4,8 @@
 #include "Monster/Class/BossMonster.h"
 #include "BossPepsiMan.generated.h"
 
+class UJumpAttackComponent;
+
 UCLASS()
 class PEPCCINE_API ABossPepsiMan : public ABossMonster
 {
@@ -11,4 +13,8 @@ class PEPCCINE_API ABossPepsiMan : public ABossMonster
 	
 public:
 	ABossPepsiMan();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill|Jump")
+	UJumpAttackComponent* JumpSkillComponent;
 };

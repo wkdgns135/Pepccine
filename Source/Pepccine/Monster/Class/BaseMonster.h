@@ -18,9 +18,17 @@ UENUM(BlueprintType)
 enum class EMonsterType : uint8
 {
 	None        UMETA(DisplayName = "None"),
-	CloseRange  UMETA(DisplayName = "CloseRange"),
+	ShortRange  UMETA(DisplayName = "ShortRange"),
 	LongRange   UMETA(DisplayName = "LongRange"),
 };
+
+UENUM(BlueprintType)
+enum class EMonsterClass : uint8
+{
+	Normal      UMETA(DisplayName = "Normal"),
+	Boss		UMETA(DisplayName = "Boss"),
+};
+
 
 UCLASS()
 class PEPCCINE_API ABaseMonster : public ACharacter
@@ -31,6 +39,7 @@ public:
 	ABaseMonster();
 
 	FORCEINLINE EMonsterType GetMonsterType() const { return MonsterType; }
+	FORCEINLINE EMonsterClass GetMonsterClass() const { return MonsterClass; }
 	FORCEINLINE UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
@@ -60,6 +69,8 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster")
 	EMonsterType MonsterType;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster")
+	EMonsterClass MonsterClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	UPepccineItemSpawnWeightData* SpawnWeightData;
