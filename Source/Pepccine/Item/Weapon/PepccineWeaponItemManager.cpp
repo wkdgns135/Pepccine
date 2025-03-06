@@ -45,7 +45,6 @@ void UPepccineWeaponItemManager::PickUpItem(const UPepccineWeaponItemData* Weapo
 	// 복사해서 사용
 	UPepccineWeaponItemData* NewWeaponItemData = DuplicateObject<UPepccineWeaponItemData>(
 		WeaponItemData, this);
-
 	if (NewWeaponItemData->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main)
 	{
 		MainWeaponItemData = NewWeaponItemData;
@@ -148,7 +147,7 @@ void UPepccineWeaponItemManager::UpdateWeaponItemStats(const EPepccineWeaponItem
 		                                            ? MainWeaponItemData
 		                                            : SubWeaponItemData;
 
-	UPepccineWeaponItemData* DefaultWeaponItemData = GetWorld()->
+	UPepccineWeaponItemData* DefaultWeaponItemData = GetWorld()->GetGameInstance()->
 	                                                       GetSubsystem<UPepccineItemSpawnerSubSystem>()->
 	                                                       GetItemDataAsset()->
 	                                                       GetWeaponItemDataAsset()->

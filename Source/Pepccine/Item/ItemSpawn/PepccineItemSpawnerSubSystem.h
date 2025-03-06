@@ -17,14 +17,15 @@ class UPepccineItemDataBase;
 class APepccineDropItem;
 
 UCLASS()
-class PEPCCINE_API UPepccineItemSpawnerSubSystem : public UWorldSubsystem
+class PEPCCINE_API UPepccineItemSpawnerSubSystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
 public:
 	// 서브 시스템 무조건 생성
 	FORCEINLINE virtual bool ShouldCreateSubsystem(UObject* Outer) const override { return true; }
-
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	
 	// 누적 가중치 배열 반환
 	static void ApplyCumulativeWeights(TArray<int32>& Weights);
 	// 해당 등급 아이템 목록 반환

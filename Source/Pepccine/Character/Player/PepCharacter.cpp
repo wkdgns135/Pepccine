@@ -102,6 +102,7 @@ void APepCharacter::Tick(float DeltaTime)
 
 	CheckSprinting();
 	CheckRolling(DeltaTime);
+	GetCooldownRemaining();
 }
 
 // Initialize Character Status
@@ -123,6 +124,12 @@ void APepCharacter::InitializeCharacterMovement() const
 
 // Tick Method
 #pragma region
+void APepCharacter::GetCooldownRemaining()
+{
+	if (!ItemManagerComponent || !ItemManagerComponent->GetActiveItemData()) return;
+	ItemIconComponent->SetActiveItemCoolDown(ItemManagerComponent->GetActiveItemRemainingCooldown());
+}
+
 void APepCharacter::CheckSprinting()
 {
 	if (!PlayerStatComponent)
@@ -226,13 +233,19 @@ void APepCharacter::AddObservers()
 void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult,
                                 EMonsterSkill SkillType)
 {
-	if (bIsRolling || !HitReactionComponent || !PepccineMontageComponent) return;
+	if (bIsRolling || !HitReactionComponent || !PepccineMontageComponent || !bIsPlayerAlive) return;
 	if (bIsZooming) ZoomOut();
 
 	PlayerStatComponent->DecreaseHealth(DamageAmount);
 	if (PlayerStatComponent->GetCurrentHealth() <= 0) return;
 
 	FVector HitDirection = HitResult.ImpactNormal;
+	if (HitStack < 10)
+	{
+		FStatModifier AddStatModifier(EPepccineCharacterStatName::EPCSN_HealthDecelerationAmount, 0.1f, 1.0f);
+		PlayerStatComponent->ApplyStatModifier(AddStatModifier);
+		++HitStack;
+	}
 
 	switch (SkillType)
 	{
@@ -246,7 +259,7 @@ void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const 
 		Stumble(DamageCauser);
 		break;
 	case EMonsterSkill::GunShot:
-		// 총맞는 모션 필요
+		PepccineMontageComponent->GunHit();
 		break;
 	}
 }
@@ -295,7 +308,9 @@ void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth
 
 	if (NewHealth == 0)
 	{
-		Dead();
+		if (!bIsPlayerAlive || !PepccineMontageComponent) return;
+		bIsPlayerAlive = false;
+		PepccineMontageComponent->Death();
 	}
 
 	PrograssBarComponent->SetHealth(NewHealth, MaxHealth);
@@ -348,11 +363,6 @@ void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
 #pragma region
 void APepCharacter::Dead()
 {
-	if (!bIsPlayerAlive) return;
-	bIsPlayerAlive = false;
-
-	PepccineMontageComponent->Death();
-
 	if (APepccinePlayerController* PepccinePlayerController = Cast<APepccinePlayerController>(PlayerController))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Player Dead"));
@@ -455,12 +465,15 @@ void APepCharacter::JumpStop()
 
 void APepCharacter::UseItem()
 {
-	if (!bIsPlayerAlive || bIsStunning)
+	if (!bIsPlayerAlive || bIsStunning || bIsActiveItemUse || !ItemManagerComponent)
 	{
 		return;
 	}
-
-	UE_LOG(LogTemp, Log, TEXT("UseItem!"));
+	
+	bIsActiveItemUse = true;
+	ItemManagerComponent->UseActiveItem();
+	PepccineMontageComponent->UseActive(1.0);
+	
 	UpdateWeaponUI();
 }
 
@@ -565,7 +578,7 @@ FVector APepCharacter::GetRollDirection()
 
 void APepCharacter::Crouching()
 {
-	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive || bIsStunning || bIsClimbing)
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive || bIsStunning || bIsClimbing || bIsActiveItemUse)
 	{
 		return;
 	}
@@ -588,7 +601,7 @@ void APepCharacter::Crouching()
 
 void APepCharacter::Reload()
 {
-	if (!bIsPlayerAlive || bIsStunning || bIsClimbing || bIsReloading || !ItemManagerComponent->GetEquippedWeaponItemData())
+	if (!bIsPlayerAlive || bIsStunning || bIsClimbing || bIsReloading || !ItemManagerComponent->GetEquippedWeaponItemData()|| bIsActiveItemUse)
 	{
 		return;
 	}
@@ -611,7 +624,7 @@ void APepCharacter::Reload()
 
 void APepCharacter::Interactive()
 {
-	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing || !ItemManagerComponent)
+	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing || !ItemManagerComponent || bIsActiveItemUse)
 	{
 		return;
 	}
@@ -620,9 +633,7 @@ void APepCharacter::Interactive()
 	if (CurrentDropItem)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Interact CurrentDropItem : %s"), *CurrentDropItem->GetDropItemData()->GetDisplayName());
-
-		CurrentDropItem->PickUpItem(ItemManagerComponent);
-		//if (!CurrentDropItem->PickUpItem(ItemManagerComponent)) return;
+		if (!CurrentDropItem->PickUpItem(ItemManagerComponent)) return;
 		
 		if (UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
@@ -683,14 +694,14 @@ void APepCharacter::Interactive()
 			UpdateWeaponUI();
 			SetWeight();
 		}
-		else if (UPepccineResourceItemData* ActiveItem = Cast<UPepccineResourceItemData>(CurrentDropItem->GetDropItemData()))
+		else if (UPepccineResourceItemData* ResourceItem = Cast<UPepccineResourceItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 리소스 아이템
-			switch (ActiveItem->GetResourceItemType())
+			switch (ResourceItem->GetResourceItemType())
 			{
 			case EPepccineResourceItemType::EPRIT_HealingPotion:
 				{
-					const int32 Amount = ActiveItem->GetResourceAmount();
+					const int32 Amount = ResourceItem->GetResourceAmount();
 					const FStatModifier AddStatModifier(EPepccineCharacterStatName::EPCSN_CurrentHealth, Amount, 1.0f);
 					PlayerStatComponent->ApplyStatModifier(AddStatModifier);
 					break;
@@ -698,6 +709,11 @@ void APepCharacter::Interactive()
 			default:
 				break;
 			}
+		}
+		else if (UPepccineActiveItemData* ActiveItem = Cast<UPepccineActiveItemData>(CurrentDropItem->GetDropItemData()))
+		{
+			if (!ItemManagerComponent) return;
+			ItemIconComponent->SetActiveItem(ActiveItem->GetIconTexture(), ActiveItem->GetDisplayName(), FString("Q"), ActiveItem->GetCooldown());
 		}
 
 		PepccineMontageComponent->Pick();
@@ -799,7 +815,7 @@ void APepCharacter::OpenInventory()
 
 void APepCharacter::SwapItem(const FInputActionValue& value)
 {
-	if (!bIsPlayerAlive || bIsReloading || bIsStunning || bIsClimbing)
+	if (!bIsPlayerAlive || bIsReloading || bIsStunning || bIsClimbing || bIsActiveItemUse)
 	{
 		return;
 	}
@@ -834,7 +850,7 @@ void APepCharacter::StopFire()
 void APepCharacter::Fire()
 {
 	if (bIsRolling | !bIsPlayerAlive || !PepccineMontageComponent || bIsReloading || bIsStunning || bIsClimbing ||
-		bIsSprinting)
+		bIsSprinting || bIsActiveItemUse)
 	{
 		return;
 	}

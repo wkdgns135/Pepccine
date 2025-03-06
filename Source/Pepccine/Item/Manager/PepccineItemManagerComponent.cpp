@@ -51,7 +51,7 @@ void UPepccineItemManagerComponent::BeginPlay()
 
 			// 기본 무기 장착
 			WeaponItemManager->EquipDefaultWeapon(
-				GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->GetDefaultWeaponItemData());
+				GetWorld()->GetGameInstance()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->GetDefaultWeaponItemData());
 
 			// 데이터 로드
 			if (LoadItemSaveData())
@@ -100,7 +100,7 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 
 	FPepccineItemSaveDataStruct SaveDataStruct = SaveData->ItemSaveData;
 
-	UPepccineItemSpawnerSubSystem* ItemSpawnerSubSystem = GetWorld()->GetSubsystem<
+	UPepccineItemSpawnerSubSystem* ItemSpawnerSubSystem = GetWorld()->GetGameInstance()->GetSubsystem<
 		UPepccineItemSpawnerSubSystem>();
 	if (!ItemSpawnerSubSystem)
 	{

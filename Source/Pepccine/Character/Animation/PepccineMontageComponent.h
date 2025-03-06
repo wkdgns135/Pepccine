@@ -39,7 +39,13 @@ public:
 	UFUNCTION()
 	void Climbing();
 	UFUNCTION()
+	void GunHit();
+	UFUNCTION()
+	void UseActive(float PlayRate);
+	UFUNCTION()
 	void OnMontageBlendingOut(UAnimMontage* Montage, bool bInterrupted);
+
+	FTimerHandle GetUpTimerHandle;
 
 protected:
 	// Called when the game starts
@@ -72,6 +78,8 @@ protected:
 	UAnimMontage* StumbleGetUpMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* ClimbingMontage;
-
-	FTimerHandle GetUpTimerHandle;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* GunHitMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* ActiveMontage;
 };
