@@ -704,7 +704,6 @@ void APepCharacter::Interactive()
 		else if (UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 무기류 아이템
-			UpdateWeaponUI();
 			SetWeight();
 		}
 		else if (UPepccineResourceItemData* ResourceItem = Cast<UPepccineResourceItemData>(CurrentDropItem->GetDropItemData()))
@@ -726,11 +725,10 @@ void APepCharacter::Interactive()
 		else if (UPepccineActiveItemData* ActiveItem = Cast<UPepccineActiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 액티브 아이템
-			UpdateWeaponUI();
 		}
 
+		UpdateWeaponUI();
 		PepccineMontageComponent->Pick();
-		ItemIconComponent->SetCoins(ItemManagerComponent->GetCoinCount());
 	}
 
 	// Delay 있는 상호작용 전용
@@ -787,6 +785,7 @@ void APepCharacter::UpdateWeaponUI()
 
 	if (!ItemManagerComponent->GetActiveItemData()) return;
 	ItemIconComponent->SetActiveItem(ItemManagerComponent->GetActiveItemData()->GetIconTexture(), ItemManagerComponent->GetActiveItemData()->GetDisplayName(), FString("Q"), ItemManagerComponent->GetActiveItemData()->GetCooldown());
+	ItemIconComponent->SetCoins(ItemManagerComponent->GetCoinCount());
 }
 
 void APepCharacter::AddItemToInventory()
