@@ -145,6 +145,21 @@ void UInventoryWidget::AddItemToInventory(UTexture2D* ItemImage, const FString& 
 	}
 }
 
+void UInventoryWidget::ResetGrid()
+{
+	if (InventoryGrid)
+	{
+		InventoryGrid->ClearChildren();
+	}
+
+	CurrentRow = 0;
+	CurrentColumn = 0;
+	NextItemIndex = 0;
+	ItemDetailText->SetText(FText::FromString(""));
+
+	SetEmptyGrid();
+}
+
 void UInventoryWidget::CreateNewGridBlock()
 {
 	for (int32 Row = 0; Row < MaxRows; Row++)
