@@ -26,13 +26,13 @@ void UPepccineWeaponItemComponent::InitWeaponComponent(ACharacter* InOwnerCharac
 
 	if (!PoolSubSystem)
 	{
-		UE_LOG(LogTemp, Error, TEXT("PoolSubSystem이 설정되어있지 않습니다."));
+		UE_LOG(LogTemp, Warning, TEXT("PoolSubSystem이 설정되어있지 않습니다."));
 		return;
 	}
 
 	if (!ProjectileClass)
 	{
-		UE_LOG(LogTemp, Error, TEXT("투사체 클래스가 설정되어있지 않습니다."));
+		UE_LOG(LogTemp, Warning, TEXT("투사체 클래스가 설정되어있지 않습니다."));
 		return;
 	}
 
