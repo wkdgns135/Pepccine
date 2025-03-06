@@ -16,23 +16,28 @@ void UPepccineItemSpawnerSubSystem::InitSpawner(UPepccineItemDataAssetBase* InIt
 {
 	ItemDataAsset = InItemDataAsset;
 	SpawnedActor = InSpawnedActor;
+	InitSpawnableItemData();
+}
 
-	// 스폰가능 무기 아이템 추가
+void UPepccineItemSpawnerSubSystem::InitSpawnableItemData()
+{
+	// 무기
 	for (const UPepccineWeaponItemData* WeaponItemData : ItemDataAsset->GetWeaponItemDataAsset()->GetWeaponItemDatas())
 	{
 		SpawnableWeaponItemDatas.Add(WeaponItemData->GetItemId());
 	}
-	// 스폰가능 패시브 아이템 추가
-	for (const UPepccinePassiveItemData* PassiveItemData : ItemDataAsset->GetPassiveItemDataAsset()->
-	                                                                      GetPassiveItemDatas())
+	// 패시브
+	for (const UPepccinePassiveItemData* PassiveItemData : ItemDataAsset->GetPassiveItemDataAsset()->GetPassiveItemDatas())
 	{
 		SpawnablePassiveItemDataIds.Add(PassiveItemData->GetItemId());
 	}
-	// 스폰가능 액티브 아이템 추가
+	// 액티브
 	for (const UPepccineActiveItemData* ActiveItemData : ItemDataAsset->GetActiveItemDataAsset()->GetActiveItemDatas())
 	{
 		SpawnableActiveItemDataIds.Add(ActiveItemData->GetItemId());
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("아이템 스포너 초기화 완료!"));
 }
 
 UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& SpawnLocation,
@@ -86,6 +91,12 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 		IsEmpty() && SpawnableActiveItemDataIds.IsEmpty())
 	{
 		UE_LOG(LogTemp, Error, TEXT("더이상 스폰할 무기, 패시브, 액티브 아이템이 없습니다."));
+		return nullptr;
+	}
+
+	if (!SpawnWeightData)
+	{
+		UE_LOG(LogTemp, Error, TEXT("아이템 스폰 가중치 데이터가 없습니다."));
 		return nullptr;
 	}
 
@@ -295,6 +306,12 @@ TArray<UPepccineItemDataBase*> UPepccineItemSpawnerSubSystem::GetItemDataByItemR
 UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemDataByRandomRarity(
 	const TArray<UPepccineItemDataBase*>& ItemDatas, const UPepccineItemRarityWeightData* RarityWeightData)
 {
+	if (!RarityWeightData)
+	{
+		UE_LOG(LogTemp, Error, TEXT("아이템 등급 가중치 데이터가 없습니다."));
+		return nullptr;
+	}
+
 	UPepccineItemDataBase* ItemData = nullptr;
 
 	// 아이템 레어도 가중치

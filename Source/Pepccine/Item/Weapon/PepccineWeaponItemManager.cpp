@@ -36,6 +36,12 @@ void UPepccineWeaponItemManager::EquipDefaultWeapon(const UPepccineWeaponItemDat
 
 void UPepccineWeaponItemManager::PickUpItem(const UPepccineWeaponItemData* WeaponItemData, const bool bIsPlayEquipSound)
 {
+	if (!WeaponItemData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("아이템 데이터가 없습니다."));
+		return;
+	}
+	
 	// 복사해서 사용
 	UPepccineWeaponItemData* NewWeaponItemData = DuplicateObject<UPepccineWeaponItemData>(
 		WeaponItemData, this);

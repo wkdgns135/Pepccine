@@ -56,6 +56,13 @@ struct FPepccineItemSaveDataStruct
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (DesplayName = "코인 개수"))
 	int32 CoinCount;
 
+	// 스폰가능한 무기 아이템 아이디 목록
+	TArray<int32> SpawnableWeaponItemDatas;
+	// 스폰가능한 패시브 아이템 아이디 목록
+	TArray<int32> SpawnablePassiveItemDataIds;
+	// 스폰가능한 액티브 아이템 아이디 목록
+	TArray<int32> SpawnableActiveItemDataIds;
+
 	FPepccineItemSaveDataStruct(): MainWeaponItemId(-1), SubWeaponItemId(-1),
 	                         EquippedWeaponItemType(EPepccineWeaponItemType::EPWIT_Main), ActiveItemId(-1), CoinCount(0)
 	{
