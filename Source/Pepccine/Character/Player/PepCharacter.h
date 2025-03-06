@@ -198,6 +198,7 @@ private:
 	void SetWeight();
 	void Stumble(AActor* DamageCauser);
 	void Climb();
+	void GetCooldownRemaining();
 
 	// TEST CODE
 	void TestApplyStatModifier();

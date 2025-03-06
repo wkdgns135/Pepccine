@@ -102,6 +102,7 @@ void APepCharacter::Tick(float DeltaTime)
 
 	CheckSprinting();
 	CheckRolling(DeltaTime);
+	GetCooldownRemaining();
 }
 
 // Initialize Character Status
@@ -123,6 +124,12 @@ void APepCharacter::InitializeCharacterMovement() const
 
 // Tick Method
 #pragma region
+void APepCharacter::GetCooldownRemaining()
+{
+	if (!ItemManagerComponent || !ItemManagerComponent->GetActiveItemData()) return;
+	ItemIconComponent->SetActiveItemCoolDown(ItemManagerComponent->GetActiveItemRemainingCooldown());
+}
+
 void APepCharacter::CheckSprinting()
 {
 	if (!PlayerStatComponent)
@@ -458,15 +465,14 @@ void APepCharacter::JumpStop()
 
 void APepCharacter::UseItem()
 {
-	if (!bIsPlayerAlive || bIsStunning || bIsActiveItemUse)
+	if (!bIsPlayerAlive || bIsStunning || bIsActiveItemUse || !ItemManagerComponent)
 	{
 		return;
 	}
-
-	bIsActiveItemUse = true;
-
 	
-	UE_LOG(LogTemp, Log, TEXT("UseItem!"));
+	bIsActiveItemUse = true;
+	ItemManagerComponent->UseActiveItem();
+	PepccineMontageComponent->UseActive(1.0);
 	
 	UpdateWeaponUI();
 }
@@ -627,9 +633,7 @@ void APepCharacter::Interactive()
 	if (CurrentDropItem)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Interact CurrentDropItem : %s"), *CurrentDropItem->GetDropItemData()->GetDisplayName());
-
-		CurrentDropItem->PickUpItem(ItemManagerComponent);
-		//if (!CurrentDropItem->PickUpItem(ItemManagerComponent)) return;
+		if (!CurrentDropItem->PickUpItem(ItemManagerComponent)) return;
 		
 		if (UPepccinePassiveItemData* PassiveItem = Cast<UPepccinePassiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
@@ -690,14 +694,14 @@ void APepCharacter::Interactive()
 			UpdateWeaponUI();
 			SetWeight();
 		}
-		else if (UPepccineResourceItemData* ActiveItem = Cast<UPepccineResourceItemData>(CurrentDropItem->GetDropItemData()))
+		else if (UPepccineResourceItemData* ResourceItem = Cast<UPepccineResourceItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 리소스 아이템
-			switch (ActiveItem->GetResourceItemType())
+			switch (ResourceItem->GetResourceItemType())
 			{
 			case EPepccineResourceItemType::EPRIT_HealingPotion:
 				{
-					const int32 Amount = ActiveItem->GetResourceAmount();
+					const int32 Amount = ResourceItem->GetResourceAmount();
 					const FStatModifier AddStatModifier(EPepccineCharacterStatName::EPCSN_CurrentHealth, Amount, 1.0f);
 					PlayerStatComponent->ApplyStatModifier(AddStatModifier);
 					break;
@@ -705,6 +709,11 @@ void APepCharacter::Interactive()
 			default:
 				break;
 			}
+		}
+		else if (UPepccineActiveItemData* ActiveItem = Cast<UPepccineActiveItemData>(CurrentDropItem->GetDropItemData()))
+		{
+			if (!ItemManagerComponent) return;
+			ItemIconComponent->SetActiveItem(ActiveItem->GetIconTexture(), ActiveItem->GetDisplayName(), FString("Q"), ActiveItem->GetCooldown());
 		}
 
 		PepccineMontageComponent->Pick();

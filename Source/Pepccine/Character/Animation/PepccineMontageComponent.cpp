@@ -215,5 +215,6 @@ void UPepccineMontageComponent::OnMontageBlendingOut(UAnimMontage* Montage, bool
 	else if (Montage == ActiveMontage)
 	{
 		UE_LOG(LogTemp, Log, TEXT("EndActive"));
+		Owner->bIsActiveItemUse = false;
 	}
 }
