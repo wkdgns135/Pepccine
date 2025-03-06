@@ -51,6 +51,8 @@ void ABaseMonster::BeginPlay()
 		AudioComponent->SetBoolParameter(FName("Loop"), true);
 		AudioComponent->Play();
 	}
+
+	bIsDead = false;
 }
 
 void ABaseMonster::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -128,10 +130,11 @@ void ABaseMonster::OnHitReceived(AActor* DamageCauser, float DamageAmount, const
 			HitReactionComponent->HandleHitReaction(DamageAmount);
 		}
 
-		if (StatComponent->IsDead())
+		if (StatComponent->IsDead() && bIsDead == false)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Monster %s has died!"), *GetName());
 			Die();
+			bIsDead = true;
 		}
 	}
 }

@@ -80,4 +80,6 @@ private:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void OnHitReceived(AActor* DamageCauser, float DamageAmount, const FHitResult& HitResult, EMonsterSkill SkillType);
 	void Die();
+
+	bool bIsDead;
 };
