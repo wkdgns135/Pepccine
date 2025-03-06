@@ -41,6 +41,8 @@ void UPepccineMontageComponent::Attack()
 
 void UPepccineMontageComponent::Death()
 {
+	GetWorld()->GetTimerManager().ClearTimer(GetUpTimerHandle);
+	
 	if (AnimInstance && DeathMontage)
 	{
 		int32 JumpSection = FMath::RandRange(0, DeathMontage->CompositeSections.Num());
@@ -96,6 +98,22 @@ void UPepccineMontageComponent::Climbing()
 	if (AnimInstance && ClimbingMontage)
 	{
 		AnimInstance->Montage_Play(ClimbingMontage);
+	}
+}
+
+void UPepccineMontageComponent::GunHit()
+{
+	if (AnimInstance && GunHitMontage)
+	{
+		AnimInstance->Montage_Play(GunHitMontage);
+	}
+}
+
+void UPepccineMontageComponent::UseActive(float PlayRate)
+{
+	if (AnimInstance && ActiveMontage)
+	{
+		AnimInstance->Montage_Play(ActiveMontage, PlayRate);
 	}
 }
 
@@ -171,22 +189,32 @@ void UPepccineMontageComponent::OnMontageBlendingOut(UAnimMontage* Montage, bool
 
 	if (Montage == ReloadMontage)
 	{
-		UE_LOG(LogTemp, Log, TEXT("EndReload!"));
+		UE_LOG(LogTemp, Warning, TEXT("EndReload!"));
 		Owner->bIsReloading = false;
 	}
 	else if (Montage == DrawMontage)
 	{
-		UE_LOG(LogTemp, Log, TEXT("EndDraw!"));
+		UE_LOG(LogTemp, Warning, TEXT("EndDraw!"));
 		Owner->bIsSwapping = false;
 	}
 	else if (Montage == GetUpMontage)
 	{
-		UE_LOG(LogTemp, Log, TEXT("EndGettingUp"));
+		UE_LOG(LogTemp, Warning, TEXT("EndGettingUp"));
+		Owner->bIsStunning = false;
+	}
+	else if (Montage == StumbleGetUpMontage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("EndStumbleGettingUp"));
 		Owner->bIsStunning = false;
 	}
 	else if (Montage == ClimbingMontage)
 	{
 		UE_LOG(LogTemp, Log, TEXT("EndClimb"));
 		Owner->bIsClimbing = false;
+	}
+	else if (Montage == ActiveMontage)
+	{
+		UE_LOG(LogTemp, Log, TEXT("EndActive"));
+		Owner->bIsActiveItemUse = false;
 	}
 }

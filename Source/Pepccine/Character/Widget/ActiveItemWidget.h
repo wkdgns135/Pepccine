@@ -23,8 +23,13 @@ public:
 	UTextBlock* CoinsText;
 
 	UFUNCTION(BlueprintCallable, Category = "UI|Active")
-	void UpdateActiveItemUI(UTexture2D* ActiveImage, const FString& ActiveName, const FString& Button, const float Cooldown, const float MaxCooldown);
+	void UpdateActiveItemUI(const float Cooldown);
 	UFUNCTION(BlueprintCallable, Category = "UI|Active")
 	void UpdateCoinUI(int Coins);
+	UFUNCTION(BlueprintCallable, Category = "UI|Active")
+	void SetActiveItemUI(UTexture2D* ActiveImage, const FString& ActiveName, const FString& Button, const float MaxCooldown);
+
+private:
+	float MaxCooldown = 0;
 };
 
