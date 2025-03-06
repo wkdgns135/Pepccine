@@ -5,4 +5,7 @@ AZombieGirl::AZombieGirl()
 {
 	AIControllerClass = ANormalMonsterAIC::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	MonsterClass = EMonsterClass::Normal;
+	MonsterType = EMonsterType::ShortRange;
 }

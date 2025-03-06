@@ -8,6 +8,9 @@ ABossPumpkinHulk::ABossPumpkinHulk()
 	AIControllerClass = ABossPumpkinHulkAIC::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
+	MonsterClass = EMonsterClass::Boss;
+	MonsterType = EMonsterType::ShortRange;
+
 	JumpSkillComponent = CreateDefaultSubobject<UJumpAttackComponent>(TEXT("JumpAttackComponent"));
 	ChargeSkillComponent = CreateDefaultSubobject<UChargeAttackComponent>(TEXT("ChargeAttackComponent"));
 }

@@ -21,7 +21,7 @@ void UItemIconHUDComponent::InitItemIcons() const
 	if (ActiveItemWidget)
 	{
 		ActiveItemWidget->AddToViewport();
-		ActiveItemWidget->CoinsText->SetVisibility(ESlateVisibility::Hidden);
+		//ctiveItemWidget->CoinsText->SetVisibility(ESlateVisibility::Hidden);
 	}
 	
 	if (WeaponWidget) WeaponWidget->AddToViewport();

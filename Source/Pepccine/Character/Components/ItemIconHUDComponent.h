@@ -6,7 +6,6 @@
 #include "Character/Widget/WeaponWidget.h"
 #include "ItemIconHUDComponent.generated.h"
 
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PEPCCINE_API UItemIconHUDComponent : public UActorComponent
 {
