@@ -186,6 +186,8 @@ private:
 
 	UFUNCTION()
 	void OnActorDetectedEnhanced(FDetectedActorList& DetectedActors);
+	UFUNCTION()
+	void UpdateUI();
 
 	void InitializeCharacterMovement() const;
 	void ToggleCameraView();

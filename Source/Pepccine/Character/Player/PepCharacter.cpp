@@ -80,12 +80,11 @@ void APepCharacter::BeginPlay()
 		SaveManager->LoadPlayerStats(PlayerStatComponent->CurrentStats);
 		bIsLoaded = true;
 	}
- 
-	UpdateWeaponUI();
+	
 	PrograssBarComponent->SetHealth(PlayerStatComponent->GetCurrentHealth(), PlayerStatComponent->GetMaxHealth());
 	PrograssBarComponent->SetStamina(PlayerStatComponent->GetCurrentStamina(), PlayerStatComponent->GetMaxStamina());
-
-	// UE_LOG(LogTemp, Warning, TEXT("Player Stats Loaded [%s]"), *PlayerStatComponent->PrintStats());
+	
+	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &APepCharacter::UpdateUI);
 }
 
 void APepCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -104,6 +103,14 @@ void APepCharacter::Tick(float DeltaTime)
 	CheckRolling(DeltaTime);
 	GetCooldownRemaining();
 }
+
+// Timer
+#pragma region
+void APepCharacter::UpdateUI()
+{
+	UpdateWeaponUI();
+}
+#pragma endregion
 
 // Initialize Character Status
 #pragma region
@@ -585,7 +592,7 @@ FVector APepCharacter::GetRollDirection()
 
 void APepCharacter::Crouching()
 {
-	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive || bIsStunning || bIsClimbing || bIsActiveItemUse)
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive || bIsStunning || bIsClimbing || bIsActiveItemUse || GetCharacterMovement()->IsFalling())
 	{
 		return;
 	}
@@ -741,7 +748,7 @@ void APepCharacter::Interactive()
 
 void APepCharacter::UpdateWeaponUI()
 {
-	if (!ItemManagerComponent || !ItemIconComponent || !ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main) || !ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub))
+	if (!ItemManagerComponent || !ItemIconComponent || !ItemManagerComponent->GetEquippedWeaponItemData())
 	{
 		return;
 	}
