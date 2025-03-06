@@ -80,7 +80,7 @@ void APepCharacter::BeginPlay()
 		SaveManager->LoadPlayerStats(PlayerStatComponent->CurrentStats);
 		bIsLoaded = true;
 	}
-
+ 
 	UpdateWeaponUI();
 	PrograssBarComponent->SetHealth(PlayerStatComponent->GetCurrentHealth(), PlayerStatComponent->GetMaxHealth());
 	PrograssBarComponent->SetStamina(PlayerStatComponent->GetCurrentStamina(), PlayerStatComponent->GetMaxStamina());
@@ -119,6 +119,9 @@ void APepCharacter::InitializeCharacterMovement() const
 		MovementComponent->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
 		MovementComponent->JumpZVelocity = PlayerStatComponent->GetCurrentStats().MovementStats.JumpZVelocity;
 	}
+
+	//if (!PrograssBarComponent) return;
+	//PrograssBarComponent->InitPrograssBar();
 }
 #pragma endregion
 
@@ -254,9 +257,11 @@ void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const 
 		break;
 	case EMonsterSkill::Charge:
 		HitReactionComponent->EnterRagdoll(3);
+		TriggerCameraShake(200, 2);
 		break;
 	case EMonsterSkill::JumpAttack:
 		Stumble(DamageCauser);
+		TriggerCameraShake(200, 2);
 		break;
 	case EMonsterSkill::GunShot:
 		PepccineMontageComponent->GunHit();
@@ -479,6 +484,8 @@ void APepCharacter::UseItem()
 
 void APepCharacter::Look(const FInputActionValue& value)
 {
+	if (!bIsPlayerAlive) return;
+	
 	FVector2D LookInput = value.Get<FVector2D>();
 
 	ShotStack = 0;
@@ -624,10 +631,12 @@ void APepCharacter::Reload()
 
 void APepCharacter::Interactive()
 {
-	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing || !ItemManagerComponent || bIsActiveItemUse)
+	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing || !ItemManagerComponent || bIsActiveItemUse || !ItemIconComponent)
 	{
 		return;
 	}
+
+	ItemIconComponent->InitItemIcons();
 
 	// 아이템 인벤토리에 추가
 	if (CurrentDropItem)
@@ -671,8 +680,7 @@ void APepCharacter::Interactive()
 				}
 			}
 			// 인벤토리에 추가
-			InventoryComponent->AddItem(PassiveItem->GetIconTexture(), PassiveItem->GetDisplayName(),
-			                            PassiveItem->GetDescription(), PlayerStatComponent->PrintStats());
+			AddItemToInventory();
 
 			TArray<FPepccineCharacterFeature> CharacterFeatures = PassiveItem->GetCharacterFeatures();
 			for (const FPepccineCharacterFeature& Feature : CharacterFeatures)
@@ -735,7 +743,7 @@ void APepCharacter::Interactive()
 
 void APepCharacter::UpdateWeaponUI()
 {
-	if (!ItemManagerComponent || !ItemIconComponent)
+	if (!ItemManagerComponent || !ItemIconComponent || !ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main) || !ItemManagerComponent->GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub))
 	{
 		return;
 	}
@@ -773,6 +781,21 @@ void APepCharacter::UpdateWeaponUI()
 	}
 }
 
+void APepCharacter::AddItemToInventory()
+{
+	if (!InventoryComponent || !ItemManagerComponent) return;
+
+	InventoryComponent->RemoveAllItem();
+	
+	TMap<int32, UPepccinePassiveItemData*> PassiveItems = ItemManagerComponent->GetPassiveItemDatas();
+
+	for (const auto& PassiveItem : PassiveItems)
+	{
+		InventoryComponent->AddItem(PassiveItem.Value->GetIconTexture(), PassiveItem.Value->GetDisplayName(),
+																PassiveItem.Value->GetDescription(), PlayerStatComponent->PrintStats());
+	}
+}
+
 void APepCharacter::OpenInventory()
 {
 	if (bIsRolling || !InventoryComponent || bIsStunning || !ItemManagerComponent)
@@ -780,21 +803,7 @@ void APepCharacter::OpenInventory()
 		return;
 	}
 
-	if (bIsLoaded)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("아이템 로딩중"));
-		// 아이템 매니저에서 패시브 아이템 목록 가져와서 인벤토리에 넣는 작업 1회성
-		TMap<int32, UPepccinePassiveItemData*> PassiveItems = ItemManagerComponent->GetPassiveItemDatas();
-
-		for (const auto& PassiveItem : PassiveItems)
-		{
-			InventoryComponent->AddItem(PassiveItem.Value->GetIconTexture(), PassiveItem.Value->GetDisplayName(),
-			                            PassiveItem.Value->GetDescription(), PlayerStatComponent->PrintStats());
-		}
-
-		bIsLoaded = false;
-	}
-
+	AddItemToInventory();
 	bIsInventoryOpened = !bIsInventoryOpened;
 	InventoryComponent->ToggleInventory();
 

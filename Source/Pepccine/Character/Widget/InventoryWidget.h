@@ -20,6 +20,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void AddItemToInventory(UTexture2D* ItemImage, const FString& ItemName, const FString& ItemDetail, const FString& StatDetail);
+	void ResetGrid();
 
 protected:
 	UPROPERTY(meta = (BindWidget))

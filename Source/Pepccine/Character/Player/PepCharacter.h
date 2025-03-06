@@ -199,6 +199,7 @@ private:
 	void Stumble(AActor* DamageCauser);
 	void Climb();
 	void GetCooldownRemaining();
+	void AddItemToInventory();
 
 	// TEST CODE
 	void TestApplyStatModifier();

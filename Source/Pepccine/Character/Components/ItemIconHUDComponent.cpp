@@ -13,7 +13,10 @@ UItemIconHUDComponent::UItemIconHUDComponent()
 void UItemIconHUDComponent::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
+void UItemIconHUDComponent::InitItemIcons()
+{
 	if (ActiveItemWidget)
 	{
 		ActiveItemWidget->AddToViewport();
