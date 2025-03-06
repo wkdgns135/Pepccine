@@ -80,12 +80,11 @@ void APepCharacter::BeginPlay()
 		SaveManager->LoadPlayerStats(PlayerStatComponent->CurrentStats);
 		bIsLoaded = true;
 	}
-
-	UpdateWeaponUI();
+	
 	PrograssBarComponent->SetHealth(PlayerStatComponent->GetCurrentHealth(), PlayerStatComponent->GetMaxHealth());
 	PrograssBarComponent->SetStamina(PlayerStatComponent->GetCurrentStamina(), PlayerStatComponent->GetMaxStamina());
-
-	// UE_LOG(LogTemp, Warning, TEXT("Player Stats Loaded [%s]"), *PlayerStatComponent->PrintStats());
+	
+	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &APepCharacter::UpdateUI);
 }
 
 void APepCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -105,6 +104,14 @@ void APepCharacter::Tick(float DeltaTime)
 	GetCooldownRemaining();
 }
 
+// Timer
+#pragma region
+void APepCharacter::UpdateUI()
+{
+	UpdateWeaponUI();
+}
+#pragma endregion
+
 // Initialize Character Status
 #pragma region
 void APepCharacter::InitializeCharacterMovement() const
@@ -119,6 +126,9 @@ void APepCharacter::InitializeCharacterMovement() const
 		MovementComponent->MaxWalkSpeed = PlayerStatComponent->GetCurrentStats().MovementStats.MovementSpeed;
 		MovementComponent->JumpZVelocity = PlayerStatComponent->GetCurrentStats().MovementStats.JumpZVelocity;
 	}
+
+	//if (!PrograssBarComponent) return;
+	//PrograssBarComponent->InitPrograssBar();
 }
 #pragma endregion
 
@@ -254,9 +264,11 @@ void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const 
 		break;
 	case EMonsterSkill::Charge:
 		HitReactionComponent->EnterRagdoll(3);
+		TriggerCameraShake(200, 2);
 		break;
 	case EMonsterSkill::JumpAttack:
 		Stumble(DamageCauser);
+		TriggerCameraShake(200, 2);
 		break;
 	case EMonsterSkill::GunShot:
 		PepccineMontageComponent->GunHit();
@@ -479,6 +491,8 @@ void APepCharacter::UseItem()
 
 void APepCharacter::Look(const FInputActionValue& value)
 {
+	if (!bIsPlayerAlive) return;
+	
 	FVector2D LookInput = value.Get<FVector2D>();
 
 	ShotStack = 0;
@@ -578,7 +592,7 @@ FVector APepCharacter::GetRollDirection()
 
 void APepCharacter::Crouching()
 {
-	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive || bIsStunning || bIsClimbing || bIsActiveItemUse)
+	if (!GetCharacterMovement() || bIsRolling || !PlayerStatComponent | !bIsPlayerAlive || bIsStunning || bIsClimbing || bIsActiveItemUse || GetCharacterMovement()->IsFalling())
 	{
 		return;
 	}
@@ -624,7 +638,7 @@ void APepCharacter::Reload()
 
 void APepCharacter::Interactive()
 {
-	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing || !ItemManagerComponent || bIsActiveItemUse)
+	if (!bIsPlayerAlive || !PlayerStatComponent || !PepccineMontageComponent || bIsStunning || bIsClimbing || !ItemManagerComponent || bIsActiveItemUse || !ItemIconComponent)
 	{
 		return;
 	}
@@ -671,8 +685,7 @@ void APepCharacter::Interactive()
 				}
 			}
 			// 인벤토리에 추가
-			InventoryComponent->AddItem(PassiveItem->GetIconTexture(), PassiveItem->GetDisplayName(),
-			                            PassiveItem->GetDescription(), PlayerStatComponent->PrintStats());
+			AddItemToInventory();
 
 			TArray<FPepccineCharacterFeature> CharacterFeatures = PassiveItem->GetCharacterFeatures();
 			for (const FPepccineCharacterFeature& Feature : CharacterFeatures)
@@ -691,7 +704,6 @@ void APepCharacter::Interactive()
 		else if (UPepccineWeaponItemData* WeaponItem = Cast<UPepccineWeaponItemData>(CurrentDropItem->GetDropItemData()))
 		{
 			// 무기류 아이템
-			UpdateWeaponUI();
 			SetWeight();
 		}
 		else if (UPepccineResourceItemData* ResourceItem = Cast<UPepccineResourceItemData>(CurrentDropItem->GetDropItemData()))
@@ -712,12 +724,11 @@ void APepCharacter::Interactive()
 		}
 		else if (UPepccineActiveItemData* ActiveItem = Cast<UPepccineActiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
-			if (!ItemManagerComponent) return;
-			ItemIconComponent->SetActiveItem(ActiveItem->GetIconTexture(), ActiveItem->GetDisplayName(), FString("Q"), ActiveItem->GetCooldown());
+			// 액티브 아이템
 		}
 
+		UpdateWeaponUI();
 		PepccineMontageComponent->Pick();
-		ItemIconComponent->SetCoins(ItemManagerComponent->GetCoinCount());
 	}
 
 	// Delay 있는 상호작용 전용
@@ -735,7 +746,7 @@ void APepCharacter::Interactive()
 
 void APepCharacter::UpdateWeaponUI()
 {
-	if (!ItemManagerComponent || !ItemIconComponent)
+	if (!ItemManagerComponent || !ItemIconComponent || !ItemManagerComponent->GetEquippedWeaponItemData())
 	{
 		return;
 	}
@@ -771,6 +782,25 @@ void APepCharacter::UpdateWeaponUI()
 			bIsMainWeaponEquipped
 		);
 	}
+
+	if (!ItemManagerComponent->GetActiveItemData()) return;
+	ItemIconComponent->SetActiveItem(ItemManagerComponent->GetActiveItemData()->GetIconTexture(), ItemManagerComponent->GetActiveItemData()->GetDisplayName(), FString("Q"), ItemManagerComponent->GetActiveItemData()->GetCooldown());
+	ItemIconComponent->SetCoins(ItemManagerComponent->GetCoinCount());
+}
+
+void APepCharacter::AddItemToInventory()
+{
+	if (!InventoryComponent || !ItemManagerComponent) return;
+
+	InventoryComponent->RemoveAllItem();
+	
+	TMap<int32, UPepccinePassiveItemData*> PassiveItems = ItemManagerComponent->GetPassiveItemDatas();
+
+	for (const auto& PassiveItem : PassiveItems)
+	{
+		InventoryComponent->AddItem(PassiveItem.Value->GetIconTexture(), PassiveItem.Value->GetDisplayName(),
+																PassiveItem.Value->GetDescription(), PlayerStatComponent->PrintStats());
+	}
 }
 
 void APepCharacter::OpenInventory()
@@ -780,21 +810,7 @@ void APepCharacter::OpenInventory()
 		return;
 	}
 
-	if (bIsLoaded)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("아이템 로딩중"));
-		// 아이템 매니저에서 패시브 아이템 목록 가져와서 인벤토리에 넣는 작업 1회성
-		TMap<int32, UPepccinePassiveItemData*> PassiveItems = ItemManagerComponent->GetPassiveItemDatas();
-
-		for (const auto& PassiveItem : PassiveItems)
-		{
-			InventoryComponent->AddItem(PassiveItem.Value->GetIconTexture(), PassiveItem.Value->GetDisplayName(),
-			                            PassiveItem.Value->GetDescription(), PlayerStatComponent->PrintStats());
-		}
-
-		bIsLoaded = false;
-	}
-
+	AddItemToInventory();
 	bIsInventoryOpened = !bIsInventoryOpened;
 	InventoryComponent->ToggleInventory();
 

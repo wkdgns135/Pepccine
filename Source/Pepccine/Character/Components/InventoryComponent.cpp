@@ -30,6 +30,14 @@ void UInventoryComponent::AddItem(UTexture2D* ItemImage, const FString& ItemName
 	}
 }
 
+void UInventoryComponent::RemoveAllItem()
+{
+	if (InventoryWidget)
+	{
+		InventoryWidget->ResetGrid();
+	}
+}
+
 void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                         FActorComponentTickFunction* ThisTickFunction)
 {

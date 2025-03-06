@@ -11,7 +11,11 @@ UPrograssBarHUDComponent::UPrograssBarHUDComponent()
 void UPrograssBarHUDComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	InitPrograssBar();
+}
+
+void UPrograssBarHUDComponent::InitPrograssBar() const
+{
 	if (StaminaWidget) StaminaWidget->AddToViewport();
 	if (HealthWidget) HealthWidget->AddToViewport();
 }

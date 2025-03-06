@@ -186,6 +186,8 @@ private:
 
 	UFUNCTION()
 	void OnActorDetectedEnhanced(FDetectedActorList& DetectedActors);
+	UFUNCTION()
+	void UpdateUI();
 
 	void InitializeCharacterMovement() const;
 	void ToggleCameraView();
@@ -199,6 +201,7 @@ private:
 	void Stumble(AActor* DamageCauser);
 	void Climb();
 	void GetCooldownRemaining();
+	void AddItemToInventory();
 
 	// TEST CODE
 	void TestApplyStatModifier();

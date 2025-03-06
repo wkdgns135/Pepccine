@@ -11,7 +11,7 @@ class PEPCCINE_API UMenuWidget : public UUserWidget
 
 public:
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* GameOver;
+	class UImage* GameOver;
 	
 	UPROPERTY(meta = (BindWidget))
 	class UButton* ExitButton;

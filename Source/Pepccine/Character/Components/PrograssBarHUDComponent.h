@@ -23,7 +23,8 @@ public:
 
 	void SetStamina(const float NewStamina, const float MaxStamina) const;
 	void SetHealth(const float NewHealth, const float MaxHealth) const;
-	
+
+	void InitPrograssBar() const;
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
