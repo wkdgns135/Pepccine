@@ -1,5 +1,6 @@
 ﻿#include "PepccineItemSpawnerSubSystem.h"
 
+#include "PepccineGameInstance.h"
 #include "PepccineItemSpawnWeightData.h"
 #include "Item/PepccineDropItem.h"
 #include "Item/PepccineItemDataAssetBase.h"
@@ -11,11 +12,26 @@
 #include "Item/Passive/PepccinePassiveItemData.h"
 #include "Item/Active/PepccineActiveItemData.h"
 
-void UPepccineItemSpawnerSubSystem::InitSpawner(UPepccineItemDataAssetBase* InItemDataAsset,
-                                                const TSubclassOf<APepccineDropItem>& InSpawnedActor)
+void UPepccineItemSpawnerSubSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-	ItemDataAsset = InItemDataAsset;
-	SpawnedActor = InSpawnedActor;
+	Super::Initialize(Collection);
+
+	const UPepccineGameInstance* GameInstance = Cast<UPepccineGameInstance>(GetGameInstance());
+
+	if (!GameInstance)
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임 인스턴스가 없습니다."));
+		return;
+	}
+	
+	ItemDataAsset = GameInstance->GetItemDataAsset();
+	SpawnActor = GameInstance->GetSpawnActor();
+
+	if (!ItemDataAsset || !SpawnActor)
+	{
+		UE_LOG(LogTemp, Error, TEXT("아이템 데이터 에셋 혹은 아이템 스포너 엑터가 없습니다."));
+		return;
+	}
 
 	// 스폰가능 무기 아이템 추가
 	for (const UPepccineWeaponItemData* WeaponItemData : ItemDataAsset->GetWeaponItemDataAsset()->GetWeaponItemDatas())
@@ -24,7 +40,7 @@ void UPepccineItemSpawnerSubSystem::InitSpawner(UPepccineItemDataAssetBase* InIt
 	}
 	// 스폰가능 패시브 아이템 추가
 	for (const UPepccinePassiveItemData* PassiveItemData : ItemDataAsset->GetPassiveItemDataAsset()->
-	                                                                      GetPassiveItemDatas())
+																		  GetPassiveItemDatas())
 	{
 		SpawnablePassiveItemDataIds.Add(PassiveItemData->GetItemId());
 	}
@@ -33,6 +49,27 @@ void UPepccineItemSpawnerSubSystem::InitSpawner(UPepccineItemDataAssetBase* InIt
 	{
 		SpawnableActiveItemDataIds.Add(ActiveItemData->GetItemId());
 	}
+}
+
+void UPepccineItemSpawnerSubSystem::InitSpawnableItemData()
+{
+	// 무기
+	for (const UPepccineWeaponItemData* WeaponItemData : ItemDataAsset->GetWeaponItemDataAsset()->GetWeaponItemDatas())
+	{
+		SpawnableWeaponItemDatas.Add(WeaponItemData->GetItemId());
+	}
+	// 패시브
+	for (const UPepccinePassiveItemData* PassiveItemData : ItemDataAsset->GetPassiveItemDataAsset()->GetPassiveItemDatas())
+	{
+		SpawnablePassiveItemDataIds.Add(PassiveItemData->GetItemId());
+	}
+	// 액티브
+	for (const UPepccineActiveItemData* ActiveItemData : ItemDataAsset->GetActiveItemDataAsset()->GetActiveItemDatas())
+	{
+		SpawnableActiveItemDataIds.Add(ActiveItemData->GetItemId());
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("아이템 스포너 초기화 완료!"));
 }
 
 UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& SpawnLocation,
@@ -65,7 +102,7 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::SpawnItem(const FVector& S
 
 		// 아이템 스폰
 		if (APepccineDropItem* DropItem = World->SpawnActor<APepccineDropItem>(
-			SpawnedActor, SpawnLocation, FRotator::ZeroRotator, SpawnParams))
+			SpawnActor, SpawnLocation, FRotator::ZeroRotator, SpawnParams))
 		{
 			// 아이템 초기화
 			DropItem->InitializeDropItem(DropItemData, bIsShopItem);
@@ -86,6 +123,12 @@ UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemFromWeightDat
 		IsEmpty() && SpawnableActiveItemDataIds.IsEmpty())
 	{
 		UE_LOG(LogTemp, Error, TEXT("더이상 스폰할 무기, 패시브, 액티브 아이템이 없습니다."));
+		return nullptr;
+	}
+
+	if (!SpawnWeightData)
+	{
+		UE_LOG(LogTemp, Error, TEXT("아이템 스폰 가중치 데이터가 없습니다."));
 		return nullptr;
 	}
 
@@ -295,6 +338,12 @@ TArray<UPepccineItemDataBase*> UPepccineItemSpawnerSubSystem::GetItemDataByItemR
 UPepccineItemDataBase* UPepccineItemSpawnerSubSystem::GetRandomItemDataByRandomRarity(
 	const TArray<UPepccineItemDataBase*>& ItemDatas, const UPepccineItemRarityWeightData* RarityWeightData)
 {
+	if (!RarityWeightData)
+	{
+		UE_LOG(LogTemp, Error, TEXT("아이템 등급 가중치 데이터가 없습니다."));
+		return nullptr;
+	}
+
 	UPepccineItemDataBase* ItemData = nullptr;
 
 	// 아이템 레어도 가중치
