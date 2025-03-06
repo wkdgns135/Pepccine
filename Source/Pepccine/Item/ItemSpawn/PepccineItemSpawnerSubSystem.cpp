@@ -261,6 +261,35 @@ UPepccineWeaponItemData* UPepccineItemSpawnerSubSystem::GetDefaultWeaponItemData
 	return ItemDataAsset->GetWeaponItemDataAsset()->GetWeaponItemDatasById(0);
 }
 
+void UPepccineItemSpawnerSubSystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	UPepccineItemDataAssetBase* InItemDataAsset = LoadObject<UPepccineItemDataAssetBase>(nullptr, TEXT("/Script/Pepccine.PepccineItemDataAssetBase'/Game/Pepccine/Item/DA_ItemDataAsset.DA_ItemDataAsset'"));
+	UClass* InSpawnedActorClass = LoadClass<APepccineDropItem>(nullptr, TEXT("/Script/Engine.Blueprint'/Game/Pepccine/Item/Bluprints/BP_DropItem.BP_DropItem_C'"));
+	
+	if (!InItemDataAsset || !InSpawnedActorClass)return;
+	ItemDataAsset = InItemDataAsset;
+	SpawnedActor = InSpawnedActorClass;
+
+	// 스폰가능 무기 아이템 추가
+	for (const UPepccineWeaponItemData* WeaponItemData : ItemDataAsset->GetWeaponItemDataAsset()->GetWeaponItemDatas())
+	{
+		SpawnableWeaponItemDatas.Add(WeaponItemData->GetItemId());
+	}
+	// 스폰가능 패시브 아이템 추가
+	for (const UPepccinePassiveItemData* PassiveItemData : ItemDataAsset->GetPassiveItemDataAsset()->
+																		  GetPassiveItemDatas())
+	{
+		SpawnablePassiveItemDataIds.Add(PassiveItemData->GetItemId());
+	}
+	// 스폰가능 액티브 아이템 추가
+	for (const UPepccineActiveItemData* ActiveItemData : ItemDataAsset->GetActiveItemDataAsset()->GetActiveItemDatas())
+	{
+		SpawnableActiveItemDataIds.Add(ActiveItemData->GetItemId());
+	}
+}
+
 void UPepccineItemSpawnerSubSystem::ApplyCumulativeWeights(TArray<int32>& Weights)
 {
 	int32 CumulativeWeights = 0;

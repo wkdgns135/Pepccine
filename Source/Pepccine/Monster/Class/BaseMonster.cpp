@@ -65,7 +65,7 @@ void ABaseMonster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		}
 	}
 
-	UPepccineItemSpawnerSubSystem* TestSub = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
+	UPepccineItemSpawnerSubSystem* TestSub = GetWorld()->GetGameInstance()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
 	UPepccineItemDataBase* Test = TestSub->GetRandomItemFromWeightDataAsset(SpawnWeightData);
 	TestSub->SpawnItem(GetActorLocation(), Test, false);
 }
