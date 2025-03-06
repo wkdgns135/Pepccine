@@ -252,7 +252,7 @@ void APepCharacter::OnPlayerHit(AActor* DamageCauser, float DamageAmount, const 
 		Stumble(DamageCauser);
 		break;
 	case EMonsterSkill::GunShot:
-		// 총맞는 모션 필요
+		PepccineMontageComponent->GunHit();
 		break;
 	}
 }
