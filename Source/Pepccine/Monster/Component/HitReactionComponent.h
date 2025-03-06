@@ -4,6 +4,8 @@
 #include "Components/ActorComponent.h"
 #include "HitReactionComponent.generated.h"
 
+class UAnimMontage;
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PEPCCINE_API UHitReactionComponent : public UActorComponent
 {
@@ -35,4 +37,5 @@ protected:
 private:
     /** 피격 카운트 */
     int32 HitCount = 0;
+    void OnHitReactionMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 };
