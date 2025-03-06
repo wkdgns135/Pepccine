@@ -301,6 +301,8 @@ void APepCharacter::OnHealthChanged(const float NewHealth, const float MaxHealth
 
 	if (NewHealth == 0)
 	{
+		if (!bIsPlayerAlive || !PepccineMontageComponent) return;
+		bIsPlayerAlive = false;
 		PepccineMontageComponent->Death();
 	}
 
@@ -354,9 +356,6 @@ void APepCharacter::OnActorDetectedEnhanced(FDetectedActorList& DetectedActors)
 #pragma region
 void APepCharacter::Dead()
 {
-	if (!bIsPlayerAlive) return;
-	bIsPlayerAlive = false;
-
 	if (APepccinePlayerController* PepccinePlayerController = Cast<APepccinePlayerController>(PlayerController))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Player Dead"));

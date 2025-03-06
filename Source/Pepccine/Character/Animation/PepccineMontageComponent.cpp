@@ -41,6 +41,8 @@ void UPepccineMontageComponent::Attack()
 
 void UPepccineMontageComponent::Death()
 {
+	GetWorld()->GetTimerManager().ClearTimer(GetUpTimerHandle);
+	
 	if (AnimInstance && DeathMontage)
 	{
 		int32 JumpSection = FMath::RandRange(0, DeathMontage->CompositeSections.Num());

@@ -41,6 +41,8 @@ public:
 	UFUNCTION()
 	void OnMontageBlendingOut(UAnimMontage* Montage, bool bInterrupted);
 
+	FTimerHandle GetUpTimerHandle;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -72,6 +74,4 @@ protected:
 	UAnimMontage* StumbleGetUpMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* ClimbingMontage;
-
-	FTimerHandle GetUpTimerHandle;
 };
