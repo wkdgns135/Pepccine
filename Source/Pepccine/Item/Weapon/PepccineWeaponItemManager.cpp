@@ -31,15 +31,15 @@ void UPepccineWeaponItemManager::SetWeaponItemComponent(ACharacter* OwnerCharact
 
 void UPepccineWeaponItemManager::EquipDefaultWeapon(const UPepccineWeaponItemData* WeaponItemData)
 {
-	PickUpItem(WeaponItemData);
+	PickUpItem(WeaponItemData, false);
 }
 
-void UPepccineWeaponItemManager::PickUpItem(const UPepccineWeaponItemData* WeaponItemData)
+void UPepccineWeaponItemManager::PickUpItem(const UPepccineWeaponItemData* WeaponItemData, const bool bIsPlayEquipSound)
 {
+	if (!WeaponItemData)return;
 	// 복사해서 사용
 	UPepccineWeaponItemData* NewWeaponItemData = DuplicateObject<UPepccineWeaponItemData>(
 		WeaponItemData, this);
-
 	if (NewWeaponItemData->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main)
 	{
 		MainWeaponItemData = NewWeaponItemData;
@@ -53,7 +53,7 @@ void UPepccineWeaponItemManager::PickUpItem(const UPepccineWeaponItemData* Weapo
 	UpdateWeaponItemStats(NewWeaponItemData->GetWeaponItemType());
 
 	// 획득한 무기 장착
-	EquipWeapon(NewWeaponItemData);
+	EquipWeapon(NewWeaponItemData, bIsPlayEquipSound);
 
 	UE_LOG(LogTemp, Warning, TEXT("%s 등록!"), *NewWeaponItemData->GetDisplayName());
 }
@@ -142,7 +142,7 @@ void UPepccineWeaponItemManager::UpdateWeaponItemStats(const EPepccineWeaponItem
 		                                            ? MainWeaponItemData
 		                                            : SubWeaponItemData;
 
-	UPepccineWeaponItemData* DefaultWeaponItemData = GetWorld()->
+	UPepccineWeaponItemData* DefaultWeaponItemData = GetWorld()->GetGameInstance()->
 	                                                       GetSubsystem<UPepccineItemSpawnerSubSystem>()->
 	                                                       GetItemDataAsset()->
 	                                                       GetWeaponItemDataAsset()->

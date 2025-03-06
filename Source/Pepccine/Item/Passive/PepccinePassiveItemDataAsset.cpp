@@ -2,6 +2,7 @@
 
 #include "PepccinePassiveItemData.h"
 
+#if WITH_EDITOR
 void UPepccinePassiveItemDataAsset::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -24,3 +25,4 @@ void UPepccinePassiveItemDataAsset::PostEditChangeProperty(struct FPropertyChang
 		}
 	}
 }
+#endif

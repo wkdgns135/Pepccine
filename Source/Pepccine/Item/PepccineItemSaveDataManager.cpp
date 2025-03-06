@@ -15,7 +15,6 @@ void UPepccineItemSaveDataManager::Initialize(FSubsystemCollectionBase& Collecti
 	{
 		SaveData = Cast<UPepccineItemSaveData>(
 		UGameplayStatics::CreateSaveGameObject(UPepccineItemSaveData::StaticClass()));
-		UE_LOG(LogTemp, Warning, TEXT("TEST!!!!!!"));
 	}
 	else
 	{

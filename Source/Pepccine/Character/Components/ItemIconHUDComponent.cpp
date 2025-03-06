@@ -29,10 +29,16 @@ void UItemIconHUDComponent::SetWeaponItem(UTexture2D* MainWeaponImage, UTexture2
 	WeaponWidget->UpdateWeaponUI(MainWeaponImage, SubWeaponImage, WeaponName, Ammo, SpareAmmo, bIsMainWeapon);
 }
 
-void UItemIconHUDComponent::SetActiveItem(UTexture2D* ActiveImage, const FString& ActiveName, const FString& ActiveButton, const int32 Cooldown, const int32 MaxCooldown)
+void UItemIconHUDComponent::SetActiveItem(UTexture2D* ActiveImage, const FString& ActiveName, const FString& ActiveButton, const int32 MaxCooldown)
 {
 	if (!ActiveItemWidget) return;
-	ActiveItemWidget->UpdateActiveItemUI(ActiveImage, ActiveName, ActiveButton, Cooldown, MaxCooldown);
+	ActiveItemWidget->SetActiveItemUI(ActiveImage, ActiveName, ActiveButton, MaxCooldown);
+}
+
+void UItemIconHUDComponent::SetActiveItemCoolDown(const int32 Cooldown)
+{
+	if (!ActiveItemWidget) return;
+	ActiveItemWidget->UpdateActiveItemUI(Cooldown);
 }
 
 void UItemIconHUDComponent::SetCoins(int Coins)
