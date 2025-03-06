@@ -251,7 +251,7 @@ void APepccineDropItem::ChangeWeaponItemData(UPepccineWeaponItemData* BeforeWeap
 	if (DropItemData)
 	{
 		// 원본 데이터
-		DefaultDropItemData = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->
+		DefaultDropItemData = GetWorld()->GetGameInstance()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->
 		                                  GetItemDataAsset()->GetWeaponItemDataAsset()->
 		                                  GetWeaponItemDatasById(BeforeWeaponItemData->GetItemId());
 		// 드랍 아이템 원본 데이터로 설정
@@ -282,7 +282,7 @@ void APepccineDropItem::ChangeActiveItemData(UPepccineActiveItemData* BeforeActi
 	if (DropItemData)
 	{
 		// 원본 데이터
-		DefaultDropItemData = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->
+		DefaultDropItemData = GetWorld()->GetGameInstance()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->
 		                                  GetItemDataAsset()->GetActiveItemDataAsset()->
 		                                  GetActiveItemById(BeforeActiveItemData->GetItemId());
 		// 드랍 아이템 원본 데이터로 설정

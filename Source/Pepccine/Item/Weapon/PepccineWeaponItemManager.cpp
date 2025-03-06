@@ -36,10 +36,10 @@ void UPepccineWeaponItemManager::EquipDefaultWeapon(const UPepccineWeaponItemDat
 
 void UPepccineWeaponItemManager::PickUpItem(const UPepccineWeaponItemData* WeaponItemData, const bool bIsPlayEquipSound)
 {
+	if (!WeaponItemData)return;
 	// 복사해서 사용
 	UPepccineWeaponItemData* NewWeaponItemData = DuplicateObject<UPepccineWeaponItemData>(
 		WeaponItemData, this);
-
 	if (NewWeaponItemData->GetWeaponItemType() == EPepccineWeaponItemType::EPWIT_Main)
 	{
 		MainWeaponItemData = NewWeaponItemData;
@@ -142,7 +142,7 @@ void UPepccineWeaponItemManager::UpdateWeaponItemStats(const EPepccineWeaponItem
 		                                            ? MainWeaponItemData
 		                                            : SubWeaponItemData;
 
-	UPepccineWeaponItemData* DefaultWeaponItemData = GetWorld()->
+	UPepccineWeaponItemData* DefaultWeaponItemData = GetWorld()->GetGameInstance()->
 	                                                       GetSubsystem<UPepccineItemSpawnerSubSystem>()->
 	                                                       GetItemDataAsset()->
 	                                                       GetWeaponItemDataAsset()->
