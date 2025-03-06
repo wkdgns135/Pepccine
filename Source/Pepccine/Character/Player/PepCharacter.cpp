@@ -725,8 +725,8 @@ void APepCharacter::Interactive()
 		}
 		else if (UPepccineActiveItemData* ActiveItem = Cast<UPepccineActiveItemData>(CurrentDropItem->GetDropItemData()))
 		{
-			if (!ItemManagerComponent) return;
-			ItemIconComponent->SetActiveItem(ActiveItem->GetIconTexture(), ActiveItem->GetDisplayName(), FString("Q"), ActiveItem->GetCooldown());
+			// 액티브 아이템
+			UpdateWeaponUI();
 		}
 
 		PepccineMontageComponent->Pick();
@@ -784,6 +784,9 @@ void APepCharacter::UpdateWeaponUI()
 			bIsMainWeaponEquipped
 		);
 	}
+
+	if (!ItemManagerComponent->GetActiveItemData()) return;
+	ItemIconComponent->SetActiveItem(ItemManagerComponent->GetActiveItemData()->GetIconTexture(), ItemManagerComponent->GetActiveItemData()->GetDisplayName(), FString("Q"), ItemManagerComponent->GetActiveItemData()->GetCooldown());
 }
 
 void APepCharacter::AddItemToInventory()

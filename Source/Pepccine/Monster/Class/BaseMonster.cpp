@@ -21,8 +21,8 @@ ABaseMonster::ABaseMonster()
 	
 	HealthBarWidgetComp->SetupAttachment(RootComponent);
 	HealthBarWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
-	HealthBarWidgetComp->SetDrawSize(FVector2D(77.0f, 7.0f));
-	HealthBarWidgetComp->SetRelativeLocation(FVector(0, 0, 100.0f));
+	HealthBarWidgetComp->SetDrawSize(FVector2D(60.0f, 5.0f));
+	HealthBarWidgetComp->SetRelativeLocation(FVector(0, 0, 110.0f));
 
 	static ConstructorHelpers::FClassFinder<UUserWidget> HealthWidgetClass(TEXT("/Game/Pepccine/Monster/BP_MonsterHealthWidget"));
 	if (HealthWidgetClass.Succeeded())
