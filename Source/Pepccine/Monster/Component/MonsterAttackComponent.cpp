@@ -28,7 +28,15 @@ void UMonsterAttackComponent::PerformAttack()
 
     if (AttackMontage)
     {
-        OwnerCharacter->PlayAnimMontage(AttackMontage);
+        USkeletalMeshComponent* MeshComp = OwnerCharacter->FindComponentByClass<USkeletalMeshComponent>();
+        UAnimInstance* AnimInstance = MeshComp->GetAnimInstance();
+        if (MeshComp && AnimInstance)
+        {
+            int32 JumpSection = FMath::RandRange(0, AttackMontage->CompositeSections.Num());
+            FName SectionName = FName(*FString::Printf(TEXT("%d"), JumpSection));
+            AnimInstance->Montage_Play(AttackMontage);
+            AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
+        }
     }
 }
 
@@ -53,11 +61,12 @@ void UMonsterAttackComponent::AttackTrace()
 
     float CapsuleRadius = (OwnerMonster->GetMonsterType() == EMonsterType::LongRange) ? 5.0f : 20.0f;
     float CapsuleHalfHeight = (OwnerMonster->GetMonsterType() == EMonsterType::LongRange) ? AttackRange * 0.5f : 30.0f;
+    EMonsterSkill AttackType = (OwnerMonster->GetMonsterType() == EMonsterType::LongRange) ? EMonsterSkill::GunShot : EMonsterSkill::None;
 
-    ExecuteTrace(OwnerMonster, AttackRange, CapsuleRadius, CapsuleHalfHeight);
+    ExecuteTrace(OwnerMonster, AttackRange, CapsuleRadius, CapsuleHalfHeight, AttackType);
 }
 
-void UMonsterAttackComponent::ExecuteTrace(ABaseMonster* OwnerMonster, float Range, float CapsuleRadius, float CapsuleHalfHeight)
+void UMonsterAttackComponent::ExecuteTrace(ABaseMonster* OwnerMonster, float Range, float CapsuleRadius, float CapsuleHalfHeight, EMonsterSkill AttackType)
 {
     FVector StartLocation = OwnerMonster->GetActorLocation();
     FVector ForwardVector = OwnerMonster->GetActorForwardVector();
@@ -90,7 +99,7 @@ void UMonsterAttackComponent::ExecuteTrace(ABaseMonster* OwnerMonster, float Ran
             UMonsterStatComponent* StatComp = OwnerMonster->FindComponentByClass<UMonsterStatComponent>();
             if (StatComp)
             {
-                SendHitResult(Player, StatComp->Attack, HitResult, EMonsterSkill::None);
+                SendHitResult(Player, StatComp->Attack, HitResult, AttackType);
             }
             else
             {

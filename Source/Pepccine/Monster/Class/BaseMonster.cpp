@@ -8,6 +8,7 @@
 #include "Room/Controller/BaseRoomController.h"
 #include "Components/WidgetComponent.h"
 #include "Components/AudioComponent.h"
+#include "Item/ItemSpawn/PepccineItemSpawnerSubSystem.h"
 
 ABaseMonster::ABaseMonster()
 {
@@ -63,6 +64,10 @@ void ABaseMonster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 			RoomController->DecreaseMonsterCount();
 		}
 	}
+
+	UPepccineItemSpawnerSubSystem* TestSub = GetWorld()->GetSubsystem<UPepccineItemSpawnerSubSystem>();
+	UPepccineItemDataBase* Test = TestSub->GetRandomItemFromWeightDataAsset(SpawnWeightData);
+	TestSub->SpawnItem(GetActorLocation(), Test, false);
 }
 
 void ABaseMonster::InitializeHealthBar()
@@ -126,7 +131,6 @@ void ABaseMonster::Die()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Monster Die!"));
 
-	// ������ ó�� (Ragdoll Ȱ��ȭ)
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 	GetMesh()->Stop();
 	GetMesh()->SetSimulatePhysics(true);
@@ -134,6 +138,6 @@ void ABaseMonster::Die()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopMovementImmediately();
-	
-	SetLifeSpan(5.0f);
+
+	SetLifeSpan(3.0f);
 }
