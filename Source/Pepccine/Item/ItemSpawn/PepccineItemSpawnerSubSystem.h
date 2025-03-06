@@ -44,7 +44,7 @@ public:
 	                                 bool bIsShopItem = false);
 	// 확률로 아이템 스폰
 	UFUNCTION(BlueprintPure, Category = "Item|Spawner")
-	UPepccineItemDataBase* GetRandomItemFromWeightDataAsset(const UPepccineItemSpawnWeightData* SpawnWeightData);
+	UPepccineItemDataBase* GetRandomItemFromWeightDataAsset(UPepccineItemSpawnWeightData* SpawnWeightData);
 
 	// 현재 스폰할 아이템 이미 스폰된 건지 확인(Resource Item은 제외, 플레이어가 가지고 있는 아이템 포함)
 	bool CanSpawnItemData(const UPepccineItemDataBase* ItemData) const;
@@ -77,8 +77,4 @@ protected:
 	TArray<int32> SpawnablePassiveItemDataIds;
 	// 스폰가능한 액티브 아이템 아이디 목록
 	TArray<int32> SpawnableActiveItemDataIds;
-
-	// 저장 데이터
-	UPROPERTY()
-	UPepccineItemSaveData* SaveData;
 };
