@@ -160,3 +160,19 @@ void ABaseMonster::Die()
 
 	SetLifeSpan(3.0f);
 }
+
+void ABaseMonster::HideHealthBar()
+{
+	if (HealthBarWidgetComp)
+	{
+		HealthBarWidgetComp->SetHiddenInGame(true);
+	}
+}
+
+void ABaseMonster::ShowHealthBar()
+{
+	if (HealthBarWidgetComp)
+	{
+		HealthBarWidgetComp->SetHiddenInGame(false);
+	}
+}

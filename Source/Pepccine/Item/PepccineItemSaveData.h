@@ -52,6 +52,9 @@ struct FPepccineItemSaveDataStruct
 	// 액티브 아이템 아이디
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (DesplayName = "액티브 아이템 아이디"))
 	int32 ActiveItemId;
+	// 액티브 아이템 남은 재사용 대기시간
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (DesplayName = "액티브 아이템 남은 재사용 대기시간"))
+	float ActiveItemRemainingCooldown;
 	// 코인 개수
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (DesplayName = "코인 개수"))
 	int32 CoinCount;
@@ -64,7 +67,7 @@ struct FPepccineItemSaveDataStruct
 	TArray<int32> SpawnableActiveItemDataIds;
 
 	FPepccineItemSaveDataStruct(): MainWeaponItemId(-1), SubWeaponItemId(-1),
-	                         EquippedWeaponItemType(EPepccineWeaponItemType::EPWIT_Main), ActiveItemId(-1), CoinCount(0)
+	                         EquippedWeaponItemType(EPepccineWeaponItemType::EPWIT_Main), ActiveItemId(-1), ActiveItemRemainingCooldown(0.0f), CoinCount(0)
 	{
 	}
 };

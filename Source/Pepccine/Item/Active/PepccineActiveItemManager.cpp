@@ -7,12 +7,15 @@ void UPepccineActiveItemManager::PickUpItem(const UPepccineActiveItemData* InAct
 {
 	if (UPepccineActiveItemData* NewActiveItemData = DuplicateObject<UPepccineActiveItemData>(InActiveItemData, this))
 	{
+		// 이전 액티브 아이템이 있어서 교체될 떄 바로 재사용 대기시간 적용
+		if (ActiveItemData)
+		{
+			ActiveItemRemainingCooldown = ActiveItemData->GetCooldown();
+			UE_LOG(LogTemp, Warning, TEXT("액티브 아이템 재사용 대기시간 : %.2f"), ActiveItemRemainingCooldown);
+			bIsActiveItemCooldown = true;
+		}
+		
 		ActiveItemData = NewActiveItemData;
-
-		// 획득시 바로 재사용 대기시간 적용
-		ActiveItemRemainingCooldown = ActiveItemData->GetCooldown();
-		UE_LOG(LogTemp, Warning, TEXT("액티브 아이템 재사용 대기시간 : %.2f"), ActiveItemRemainingCooldown);
-		bIsActiveItemCooldown = true;
 	}
 	else
 	{

@@ -31,7 +31,7 @@ void UPepccineWeaponItemManager::SetWeaponItemComponent(ACharacter* OwnerCharact
 
 void UPepccineWeaponItemManager::EquipDefaultWeapon(const UPepccineWeaponItemData* WeaponItemData)
 {
-	PickUpItem(WeaponItemData, false);
+	PickUpItem(WeaponItemData, true);
 }
 
 void UPepccineWeaponItemManager::PickUpItem(const UPepccineWeaponItemData* WeaponItemData, const bool bIsPlayEquipSound)
