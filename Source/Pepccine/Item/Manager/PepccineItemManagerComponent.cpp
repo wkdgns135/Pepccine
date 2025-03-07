@@ -5,7 +5,6 @@
 #include "Item/ItemSpawn/PepccineItemSpawnerSubSystem.h"
 #include "Item/Active/PepccineActiveItemData.h"
 #include "GameFramework/Character.h"
-#include "Item/PepccineItemSaveDataManager.h"
 #include "Item/Active/PepccineActiveItemDataAsset.h"
 #include "Kismet/GameplayStatics.h"
 #include "Item/Passive/PepccinePassiveItemData.h"
@@ -49,14 +48,17 @@ void UPepccineItemManagerComponent::BeginPlay()
 			// 무기 컴포넌트 등록
 			WeaponItemManager->SetWeaponItemComponent(OwnerCharacter);
 
-			// 기본 무기 장착
-			WeaponItemManager->EquipDefaultWeapon(
-				GetWorld()->GetGameInstance()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->
-				            GetDefaultWeaponItemData());
-
 			// 데이터 로드
 			if (LoadItemSaveData())
 			{
+				if (!GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Sub))
+				{
+					// 기본 무기 장착
+					WeaponItemManager->EquipDefaultWeapon(
+						GetWorld()->GetGameInstance()->GetSubsystem<UPepccineItemSpawnerSubSystem>()->
+									GetDefaultWeaponItemData());
+				}
+				
 				UE_LOG(LogTemp, Warning, TEXT("아이템 데이터 로드 성공!"));
 			}
 		}
@@ -177,6 +179,12 @@ bool UPepccineItemManagerComponent::LoadItemSaveData()
 		                                                            GetActiveItemById(SaveDataStruct.ActiveItemId))
 		{
 			PickUpItem(ActiveItemData, false);
+			const float ActiveItemRemainingCooldown = SaveDataStruct.ActiveItemRemainingCooldown;
+			ActiveItemManager->SetActiveItemRemainingCooldown(ActiveItemRemainingCooldown);
+			ActiveItemManager->SetIsActiveItemCooldown(ActiveItemRemainingCooldown > 0.0f);
+
+			UE_LOG(LogTemp, Warning, TEXT("TEST : %.2f, %d"), ActiveItemRemainingCooldown, ActiveItemManager->IsActiveItemCooldown());
+			
 			// 스폰 가능 목록에서 제거
 			ItemSpawnerSubSystem->RemoveSpawnableItemDataId(ActiveItemData);
 		}
@@ -226,9 +234,13 @@ void UPepccineItemManagerComponent::SaveItemSaveData() const
 	if (const UPepccineActiveItemData* ActiveItemData = GetActiveItemData())
 	{
 		SaveData->ItemSaveData.ActiveItemId = ActiveItemData->GetItemId();
+		SaveData->ItemSaveData.ActiveItemRemainingCooldown = ActiveItemManager->GetActiveItemRemainingCooldown();
+
+		UE_LOG(LogTemp, Warning, TEXT("TEST2 : %.2f"), SaveData->ItemSaveData.ActiveItemRemainingCooldown);
 	}
 	// 코인
 	SaveData->ItemSaveData.CoinCount = CoinCount;
+	
 	if (UGameplayStatics::SaveGameToSlot(SaveData, "ItemSaveData", 0))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("아이템 데이터 저장 성공!"));
@@ -269,7 +281,7 @@ bool UPepccineItemManagerComponent::PickUpItem(const UPepccineItemDataBase* Drop
 		{
 			WeaponItemData->GetWeaponItemStatsPointer()->SpareAmmo = SpareAmmo;
 		}
-		WeaponItemManager->PickUpItem(WeaponItemData);
+		WeaponItemManager->PickUpItem(WeaponItemData, bIsPlayPickUpSound);
 	}
 	// 패시브 아이템
 	else if (const UPepccinePassiveItemData* PassiveItemData = Cast<UPepccinePassiveItemData>(NewDropItemData))

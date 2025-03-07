@@ -53,7 +53,7 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage, const FVector
 		UE_LOG(LogTemp, Warning, TEXT("발사 준비 중"));
 		return;
 	}
-
+	
 	// 현재 탄창에 탄약이 없을 경우 발사 실패
 	if (EquippedWeaponData->GetWeaponItemStats().MagazineAmmo == 0.0f)
 	{
@@ -83,11 +83,11 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage, const FVector
 			// // 반동 초기화 타이머 리셋
 			World->GetTimerManager().ClearTimer(RecoilResetTimer);
 			World->GetTimerManager().SetTimer(RecoilResetTimer, this,
-											  &UPepccineWeaponItemComponent::ResetShotsFired, 0.5f,false);
+			                                  &UPepccineWeaponItemComponent::ResetShotsFired, 0.5f, false);
 
 			// 탄 소모
 			EquippedWeaponData->GetWeaponItemStatsPointer()->MagazineAmmo--;
-			
+
 			for (int32 i = 0; i < ProjectileCount; i++)
 			{
 				FVector NewShootDirection = FMath::VRandCone(ShootDirection, SpreadAngleRadians);
@@ -96,7 +96,7 @@ void UPepccineWeaponItemComponent::Fire(const float& WeaponDamage, const FVector
 				APepccinePoolable* Poolable;
 				PoolSubSystem->SpawnFromPool(ProjectileClass, GetSocketLocation(SoketName),
 				                             GetSocketRotation(SoketName), Poolable);
-				
+
 				if (Poolable)
 				{
 					if (APepccineProjectile* SpawnedProjectile = Cast<APepccineProjectile>(Poolable))
@@ -197,7 +197,7 @@ void UPepccineWeaponItemComponent::EquipWeapon(UPepccineWeaponItemData* WeaponIt
 	GetWorld()->GetTimerManager().ClearTimer(RecoilResetTimer);
 	ResetShotsFired();
 
-	UE_LOG(LogTemp,Warning,TEXT("%s"), *EquippedWeaponData->GetDisplayName());
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *EquippedWeaponData->GetDisplayName());
 
 	if (bIsPlayEquipSound)
 	{
@@ -232,7 +232,7 @@ void UPepccineWeaponItemComponent::ApplyRecoil(const float RecoilAmount, const f
 	{
 		return;
 	}
-	
+
 	// 반동 값 계산 (ShotsFired가 증가할수록 반동 증가)
 	const float RandomPitch = RecoilAmount * ShotsFired * 0.05f;
 	const float RandomYaw = FMath::RandRange(-MaxRecoilYaw, MaxRecoilYaw) * ShotsFired * 0.05f;
