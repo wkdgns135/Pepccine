@@ -643,6 +643,8 @@ void APepCharacter::Interactive()
 		return;
 	}
 
+	ItemIconComponent->SetCoins(ItemManagerComponent->GetCoinCount());
+
 	// 아이템 인벤토리에 추가
 	if (CurrentDropItem)
 	{
@@ -751,6 +753,9 @@ void APepCharacter::UpdateWeaponUI()
 		return;
 	}
 
+	// 코인 갱신
+	ItemIconComponent->SetCoins(ItemManagerComponent->GetCoinCount());
+
 	// 주무기 정보
 	UPepccineWeaponItemData* MainWeaponData = ItemManagerComponent->
 		GetWeaponItemData(EPepccineWeaponItemType::EPWIT_Main);
@@ -785,7 +790,6 @@ void APepCharacter::UpdateWeaponUI()
 
 	if (!ItemManagerComponent->GetActiveItemData()) return;
 	ItemIconComponent->SetActiveItem(ItemManagerComponent->GetActiveItemData()->GetIconTexture(), ItemManagerComponent->GetActiveItemData()->GetDisplayName(), FString("Q"), ItemManagerComponent->GetActiveItemData()->GetCooldown());
-	ItemIconComponent->SetCoins(ItemManagerComponent->GetCoinCount());
 }
 
 void APepCharacter::AddItemToInventory()
