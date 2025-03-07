@@ -70,6 +70,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	UPepccineItemSpawnWeightData* SpawnWeightData;
 
+	void HideHealthBar();
+	void ShowHealthBar();
 private:
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")

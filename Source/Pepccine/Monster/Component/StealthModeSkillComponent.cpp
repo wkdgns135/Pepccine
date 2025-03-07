@@ -1,5 +1,7 @@
 #include "Monster/Component/StealthModeSkillComponent.h"
 #include "Monster/Component/MonsterStatComponent.h"
+#include "Monster/Class/BaseMonster.h"
+#include "Monster/Class/BossWarZombie.h"
 #include "GameFramework/Actor.h"
 
 UStealthModeSkillComponent::UStealthModeSkillComponent()
@@ -27,6 +29,15 @@ void UStealthModeSkillComponent::ActivateSkill()
 
     // 블루프린트에서 머티리얼 Dissolve 적용
     OnStealthActivated();
+
+    if (AActor* Owner = GetOwner())
+    {
+        if (ABaseMonster* Monster = Cast<ABaseMonster>(Owner))
+        {
+            Monster->HideHealthBar();
+        }
+    }
+
 
     // StealthTime 후 속도 복구 타이머 설정
     GetWorld()->GetTimerManager().SetTimer(
@@ -56,6 +67,11 @@ void UStealthModeSkillComponent::ResetSpeed()
 {
     if (AActor* Owner = GetOwner())
     {
+        if (ABaseMonster* Monster = Cast<ABaseMonster>(Owner))
+        {
+            Monster->ShowHealthBar();
+        }
+
         if (UMonsterStatComponent* StatComp = Owner->FindComponentByClass<UMonsterStatComponent>())
         {
             StatComp->IncreaseSPD(1.0f / SpeedMultiplier);
