@@ -17,4 +17,5 @@ public:
 protected:
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill|Stealth")
 	//UStealthModeSkillComponent* StealthModeComponent;
+
 };
