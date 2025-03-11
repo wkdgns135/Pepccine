@@ -1,5 +1,6 @@
 # Project Pepccine
-![Game Thumbnail](https://github.com/user-attachments/assets/8dc14007-9da5-4d17-bec7-62d7c2bcdc5b)
+## 🎥 Gameplay Demo
+[![Watch the demo](https://img.youtube.com/vi/G48htx_-Vzk/maxresdefault.jpg)](https://www.youtube.com/watch?v=G48htx_-Vzk)
 
 ## 📌 Introduction
 좀비 아포칼립스 속, 주인공은 백신을 찾아 폐허가 된 건물에 들어간다.
@@ -16,7 +17,7 @@
 - **UE5 기반의 고퀄리티 그래픽**  
 
 ## 📂 Downloads
-- ### [📄 프로젝트 설명 PDF](https://github.com/user-attachments/files/19173376/default.pdf)  
+- ### [📄 프로젝트 설명 PPT](https://docs.google.com/presentation/d/14lWRrTKG2bGBGjFwbCRLCnqVhLA8uFMyBQIt6kAwu7M/edit?usp=sharing)  
 - ### [🎮 게임 데모 다운로드](https://github.com/NbcampUnreal/2nd-Team4-CH3-Project/releases/tag/v1.0.0)  
 
 ## 🛠️ Development
