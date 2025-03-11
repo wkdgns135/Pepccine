@@ -1,5 +1,6 @@
 # Project Pepccine
-[![Watch the demo](https://github.com/user-attachments/assets/5c9f22b8-5536-415b-9dcb-4fc1b3ba1814)](https://youtu.be/G48htx_-Vzk)
+## 🎥 Gameplay Demo
+[![Watch the demo](https://img.youtube.com/vi/G48htx_-Vzk/maxresdefault.jpg)](https://www.youtube.com/watch?v=G48htx_-Vzk)
 
 ## 📌 Introduction
 좀비 아포칼립스 속, 주인공은 백신을 찾아 폐허가 된 건물에 들어간다.
